@@ -1,7 +1,6 @@
 package be.uhasselt.dwi_application.controller.WorkInstruction.Assembly;
 
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.AssemblyPlayerController;
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.AssemblyPlayerManager;
 import be.uhasselt.dwi_application.controller.Controller;
 import be.uhasselt.dwi_application.controller.MainController;
 import be.uhasselt.dwi_application.controller.WorkInstruction.InstructionManagerController;
@@ -11,12 +10,14 @@ import be.uhasselt.dwi_application.utility.database.repository.assembly.Assembly
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import java.util.function.Consumer;
 
@@ -24,29 +25,44 @@ import static be.uhasselt.dwi_application.utility.modules.Dialog.showExceptionDi
 
 public class AssemblyTileController implements Controller {
     @FXML private VBox tileContainer_vbox;
-    @FXML private Button editSave_btn;
+    @FXML private Button editAssembly_btn;
     @FXML private CheckBox selectCheckBox;
     @FXML private Label assemblyName_lbl;
     @FXML private TextField assemblyName_txt;
-    @FXML private Button playAssembly_btn;
+    @FXML private Rectangle colorBox;
 
-    private Assembly assembly;
-    private Consumer<Assembly> onSelectionChange;
+    private final Assembly assembly;
+    private final Consumer<Assembly> onSelectionChange;
     private final AssemblyRepository assemblyRepository = AssemblyRepository.getInstance();
 
-    public void setAssembly(Assembly assembly, Consumer<Assembly> onSelectionChange) {
+    public AssemblyTileController(Assembly assembly, Consumer<Assembly> onSelectionChange) {
         this.assembly = assembly;
         this.onSelectionChange = onSelectionChange;
+    }
 
+    @FXML
+    public void initialize() {
         // Set assembly name
         assemblyName_lbl.setText(assembly.getName());
         assemblyName_txt.setText(assembly.getName());
 
+        colorBox.setFill(assembly.getColor());
+
         // Set up event handlers
-        tileContainer_vbox.setOnMouseClicked(this::handleTileClick);
-        selectCheckBox.setOnAction(event -> handleSelectionChange());
-        editSave_btn.setOnAction(event -> toggleEditSave());
-        playAssembly_btn.setOnAction(event -> playAssembly());
+        assemblyName_lbl.setOnMouseClicked( event -> {
+            enterEditName();
+            event.consume();
+        });
+
+        tileContainer_vbox.setOnMouseClicked(_ -> playAssembly());
+        selectCheckBox.setOnAction(_ -> onSelectionChange.accept(assembly));
+        editAssembly_btn.setOnAction(_ -> editAssembly());
+
+        assemblyName_txt.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                saveAssemblyName();
+            }
+        });
     }
 
     private void playAssembly() {
@@ -62,7 +78,7 @@ public class AssemblyTileController implements Controller {
         }
     }
 
-    private void handleTileClick(MouseEvent event) {
+    private void editAssembly() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(FxmlViews.INSTRUCTION_CREATER));
             loader.setControllerFactory(_-> new InstructionManagerController(assembly));
@@ -76,27 +92,17 @@ public class AssemblyTileController implements Controller {
         }
     }
 
-    private void handleSelectionChange() {
-        onSelectionChange.accept(assembly);
-    }
-
-    @FXML
-    private void toggleEditSave() {
-        if (assemblyName_txt.isVisible()) {
-            saveAssemblyName();
-        } else {
-            assemblyName_lbl.setVisible(false);
-            assemblyName_txt.setVisible(true);
-            assemblyName_txt.requestFocus();
-            editSave_btn.setText("Save");
-        }
+    private void enterEditName() {
+        assemblyName_lbl.setVisible(false);
+        assemblyName_txt.setVisible(true);
+        assemblyName_txt.requestFocus();
     }
 
     private void saveAssemblyName() {
         String newName = assemblyName_txt.getText().trim();
         if (!newName.isEmpty() && !newName.equals(assembly.getName())) {
             assembly.setName(newName);
-            assemblyRepository.updateAssembly(assembly);
+            assemblyRepository.update(assembly);
             System.out.println("Updated Assembly Name: " + newName);
         }
 
@@ -104,7 +110,11 @@ public class AssemblyTileController implements Controller {
         assemblyName_lbl.setText(assembly.getName());
         assemblyName_lbl.setVisible(true);
         assemblyName_txt.setVisible(false);
-        editSave_btn.setText("Edit");
+        editAssembly_btn.setText("Edit");
+    }
+
+    void updateColor(Color selectedColor) {
+        colorBox.setFill(assembly.getColor());
     }
 
     @Override

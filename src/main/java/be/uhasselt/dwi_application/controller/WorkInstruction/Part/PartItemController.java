@@ -65,6 +65,7 @@ public class PartItemController implements Controller {
 
     private void toggleSelection() {
         if (partCheckbox.isSelected()) {
+            //Veranderen naar een consumer:
             PartManagerController.getInstance().addSelectedPart(part);
         } else {
             PartManagerController.getInstance().removeSelectedPart(part);
@@ -106,7 +107,7 @@ public class PartItemController implements Controller {
         InstructionManagerController.getInstance().populatePartSelector();
 
         if (assembly != null) {
-            assemblyRepository.updateAssembly(assembly);
+            assemblyRepository.update(assembly);
         }
     }
 

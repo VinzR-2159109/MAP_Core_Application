@@ -23,8 +23,9 @@ public interface AssemblyDao {
     @GetGeneratedKeys
     Long insert(@BindBean Assembly assembly);
 
-    @SqlUpdate("UPDATE assembly SET name = :name WHERE id = :id")
-    void update(@BindBean Assembly assembly);
+    @SqlUpdate("UPDATE assembly SET name = :name, color = :color WHERE id = :id")
+    void update(@Bind("id") Long id, @Bind("name") String name, @Bind("color") String color);
+
 
     @SqlUpdate("DELETE FROM assembly WHERE id = :id")
     void delete(@Bind("id") Long id);

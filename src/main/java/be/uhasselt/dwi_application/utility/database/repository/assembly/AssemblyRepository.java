@@ -60,10 +60,10 @@ public class AssemblyRepository {
         }
     }
 
-    public void updateAssembly(Assembly assembly) {
+    public void update(Assembly assembly) {
         jdbi.useTransaction(handle -> {
             AssemblyDao assemblyDao = handle.attach(AssemblyDao.class);
-            assemblyDao.update(assembly);
+            assemblyDao.update(assembly.getId(), assembly.getName(), assembly.getColor().toString());
         });
     }
 }
