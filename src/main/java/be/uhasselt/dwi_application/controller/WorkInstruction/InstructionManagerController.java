@@ -1,5 +1,6 @@
 package be.uhasselt.dwi_application.controller.WorkInstruction;
 
+import be.uhasselt.dwi_application.controller.Controller;
 import be.uhasselt.dwi_application.controller.WorkInstruction.Part.PartManagerController;
 import be.uhasselt.dwi_application.model.workInstruction.*;
 import be.uhasselt.dwi_application.model.picking.Part;
@@ -24,7 +25,7 @@ import java.util.*;
 import static be.uhasselt.dwi_application.utility.modules.Dialog.*;
 import static be.uhasselt.dwi_application.utility.modules.ImageHandler.uploadImage;
 
-public class InstructionManagerController {
+public class InstructionManagerController implements Controller {
     @FXML private Button addAssemblyInstruction_btn;
     @FXML private Button addPickingInstruction_btn;
     @FXML private Button removeInstruction_btn;
@@ -392,4 +393,9 @@ public class InstructionManagerController {
         }
     }
     private void deleteImage() {InstructionImageView.setImage(null);}
+
+    @Override
+    public void cleanup() {
+
+    }
 }

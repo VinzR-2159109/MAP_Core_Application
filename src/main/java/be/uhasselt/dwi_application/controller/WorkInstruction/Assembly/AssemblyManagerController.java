@@ -1,5 +1,6 @@
 package be.uhasselt.dwi_application.controller.WorkInstruction.Assembly;
 
+import be.uhasselt.dwi_application.controller.Controller;
 import be.uhasselt.dwi_application.model.workInstruction.Assembly;
 import be.uhasselt.dwi_application.utility.database.repository.assembly.AssemblyRepository;
 import be.uhasselt.dwi_application.utility.FxmlViews;
@@ -16,7 +17,7 @@ import java.util.List;
 
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showExceptionDialog;
 
-public class AssemblyManagerController {
+public class AssemblyManagerController implements Controller {
     @FXML private TilePane assemblyTilePane;
     @FXML private Button addAssembly_btn;
     @FXML private Button deleteAssembly_btn;
@@ -92,5 +93,10 @@ public class AssemblyManagerController {
         } else {
             selectedAssemblies.add(assembly);
         }
+    }
+
+    @Override
+    public void cleanup() {
+
     }
 }

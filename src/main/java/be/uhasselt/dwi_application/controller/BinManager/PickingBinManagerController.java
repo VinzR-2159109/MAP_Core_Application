@@ -1,5 +1,6 @@
 package be.uhasselt.dwi_application.controller.BinManager;
 
+import be.uhasselt.dwi_application.controller.Controller;
 import be.uhasselt.dwi_application.model.picking.PickingBin;
 import be.uhasselt.dwi_application.utility.FxmlViews;
 import be.uhasselt.dwi_application.utility.database.repository.pickingBin.BinRepository;
@@ -24,7 +25,7 @@ import java.util.*;
 
 import static be.uhasselt.dwi_application.utility.LoadView.getFXMLLoader;
 
-public class PickingBinManagerController implements Initializable {
+public class PickingBinManagerController implements Initializable, Controller {
     @FXML private Pane markerOverlayPane;
     @FXML private ImageView videoStream_img;
     @FXML private VBox bins_vbox;
@@ -127,8 +128,14 @@ public class PickingBinManagerController implements Initializable {
     }
 
     public void stopStream() {
+        System.out.println("<Stopping stream>");
         if (streamReader != null) {
             streamReader.stop();
         }
+    }
+
+    @Override
+    public void cleanup() {
+        stopStream();
     }
 }

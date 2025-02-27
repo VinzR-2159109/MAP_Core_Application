@@ -1,5 +1,6 @@
 package be.uhasselt.dwi_application.controller.BinManager;
 
+import be.uhasselt.dwi_application.controller.Controller;
 import be.uhasselt.dwi_application.model.picking.PickingBin;
 import be.uhasselt.dwi_application.utility.database.repository.pickingBin.BinRepository;
 import javafx.fxml.FXML;
@@ -9,12 +10,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 public class BinItemController {
-    @FXML public ComboBox partSelector_cbx;
     @FXML private Label binIdLabel;
     @FXML private TextField posXField;
     @FXML private TextField posYField;
-    @FXML private Button updatePos_btn;
-    @FXML private ComboBox<String> partSelector;
     @FXML private Button deleteBin_btn;
 
     private PickingBin bin;
@@ -36,13 +34,6 @@ public class BinItemController {
         posYField.setText(String.valueOf(bin.getPos_y()));
         posXField.setEditable(false);
         posYField.setEditable(false);
-    }
-
-    @FXML
-    private void updatePosition() {
-        int newX = Integer.parseInt(posXField.getText());
-        int newY = Integer.parseInt(posYField.getText());
-        bin.setPosition(newX, newY);
     }
 
     public void updatePositionFields(int x, int y) {

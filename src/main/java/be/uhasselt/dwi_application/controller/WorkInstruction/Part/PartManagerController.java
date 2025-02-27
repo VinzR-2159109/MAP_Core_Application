@@ -1,5 +1,6 @@
 package be.uhasselt.dwi_application.controller.WorkInstruction.Part;
 
+import be.uhasselt.dwi_application.controller.Controller;
 import be.uhasselt.dwi_application.controller.WorkInstruction.InstructionManagerController;
 import be.uhasselt.dwi_application.model.picking.Part;
 import be.uhasselt.dwi_application.model.workInstruction.Assembly;
@@ -20,7 +21,7 @@ import java.util.Set;
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showErrorDialog;
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showExceptionDialog;
 
-public class PartManagerController {
+public class PartManagerController implements Controller {
     @FXML private VBox PartContainer_vbox;
     @FXML private Button addPart_btn;
     @FXML private Button deleteSelectedParts_btn;
@@ -100,4 +101,8 @@ public class PartManagerController {
         }
     }
 
+    @Override
+    public void cleanup() {
+
+    }
 }

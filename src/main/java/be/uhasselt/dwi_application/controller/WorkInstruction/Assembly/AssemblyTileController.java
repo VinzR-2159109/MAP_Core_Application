@@ -2,6 +2,7 @@ package be.uhasselt.dwi_application.controller.WorkInstruction.Assembly;
 
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.AssemblyPlayerController;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.AssemblyPlayerManager;
+import be.uhasselt.dwi_application.controller.Controller;
 import be.uhasselt.dwi_application.controller.MainController;
 import be.uhasselt.dwi_application.controller.WorkInstruction.InstructionManagerController;
 import be.uhasselt.dwi_application.model.workInstruction.Assembly;
@@ -21,7 +22,7 @@ import java.util.function.Consumer;
 
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showExceptionDialog;
 
-public class AssemblyTileController {
+public class AssemblyTileController implements Controller {
     @FXML private VBox tileContainer_vbox;
     @FXML private Button editSave_btn;
     @FXML private CheckBox selectCheckBox;
@@ -53,7 +54,8 @@ public class AssemblyTileController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(FxmlViews.ASSEMBLY_PLAYER));
             loader.setControllerFactory(_ -> new AssemblyPlayerController(assembly));
             Parent assemblyPlayer = loader.load();
-            MainController.getInstance().setContentView(assemblyPlayer);
+            Controller controller = loader.getController();
+            MainController.getInstance().setContentView(assemblyPlayer, controller);
         } catch (Exception e) {
             e.printStackTrace();
             showExceptionDialog("Fault in playAssembly", e);
@@ -65,8 +67,9 @@ public class AssemblyTileController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(FxmlViews.INSTRUCTION_CREATER));
             loader.setControllerFactory(_-> new InstructionManagerController(assembly));
             Parent instructionView = loader.load();
+            Controller controller = loader.getController();
 
-            MainController.getInstance().setContentView(instructionView);
+            MainController.getInstance().setContentView(instructionView, controller);
         } catch (Exception e) {
             e.printStackTrace();
             showExceptionDialog("Fault in handleTileClick", e);
@@ -102,5 +105,10 @@ public class AssemblyTileController {
         assemblyName_lbl.setVisible(true);
         assemblyName_txt.setVisible(false);
         editSave_btn.setText("Edit");
+    }
+
+    @Override
+    public void cleanup() {
+
     }
 }

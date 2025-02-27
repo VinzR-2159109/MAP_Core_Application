@@ -24,6 +24,7 @@ public class MainController {
     @FXML private AnchorPane contentPane;
 
     private static MainController instance;
+    private Controller currentController;
 
     @FXML
     private void initialize() {
@@ -52,14 +53,28 @@ public class MainController {
                 return;
             }
 
-            Parent newView = FXMLLoader.load(Objects.requireNonNull(getClass().getResource(fxmlPath)));
-            setContentView(newView);
+            FXMLLoader loader = new FXMLLoader(fxmlResource);
+            Parent newView = loader.load();
+            Object controller = loader.getController();
+
+            setContentView(newView, controller);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void setContentView(Parent view){
+    public void setContentView(Parent view, Object controller) {
+        // Cleanup previous controller
+        if (currentController instanceof Controller cleanupController) {
+            cleanupController.cleanup();
+        }
+
+        // Store new controller
+        if (controller instanceof Controller) {
+            currentController = (Controller) controller;
+        }
+
+        // Replace content
         contentPane.getChildren().setAll(view);
     }
 }

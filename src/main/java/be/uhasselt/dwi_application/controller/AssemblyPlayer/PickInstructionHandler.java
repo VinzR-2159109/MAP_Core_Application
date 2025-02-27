@@ -19,7 +19,6 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PickInstructionHandler {
-    private PickingInstruction pickingInstruction;
     private final HandTrackingHandler handTracker = HandTrackingHandler.getInstance();
     private final MqttHandler mqttHandler = MqttHandler.getInstance();
     private final PickingHand pickingHand;
@@ -34,7 +33,6 @@ public class PickInstructionHandler {
     }
 
     public PickInstructionHandler(PickingHand pickingHand) {
-        this.pickingInstruction = null;
         this.pickingHand = pickingHand;
         this.bin = null;
     }
@@ -45,8 +43,6 @@ public class PickInstructionHandler {
 
     public void start(PickingInstruction pickingInstruction, Runnable onCompleteCallback) throws BinNotFoundException {
         if (isRunning) {stop();} ; System.out.println("Starting picking instruction");
-
-        this.pickingInstruction = pickingInstruction;
 
         // Getting Bin
         try {
@@ -112,21 +108,14 @@ public class PickInstructionHandler {
         if (timer != null) {
             timer.cancel();
             timer.purge();
-            timer = null;
         }
 
         mqttHelper.SendSetBinLEDOff(bin.getId());
 
         // Unsubscribe from MQTT
-        if (bin != null) {
-            String topic = "Input/Bin/Obstacle";
-            mqttHandler.unsubscribe(topic);
-            System.out.println("Unsubscribed from " + topic);
-        }
-
-        // Clear references
-        pickingInstruction = null;
-        bin = null;
+        String topic = "Input/Bin/Obstacle";
+        mqttHandler.unsubscribe(topic);
+        System.out.println("Unsubscribed from " + topic);
     }
 
     private double calculateQualityOfWorkScore() {

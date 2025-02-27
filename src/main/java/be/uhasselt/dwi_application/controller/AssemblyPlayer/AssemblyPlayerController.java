@@ -1,5 +1,6 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer;
 
+import be.uhasselt.dwi_application.controller.Controller;
 import be.uhasselt.dwi_application.model.workInstruction.Assembly;
 import be.uhasselt.dwi_application.model.workInstruction.Instruction;
 import be.uhasselt.dwi_application.model.workInstruction.PickingInstruction;
@@ -14,7 +15,7 @@ import static be.uhasselt.dwi_application.utility.modules.Dialog.showErrorDialog
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showExceptionDialog;
 import static be.uhasselt.dwi_application.utility.modules.ImageHandler.loadImage;
 
-public class AssemblyPlayerController {
+public class AssemblyPlayerController implements Controller {
     @FXML private Button nok_btn;
     @FXML private Button ok_btn;
     @FXML private Label instructionDescription_lbl;
@@ -99,5 +100,14 @@ public class AssemblyPlayerController {
             showExceptionDialog(e.getTitle(), e.getHeader(), e);
         }
     }
+
+    public void cleanup() {
+        System.out.println("AssemblyPlayerController is being destroyed!");
+        // Stop any running background tasks
+        if (pickInstructionHandler != null && pickInstructionHandler.isRunning()) {
+            pickInstructionHandler.stop();
+        }
+    }
+
 
 }

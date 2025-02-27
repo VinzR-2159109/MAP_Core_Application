@@ -1,5 +1,6 @@
 package be.uhasselt.dwi_application.controller.WorkInstruction.Part;
 
+import be.uhasselt.dwi_application.controller.Controller;
 import be.uhasselt.dwi_application.controller.WorkInstruction.InstructionManagerController;
 import be.uhasselt.dwi_application.model.picking.Part;
 import be.uhasselt.dwi_application.model.picking.PickingBin;
@@ -14,7 +15,7 @@ import java.util.List;
 
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showErrorDialog;
 
-public class PartItemController {
+public class PartItemController implements Controller {
     @FXML private Label partName_lbl;
     @FXML private TextField partName_txt;
     @FXML private Button editSave_btn;
@@ -136,5 +137,10 @@ public class PartItemController {
         // Assign part to new bin
         selectedBin.setPart(part);
         binRepository.updateBin(selectedBin);
+    }
+
+    @Override
+    public void cleanup() {
+
     }
 }
