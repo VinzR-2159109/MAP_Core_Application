@@ -1,0 +1,79 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.javamodularity.moduleplugin' version '1.8.12'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
+    id 'org.beryx.jlink' version '2.25.0'
+}
+
+group 'be.uhasselt'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    junitVersion = '5.10.2'
+}
+
+sourceCompatibility = '23'
+targetCompatibility = '23'
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+application {
+    mainModule = 'be.uhasselt.dwi_application'
+    mainClass = 'be.uhasselt.dwi_application.DWI_Core_Application'
+}
+
+javafx {
+    version = '23.0.1'
+    modules = ['javafx.controls', 'javafx.fxml','javafx.graphics', 'javafx.web', 'javafx.swing']
+}
+
+dependencies {
+    implementation 'org.jdbi:jdbi3-core:3.38.0'
+    implementation 'org.jdbi:jdbi3-sqlobject:3.38.0'
+    implementation 'com.h2database:h2:2.2.220'
+
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
+    implementation("com.hivemq:hivemq-mqtt-client:1.3.4")
+    implementation 'org.apache.commons:commons-imaging:1.0-alpha3'
+
+    implementation("org.openjfx:javafx-controls:23.0.1")
+    implementation("org.openjfx:javafx-fxml:23.0.1")
+    implementation('org.controlsfx:controlsfx:11.2.1')
+    implementation('org.kordamp.ikonli:ikonli-javafx:12.3.1')
+    implementation('org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0')
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    testImplementation 'org.mockito:mockito-inline:4.0.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.0.0'
+    testImplementation 'org.jdbi:jdbi3-testing:3.35.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jlink {
+    imageZip = layout.buildDirectory.file("distributions/app-${javafx.platform.classifier}.zip").get().asFile
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    launcher {
+        name = 'app'
+    }
+}
+
+tasks.withType(JavaExec).configureEach {
+    environment("GDK_BACKEND", "x11")
+}
+
+jlinkZip {
+    group = 'distribution'
+}
+
+sourceSets.main.resources.srcDirs = ['src/main/resources']

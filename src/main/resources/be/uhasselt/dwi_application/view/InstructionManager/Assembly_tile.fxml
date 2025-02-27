@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+
+<VBox fx:id="tileContainer_vbox" alignment="CENTER" prefHeight="170.0" prefWidth="255.0" spacing="5" style="-fx-border-color: black; -fx-padding: 10; -fx-background-color: #F0F0F0; -fx-border-radius: 10;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.uhasselt.dwi_application.controller.WorkInstruction.Assembly.AssemblyTileController">
+
+    <!-- Selection Checkbox -->
+    <HBox alignment="CENTER_RIGHT">
+        <VBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+        </VBox.margin>
+        <children>
+         <Button fx:id="playAssembly_btn" mnemonicParsing="false" prefHeight="28.0" prefWidth="71.0" text="Play">
+            <HBox.margin>
+               <Insets right="20.0" />
+            </HBox.margin>
+            <padding>
+               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+            </padding>
+         </Button>
+            <CheckBox fx:id="selectCheckBox">
+            <HBox.margin>
+               <Insets right="5.0" />
+            </HBox.margin></CheckBox>
+        </children>
+        <padding>
+            <Insets top="5.0" />
+        </padding>
+    </HBox>
+
+    <!-- Colored Box -->
+    <Rectangle fx:id="colorBox" fill="LIGHTBLUE" height="98.0" width="175.0" />
+   <HBox>
+      <children>
+
+          <!-- StackPane to overlay Label & TextField in the same position -->
+          <StackPane>
+              <!-- Read-only Label (Shown by default) -->
+              <Label fx:id="assemblyName_lbl" prefHeight="20.0" prefWidth="168.0" style="-fx-font-size: 14px; -fx-alignment: CENTER;" />
+
+              <!-- Editable TextField (Hidden by default, same position) -->
+              <TextField fx:id="assemblyName_txt" alignment="CENTER" prefWidth="120" visible="false" />
+          </StackPane>
+
+          <!-- Edit/Save Button -->
+          <Button fx:id="editSave_btn" onAction="#toggleEditSave" prefHeight="26.0" prefWidth="92.0" text="Edit">
+            <padding>
+               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+            </padding></Button>
+      </children>
+      <VBox.margin>
+         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+      </VBox.margin>
+   </HBox>
+
+</VBox>
