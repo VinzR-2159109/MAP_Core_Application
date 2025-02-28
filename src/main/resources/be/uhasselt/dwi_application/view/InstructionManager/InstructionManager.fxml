@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="1000.0" prefWidth="1600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.uhasselt.dwi_application.controller.WorkInstruction.InstructionManagerController">
+<AnchorPane prefHeight="1000.0" prefWidth="1600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.uhasselt.dwi_application.controller.WorkInstruction.Manager.InstructionManagerController">
 
     <HBox prefHeight="1002.0" prefWidth="1634.0">
         <!-- Left Panel: Instruction Management -->
@@ -55,7 +55,7 @@
             </HBox>
          <HBox alignment="CENTER_RIGHT" layoutX="30.0" layoutY="498.0" spacing="10">
             <children>
-               <Label text="Hint">
+               <Label fx:id="hintLabel" text="Hint">
                   <HBox.margin>
                      <Insets />
                   </HBox.margin>

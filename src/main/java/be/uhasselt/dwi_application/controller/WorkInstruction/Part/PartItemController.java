@@ -1,7 +1,7 @@
 package be.uhasselt.dwi_application.controller.WorkInstruction.Part;
 
 import be.uhasselt.dwi_application.controller.Controller;
-import be.uhasselt.dwi_application.controller.WorkInstruction.InstructionManagerController;
+import be.uhasselt.dwi_application.controller.WorkInstruction.Manager.InstructionManagerController;
 import be.uhasselt.dwi_application.model.picking.Part;
 import be.uhasselt.dwi_application.model.picking.PickingBin;
 import be.uhasselt.dwi_application.model.workInstruction.Assembly;

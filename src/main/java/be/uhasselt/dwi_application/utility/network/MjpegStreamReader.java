@@ -55,7 +55,6 @@ public class MjpegStreamReader {
                     }
                 }
             } catch (IOException | ImageReadException | URISyntaxException e) {
-                System.err.println("MJPEG Stream Error: " + e.getMessage());
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException ignored) {
