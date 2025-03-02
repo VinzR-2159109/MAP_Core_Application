@@ -58,12 +58,6 @@ public class AssemblyManagerController implements Controller {
             assemblies.add(newAssembly);
             assemblyName_txt.setText("New Assembly");
             populateAssemblyTiles();
-        } else {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(null);
-            alert.setContentText("Please enter a valid assembly");
-            alert.showAndWait();
         }
     }
 

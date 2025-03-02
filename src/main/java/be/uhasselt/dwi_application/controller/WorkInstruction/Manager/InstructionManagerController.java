@@ -1,6 +1,8 @@
 package be.uhasselt.dwi_application.controller.WorkInstruction.Manager;
 
 import be.uhasselt.dwi_application.controller.Controller;
+import be.uhasselt.dwi_application.controller.MainController;
+import be.uhasselt.dwi_application.controller.WorkInstruction.LocationPicker.AssemblyLocationPickerController;
 import be.uhasselt.dwi_application.controller.WorkInstruction.Part.PartManagerController;
 import be.uhasselt.dwi_application.model.workInstruction.*;
 import be.uhasselt.dwi_application.model.picking.Part;
@@ -11,6 +13,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -43,6 +46,7 @@ public class InstructionManagerController implements Controller {
     @FXML private TextField hintField;
     @FXML private CheckBox skipDuringPlay_checkbox;
     @FXML private Spinner<Integer> partQuantiy_spinner;
+    @FXML private Button pickLocation_btn;
 
     private TreeItem<Instruction> selectedNode;
     private final Assembly assembly;
@@ -73,7 +77,7 @@ public class InstructionManagerController implements Controller {
         deleteImage_btn.setOnAction(_ -> deleteImage());
         disableHint_checkbox.setOnAction(_ -> toggleDisableHint());
         skipDuringPlay_checkbox.setOnAction(_ -> toggleSkipDuringPlay());
-
+        pickLocation_btn.setOnAction(_-> openLocationPicker());
         pickInstructionSettings_hbox.setDisable(true);
         partQuantiy_spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
 
@@ -91,9 +95,29 @@ public class InstructionManagerController implements Controller {
 
         loadInstructions(assembly, selectedNode, instructionTree);
         populatePartSelector();
-        partSelector.valueProperty().addListener((_, _, selectedPart) -> updatePartInDB((Part) selectedPart));
-        partQuantiy_spinner.valueProperty().addListener((_, _, newValue) -> {updateQuantityInDB(newValue);});
+        partSelector.valueProperty().addListener((_, _, selectedPart) -> updatePartInDB(selectedPart));
+        partQuantiy_spinner.valueProperty().addListener((_, _, newValue) -> updateQuantityInDB(newValue));
 
+    }
+
+    private void openLocationPicker() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(FxmlViews.LOCATION_PICKER));
+            if (selectedNode != null) {
+                Instruction instruction = selectedNode.getValue();
+                if (instruction instanceof AssemblyInstruction assemblyInstruction) {
+                    loader.setControllerFactory(_-> new AssemblyLocationPickerController(assemblyInstruction));
+                    Parent instructionView = loader.load();
+                    Controller controller = loader.getController();
+
+                    MainController.getInstance().setContentView(instructionView, controller);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showExceptionDialog("Fault in handleTileClick", e);
+        }
     }
 
     public void populatePartSelector() {
@@ -215,7 +239,7 @@ public class InstructionManagerController implements Controller {
     private void uploadInstructionImage() {
         try {
             Image image = uploadImage(InstructionImageView.getScene().getWindow());
-            InstructionRepository.getInstance().uploadImageToInstruction(image.getUrl(), selectedNode.getValue().getId());
+            InstructionRepository.getInstance().uploadImage(image.getUrl(), selectedNode.getValue().getId());
         } catch (IOException e) {
             showExceptionDialog("Error while uploading Image", e);
         }

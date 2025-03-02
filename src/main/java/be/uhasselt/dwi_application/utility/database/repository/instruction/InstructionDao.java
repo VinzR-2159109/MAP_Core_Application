@@ -1,19 +1,22 @@
 package be.uhasselt.dwi_application.utility.database.repository.instruction;
 
-import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
+import be.uhasselt.dwi_application.model.basic.Position;
 import be.uhasselt.dwi_application.model.workInstruction.Instruction;
 import be.uhasselt.dwi_application.model.workInstruction.InstructionRecord;
-import be.uhasselt.dwi_application.model.workInstruction.PickingInstruction;
+import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.config.RegisterConstructorMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
+import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import java.util.List;
 
 @RegisterConstructorMapper(Instruction.class)
 @RegisterConstructorMapper(InstructionRecord.class)
+@RegisterBeanMapper(Position.class)
+@RegisterBeanMapper(AssemblyInstructionPosition.class)
 public interface InstructionDao {
 
     // Fetch a single instruction by ID
@@ -48,6 +51,12 @@ public interface InstructionDao {
     @SqlUpdate("UPDATE INSTRUCTION SET description = :description, INSTRUCTION_HINT = :hint, image_path = :imagePath, properties = :properties WHERE id = :id")
     void updateAssemblyInstruction(@Bind("id") Long id, @Bind("description") String description, @Bind("hint") String hint, @Bind("imagePath") String imagePath, @Bind("properties") String properties);
 
+    @SqlUpdate("DELETE FROM AssemblyInstruction_Position WHERE instruction_id = :id")
+    void deleteAssemblyPositions(@Bind("id") Long id);
+
+    @SqlBatch("INSERT INTO AssemblyInstruction_Position (instruction_id, position_id) VALUES (:instructionId, :positionId)")
+    void insertAssemblyPositions(@Bind("instructionId") Long instructionId, @Bind("positionId") List<Long> positionIds);
+
     // Delete
     @SqlUpdate("DELETE FROM instruction WHERE id = :id")
     void delete(@Bind("id") Long id);
@@ -72,4 +81,10 @@ public interface InstructionDao {
 
     @SqlQuery("SELECT image_path FROM instruction WHERE id = :id")
     String findImageByInstructionId(@Bind("id") Long id);
+
+    @SqlQuery("SELECT p.* FROM AssemblyInstruction_Position aip " +
+            "JOIN Position p ON aip.position_id = p.id " +
+            "WHERE aip.instruction_id = :instructionId")
+    List<Position> findAllAssemblyInstructionPositions(@Bind("instructionId") Long instructionId);
+
 }

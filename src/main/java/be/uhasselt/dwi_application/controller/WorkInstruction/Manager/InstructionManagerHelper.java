@@ -68,7 +68,7 @@ public class InstructionManagerHelper {
         Instruction instruction = selectedNode.getValue();
         // Dont delete rootNode
         if (instruction.getParentInstructionId() != null) {
-            InstructionRepository.getInstance().removeInstruction(instruction.getId());
+            InstructionRepository.getInstance().delete(instruction.getId());
             TreeItem<Instruction> parent = selectedNode.getParent();
             if (parent != null) {
                 parent.getChildren().remove(selectedNode);

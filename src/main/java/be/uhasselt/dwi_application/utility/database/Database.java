@@ -1,6 +1,8 @@
 package be.uhasselt.dwi_application.utility.database;
 
+import be.uhasselt.dwi_application.model.basic.Position;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.mapper.reflect.BeanMapper;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 
 public class Database {

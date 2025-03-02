@@ -29,6 +29,7 @@ module be.uhasselt.dwi_application {
     opens be.uhasselt.dwi_application.controller.WorkInstruction.Part to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.WorkInstruction.Assembly to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.WorkInstruction.Manager to javafx.fxml;
+    opens be.uhasselt.dwi_application.controller.WorkInstruction.LocationPicker to javafx.fxml;
 
     opens be.uhasselt.dwi_application.model.basic to org.jdbi.v3.core;
     opens be.uhasselt.dwi_application.model.workInstruction to org.jdbi.v3.core;

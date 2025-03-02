@@ -1,7 +1,12 @@
 package be.uhasselt.dwi_application.model.workInstruction;
 
+import be.uhasselt.dwi_application.model.basic.Position;
+import be.uhasselt.dwi_application.utility.database.repository.position.PositionRepository;
 import org.jdbi.v3.core.mapper.reflect.ColumnName;
 import org.jdbi.v3.core.mapper.reflect.JdbiConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 //God class for polymorphism
 public class InstructionRecord {
