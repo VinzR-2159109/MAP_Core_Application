@@ -1,6 +1,8 @@
 package be.uhasselt.dwi_application.model.workInstruction;
 
 import be.uhasselt.dwi_application.model.basic.Position;
+import be.uhasselt.dwi_application.utility.database.repository.instruction.InstructionRepository;
+import be.uhasselt.dwi_application.utility.database.repository.position.PositionRepository;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ public class AssemblyInstruction extends Instruction {
         subInstructions.add(subInstruction);
     }
 
-    public List<Position> getAssemblyPositions() {return assemblyPositions;}
+    public List<Position> getAssemblyPositions() {return PositionRepository.getInstance().getAllByInstructionId(this.getId());}
     public void setAssemblyPositions(List<Position> assemblyPositions) {this.assemblyPositions = assemblyPositions;}
 
     public void addPosition(Position position) {assemblyPositions.add(position);    }

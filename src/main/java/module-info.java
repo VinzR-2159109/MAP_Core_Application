@@ -30,6 +30,10 @@ module be.uhasselt.dwi_application {
     opens be.uhasselt.dwi_application.controller.WorkInstruction.Assembly to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.WorkInstruction.Manager to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.WorkInstruction.LocationPicker to javafx.fxml;
+    opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly to javafx.fxml;
+    opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick to javafx.fxml;
+
+    opens be.uhasselt.dwi_application.model.Jackson.StripLedConfig to com.fasterxml.jackson.databind;
 
     opens be.uhasselt.dwi_application.model.basic to org.jdbi.v3.core;
     opens be.uhasselt.dwi_application.model.workInstruction to org.jdbi.v3.core;
@@ -51,4 +55,5 @@ module be.uhasselt.dwi_application {
     exports be.uhasselt.dwi_application.model.Jackson to com.fasterxml.jackson.databind;
     exports be.uhasselt.dwi_application.utility.database.repository.assembly;
     exports be.uhasselt.dwi_application.utility.database.repository.instruction;
+
 }

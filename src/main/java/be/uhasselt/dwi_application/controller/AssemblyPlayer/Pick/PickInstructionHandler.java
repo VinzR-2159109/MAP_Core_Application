@@ -1,4 +1,4 @@
-package be.uhasselt.dwi_application.controller.AssemblyPlayer;
+package be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick;
 
 import be.uhasselt.dwi_application.model.Jackson.ObstacleSensorData;
 import be.uhasselt.dwi_application.model.basic.Position;

@@ -1,7 +1,10 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer;
 
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyInstructionHandler;
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick.PickInstructionHandler;
 import be.uhasselt.dwi_application.controller.Controller;
 import be.uhasselt.dwi_application.model.workInstruction.Assembly;
+import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
 import be.uhasselt.dwi_application.model.workInstruction.Instruction;
 import be.uhasselt.dwi_application.model.workInstruction.PickingInstruction;
 import be.uhasselt.dwi_application.utility.exception.BinNotFoundException;
@@ -26,16 +29,16 @@ public class AssemblyPlayerController implements Controller {
     private Instruction currentInstruction;
     private final Assembly assembly;
     private final PickInstructionHandler pickInstructionHandler;
+    private final AssemblyInstructionHandler assemblyInstructionHandler;
 
     public AssemblyPlayerController(Assembly assembly) {
         this.assembly = assembly;
         pickInstructionHandler = new PickInstructionHandler(PickInstructionHandler.PickingHand.RIGHT);
+        assemblyInstructionHandler = new AssemblyInstructionHandler();
         manager = new AssemblyPlayerManager(assembly);
 
         this.currentInstruction = manager.moveToNextInstruction(null);
-        if (currentInstruction instanceof PickingInstruction pickingInstruction) {
-            handlePickingInstruction(pickingInstruction);
-        }
+        setNextInstruction(currentInstruction);
     }
 
     @FXML
@@ -55,11 +58,22 @@ public class AssemblyPlayerController implements Controller {
             InstructionImageView.setImage(null);
             ok_btn.setDisable(true);
             nok_btn.setDisable(true);
-        } else {
-            updateUI();
+            return;
         }
-    }
 
+        if (currentInstruction instanceof PickingInstruction pickingInstruction) {
+            handlePickingInstruction(pickingInstruction);
+        }
+
+        if (currentInstruction instanceof AssemblyInstruction assemblyInstruction) {
+            handleAssemblyInstruction(assemblyInstruction);
+        }
+
+        Platform.runLater(() -> {
+            instructionDescription_lbl.setText(currentInstruction.getDescription());
+            InstructionImageView.setImage(loadImage(currentInstruction.getImagePath()));
+        });
+    }
 
     private void handleOk() {
         if (pickInstructionHandler.isRunning()){
@@ -69,20 +83,10 @@ public class AssemblyPlayerController implements Controller {
             });
             return;
         }
+        assemblyInstructionHandler.stop();
 
         //Play Ok-sound, Green lights ...
         setNextInstruction(manager.moveToNextInstruction(currentInstruction));
-    }
-
-    private void updateUI() {
-        Platform.runLater(() -> {
-            instructionDescription_lbl.setText(currentInstruction.getDescription());
-            InstructionImageView.setImage(loadImage(currentInstruction.getImagePath()));
-        });
-
-        if (currentInstruction instanceof PickingInstruction pickingInstruction) {
-            handlePickingInstruction(pickingInstruction);
-        }
     }
 
     private void handleNok() {
@@ -100,6 +104,18 @@ public class AssemblyPlayerController implements Controller {
             showExceptionDialog(e.getTitle(), e.getHeader(), e);
         }
     }
+
+    private void handleAssemblyInstruction(AssemblyInstruction assemblyInstruction) {
+        try {
+            assemblyInstructionHandler.start(assemblyInstruction, () -> {
+                handleOk();
+                assemblyInstructionHandler.stop();
+            });
+        } catch (Exception e) {
+            showExceptionDialog("Error", "handleAssemblyInstruction", e);
+        }
+    }
+
 
     public void cleanup() {
         System.out.println("AssemblyPlayerController is being destroyed!");
