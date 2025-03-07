@@ -29,7 +29,12 @@ public class AssemblyInstruction extends Instruction {
         subInstructions.add(subInstruction);
     }
 
-    public List<Position> getAssemblyPositions() {return PositionRepository.getInstance().getAllByInstructionId(this.getId());}
+    public List<Position> getAssemblyPositions() {
+        if (assemblyPositions.isEmpty()) {
+            assemblyPositions = PositionRepository.getInstance().getAllByInstructionId(this.getId());
+        }
+        return assemblyPositions;
+    }
     public void setAssemblyPositions(List<Position> assemblyPositions) {this.assemblyPositions = assemblyPositions;}
 
     public void addPosition(Position position) {assemblyPositions.add(position);    }

@@ -40,6 +40,7 @@ module be.uhasselt.dwi_application {
     opens be.uhasselt.dwi_application.model.picking to org.jdbi.v3.core;
     opens be.uhasselt.dwi_application.utility.database.repository.assembly to org.jdbi.v3.core;
     opens be.uhasselt.dwi_application.utility.database.repository.instruction to org.jdbi.v3.core;
+    opens be.uhasselt.dwi_application.utility.database.repository.settings to org.jdbi.v3.core;
 
     // ✅ Export required packages
     exports be.uhasselt.dwi_application;
@@ -55,5 +56,6 @@ module be.uhasselt.dwi_application {
     exports be.uhasselt.dwi_application.model.Jackson to com.fasterxml.jackson.databind;
     exports be.uhasselt.dwi_application.utility.database.repository.assembly;
     exports be.uhasselt.dwi_application.utility.database.repository.instruction;
+    exports be.uhasselt.dwi_application.utility.database.repository.settings;
 
 }

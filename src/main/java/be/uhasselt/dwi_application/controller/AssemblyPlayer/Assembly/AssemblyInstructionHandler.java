@@ -2,6 +2,7 @@ package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
 import be.uhasselt.dwi_application.model.basic.Position;
 import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
+import be.uhasselt.dwi_application.utility.database.repository.settings.SettingsRepository;
 
 import java.util.List;
 
@@ -32,12 +33,11 @@ public class AssemblyInstructionHandler {
         int endY = (int) positions.stream().mapToDouble(Position::getY).max().orElse(0);
 
 
-        //TODO: get via Settings
-        int gridSize = 15;
+        int gridSize = SettingsRepository.loadSettings().getGridSize();
 
         // Send MQTT Commands
         helper.sendSetLedStripXGreenOnRange(startX/gridSize, endX/gridSize);
-        helper.sendSetLedStripYGreenOnRange(startY/gridSize, endY/gridSize);
+       // helper.sendSetLedStripYGreenOnRange(startY/gridSize, endY/gridSize);
     }
 
     public void stop(){

@@ -20,16 +20,16 @@ public class AssemblyMQTTHelper {
     }
 
     public void sendSetLedStripXGreenOnRange(int start, int end) {
-        sendSetLedStripRange("x", start, end, new Color(0, 255, 0), 255, "on");
+        sendSetLedStripRange("x", start, end, new Color(0, 255, 0), 50, "on");
     }
 
     public void sendSetLedStripYGreenOnRange(int start, int end) {
-        sendSetLedStripRange("y", start, end, new Color(0, 255, 0), 255, "on");
+        sendSetLedStripRange("y", start, end, new Color(0, 255, 0), 50, "on");
     }
 
     public void sendTurnOffAllLedStrip() {
         List<LEDStripRange> ledsX = List.of(new LEDStripRange(0, 28, new Color(0, 0, 0), 0, "off"));
-        List<LEDStripRange> ledsY = List.of(new LEDStripRange(29, 60, new Color(0, 0, 0), 0, "off"));
+        List<LEDStripRange> ledsY = List.of(new LEDStripRange(0, 12, new Color(0, 0, 0), 0, "off"));
 
         sendLedStripCommand("x", ledsX);
         sendLedStripCommand("y", ledsY);
