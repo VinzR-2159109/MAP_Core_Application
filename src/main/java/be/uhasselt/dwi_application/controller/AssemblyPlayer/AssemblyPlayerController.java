@@ -123,6 +123,10 @@ public class AssemblyPlayerController implements Controller {
         if (pickInstructionHandler != null && pickInstructionHandler.isRunning()) {
             pickInstructionHandler.stop();
         }
+
+        if (assemblyInstructionHandler != null) {
+            assemblyInstructionHandler.stop();
+        }
     }
 
 

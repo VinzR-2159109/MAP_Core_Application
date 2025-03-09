@@ -15,6 +15,7 @@ public class AssemblyInstructionHandler {
     }
 
     public void start(AssemblyInstruction assemblyInstruction, Runnable onCompleteCallback){
+        helper.sendTurnOffAllLedStrip();
         this.assemblyInstruction = assemblyInstruction;
 
         List<Position> positions = assemblyInstruction.getAssemblyPositions();
@@ -37,7 +38,7 @@ public class AssemblyInstructionHandler {
 
         // Send MQTT Commands
         helper.sendSetLedStripXGreenOnRange(startX/gridSize, endX/gridSize);
-       // helper.sendSetLedStripYGreenOnRange(startY/gridSize, endY/gridSize);
+        helper.sendSetLedStripYGreenOnRange(startY/gridSize, endY/gridSize);
     }
 
     public void stop(){

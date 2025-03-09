@@ -28,8 +28,8 @@ public class AssemblyMQTTHelper {
     }
 
     public void sendTurnOffAllLedStrip() {
-        List<LEDStripRange> ledsX = List.of(new LEDStripRange(0, 28, new Color(0, 0, 0), 0, "off"));
-        List<LEDStripRange> ledsY = List.of(new LEDStripRange(0, 12, new Color(0, 0, 0), 0, "off"));
+        List<LEDStripRange> ledsX = List.of(new LEDStripRange(0, 60, new Color(0, 0, 0), 0, "off"));
+        List<LEDStripRange> ledsY = List.of(new LEDStripRange(0, 28, new Color(0, 0, 0), 0, "off"));
 
         sendLedStripCommand("x", ledsX);
         sendLedStripCommand("y", ledsY);
