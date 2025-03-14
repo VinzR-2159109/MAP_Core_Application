@@ -60,14 +60,9 @@ public class MqttHandler {
             String payload = StandardCharsets.UTF_8.decode(publish.getPayload().get()).toString();
 
             if (receivedTopic.equals(topic)) {
-                System.out.println("Debug: Received message on topic [" + receivedTopic + "]: " + payload);
                 callback.accept(payload);
-            } else {
-                System.out.println("Ignoring message from unexpected topic: " + receivedTopic);
             }
         });
-
-        System.out.println("Subscribed to topic: " + topic);
     }
 
     public void publish(String topic, String message) {

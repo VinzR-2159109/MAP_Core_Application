@@ -225,6 +225,8 @@ public class AssemblyLocationPickerController implements Controller {
             videoStream_img.setImage(image);
             videoStream_img.setPreserveRatio(true);
 
+            videoStream_img.setScaleY(-1);
+
             double newWidth = image.getWidth() * videoFeedEnlargement;
             double newHeight = image.getHeight() * videoFeedEnlargement;
 

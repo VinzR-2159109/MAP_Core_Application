@@ -141,6 +141,6 @@ public class PickInstructionHandler {
     private boolean isPickCompleted(double qualityOfWorkScore) {
         boolean binClear = obstacleInBin.get();
         System.out.println("Quality of work score: " + qualityOfWorkScore + ", Bin clear: " + binClear);
-        return qualityOfWorkScore > 0 && binClear;
+        return qualityOfWorkScore > 85 && binClear;
     }
 }

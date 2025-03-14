@@ -69,13 +69,22 @@ public class HandTrackingHandler {
                     leftHandStatus = newHandStatus;
                     leftUpdated = true;
                 }
-                checkAndNotify(leftHandPosition, newHandPos, leftHandListener);
-            } else if (hand.getLabel() == HandLabel.RIGHT) {
+
+                if (!leftHandStatus.equals(HandStatus.UNKNOWN)){
+                    checkAndNotify(leftHandPosition, newHandPos, leftHandListener);
+                }
+            }
+
+            else if (hand.getLabel() == HandLabel.RIGHT) {
                 if (rightHandStatus != newHandStatus || !rightHandPosition.get().equals(newHandPos)) {
                     rightHandStatus = newHandStatus;
                     rightUpdated = true;
                 }
-                checkAndNotify(rightHandPosition, newHandPos, rightHandListener);
+
+                if (!rightHandStatus.equals(HandStatus.UNKNOWN)){
+                    checkAndNotify(rightHandPosition, newHandPos, rightHandListener);
+
+                }
             }
         }
 
