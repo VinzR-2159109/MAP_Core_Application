@@ -30,11 +30,8 @@ import static be.uhasselt.dwi_application.utility.modules.Dialog.*;
 import static be.uhasselt.dwi_application.utility.modules.ImageHandler.uploadImage;
 
 public class InstructionManagerController implements Controller {
-    @FXML private Button addAssemblyInstruction_btn;
-    @FXML private Button addPickingInstruction_btn;
     @FXML private Button removeInstruction_btn;
     @FXML private TreeView<Instruction> instructionTree;
-    @FXML private TextField descriptionField;
     @FXML private HBox pickInstructionSettings_hbox;
     @FXML private ComboBox<Part> partSelector;
     @FXML private AnchorPane partManagerContainer;
@@ -69,14 +66,16 @@ public class InstructionManagerController implements Controller {
     public void initialize() {
         System.out.println("---Initializing Instruction Manager---");
         instructionTree.setOnMouseClicked(this::handleTreeSelection);
+        instructionTree.setCellFactory(_ -> new InstructionTreeItemController(assembly));
+
+
         instance = this;
 
-        addAssemblyInstruction_btn.setOnAction(_ -> helper.addAssemblyInstruction(selectedNode));
-        addPickingInstruction_btn.setOnAction(_ -> helper.addPickingInstruction(selectedNode));
         removeInstruction_btn.setOnAction(_ -> {
             helper.removeSelectedInstruction(selectedNode, instructionTree);
             selectedNode = null;
         });
+
         uploadImage_btn.setOnAction(_ -> uploadInstructionImage());
         deleteImage_btn.setOnAction(_ -> deleteImage());
         disableHint_checkbox.setOnAction(_ -> toggleDisableHint());
@@ -94,7 +93,6 @@ public class InstructionManagerController implements Controller {
             showErrorDialog("Error", "Failed to load Part Manager", e.getMessage(), "OK");
         }
 
-        setupTypingTimer(descriptionField, this::updateDescriptionInDB);
         setupTypingTimer(hintField, this::updateHint);
 
         loadInstructions(assembly, selectedNode, instructionTree);
@@ -139,7 +137,6 @@ public class InstructionManagerController implements Controller {
             updater.lockUpdates();
             updater.setSelectedNode(selectedNode);
 
-            descriptionField.setText(instruction.getDescription());
             hintField.setText(instruction.getHint() != null ? instruction.getHint() : "");
             disableHint_checkbox.setSelected(instruction.hasProperty(Instruction.InstructionProperty.HINT_DISABLED));
             skipDuringPlay_checkbox.setSelected(instruction.hasProperty(Instruction.InstructionProperty.SKIP_DURING_PLAY));
@@ -223,11 +220,6 @@ public class InstructionManagerController implements Controller {
                 typingTimer.playFromStart();
             }
         });
-    }
-
-    private void updateDescriptionInDB() {
-        boolean success = updater.updateDescriptionInDB(selectedNode, descriptionField.getText());
-        if (success) reloadUI();
     }
 
     private void updateHint() {

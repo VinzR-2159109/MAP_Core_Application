@@ -63,6 +63,12 @@ public class AssemblyTileController implements Controller {
                 saveAssemblyName();
             }
         });
+
+        assemblyName_txt.focusedProperty().addListener((_, _, isNowFocused) -> {
+            if (!isNowFocused) {
+                saveAssemblyName();
+            }
+        });
     }
 
     private void playAssembly() {

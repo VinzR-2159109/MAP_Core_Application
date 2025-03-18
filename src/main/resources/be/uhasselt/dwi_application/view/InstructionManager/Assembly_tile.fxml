@@ -45,7 +45,7 @@
           <!-- StackPane to overlay Label & TextField in the same position -->
           <StackPane prefHeight="26.0" prefWidth="179.0">
               <!-- Read-only Label (Shown by default) -->
-              <Label fx:id="assemblyName_lbl" prefHeight="20.0" prefWidth="168.0" style="-fx-font-size: 14px; -fx-alignment: CENTER;" />
+              <Label fx:id="assemblyName_lbl" prefHeight="20.0" prefWidth="168.0" style="-fx-alignment: CENTER;" />
 
               <!-- Editable TextField (Hidden by default, same position) -->
               <TextField fx:id="assemblyName_txt" alignment="CENTER" prefWidth="120" visible="false" />
