@@ -28,6 +28,8 @@ public class InstructionLoader {
         TreeItem<Instruction> root = null;
         TreeItem<Instruction> nodeToSelect = null;
 
+
+        //Finding Root
         for (Instruction instruction : instructions) {
             TreeItem<Instruction> item = new TreeItem<>(instruction);
             itemMap.put(instruction.getId(), item);
@@ -54,6 +56,7 @@ public class InstructionLoader {
             instructions.add(rootInstruction);
         }
 
+        //Building Tree
         for (Instruction instruction : instructions) {
             if (instruction.getParentInstructionId() != null) {
                 TreeItem<Instruction> parent = itemMap.get(instruction.getParentInstructionId());

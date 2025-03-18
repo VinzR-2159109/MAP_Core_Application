@@ -22,6 +22,7 @@ public class Assembly {
 
     public Assembly(String name) {
         this.name = name;
+        this.color = "#000000";
     }
 
     public void setId(Long generatedId) {this.id = generatedId;}

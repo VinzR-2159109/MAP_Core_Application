@@ -18,7 +18,7 @@ public class AssemblyInstruction extends Instruction {
     }
 
     public AssemblyInstruction(String description, Long assemblyId, Long parentId) {
-        this(description, assemblyId, parentId, null, null, null, null);
+        this(description, assemblyId, parentId, null, null, null, List.of());
     }
 
     public List<Instruction> getSubInstructions() {
@@ -31,7 +31,7 @@ public class AssemblyInstruction extends Instruction {
 
     public List<Position> getAssemblyPositions() {
         if (assemblyPositions.isEmpty()) {
-            assemblyPositions = PositionRepository.getInstance().getAllByInstructionId(this.getId());
+            assemblyPositions = PositionRepository.getInstance().getAllByInstructionId(this.getId()).orElseGet(ArrayList::new);
         }
         return assemblyPositions;
     }

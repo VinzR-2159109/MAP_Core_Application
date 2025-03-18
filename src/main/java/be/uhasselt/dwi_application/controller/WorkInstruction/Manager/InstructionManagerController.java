@@ -47,6 +47,7 @@ public class InstructionManagerController implements Controller {
     @FXML private CheckBox skipDuringPlay_checkbox;
     @FXML private Spinner<Integer> partQuantiy_spinner;
     @FXML private Button pickLocation_btn;
+    @FXML private HBox location_hbox;
 
     private TreeItem<Instruction> selectedNode;
     private final Assembly assembly;
@@ -72,7 +73,10 @@ public class InstructionManagerController implements Controller {
 
         addAssemblyInstruction_btn.setOnAction(_ -> helper.addAssemblyInstruction(selectedNode));
         addPickingInstruction_btn.setOnAction(_ -> helper.addPickingInstruction(selectedNode));
-        removeInstruction_btn.setOnAction(_ -> helper.removeSelectedInstruction(selectedNode, instructionTree));
+        removeInstruction_btn.setOnAction(_ -> {
+            helper.removeSelectedInstruction(selectedNode, instructionTree);
+            selectedNode = null;
+        });
         uploadImage_btn.setOnAction(_ -> uploadInstructionImage());
         deleteImage_btn.setOnAction(_ -> deleteImage());
         disableHint_checkbox.setOnAction(_ -> toggleDisableHint());
@@ -106,7 +110,7 @@ public class InstructionManagerController implements Controller {
             if (selectedNode != null) {
                 Instruction instruction = selectedNode.getValue();
                 if (instruction instanceof AssemblyInstruction assemblyInstruction) {
-                    loader.setControllerFactory(_-> new AssemblyLocationPickerController(assemblyInstruction));
+                    loader.setControllerFactory(_-> new AssemblyLocationPickerController(assembly, assemblyInstruction));
                     Parent instructionView = loader.load();
                     Controller controller = loader.getController();
 
@@ -140,12 +144,16 @@ public class InstructionManagerController implements Controller {
             disableHint_checkbox.setSelected(instruction.hasProperty(Instruction.InstructionProperty.HINT_DISABLED));
             skipDuringPlay_checkbox.setSelected(instruction.hasProperty(Instruction.InstructionProperty.SKIP_DURING_PLAY));
 
+            location_hbox.setDisable(instruction.hasProperty(Instruction.InstructionProperty.SKIP_DURING_PLAY));
+
             // Handle Part Selection
             if (instruction instanceof PickingInstruction pickingInstruction) {
                 pickInstructionSettings_hbox.setDisable(false);
                 partSelector.setValue(pickingInstruction.getPartToPick());
                 partQuantiy_spinner.getValueFactory().setValue(pickingInstruction.getQuantity());
-            } else {
+                location_hbox.setDisable(true);
+            } else if (instruction instanceof AssemblyInstruction assemblyInstruction) {
+                location_hbox.setDisable(false);
                 pickInstructionSettings_hbox.setDisable(true);
                 partSelector.setValue(null);
             }

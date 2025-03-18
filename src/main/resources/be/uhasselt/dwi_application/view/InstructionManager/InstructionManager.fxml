@@ -92,7 +92,7 @@
             </HBox>
 
             <!-- Update Instruction Button -->
-            <HBox alignment="CENTER_LEFT">
+            <HBox fx:id="location_hbox" alignment="CENTER_LEFT">
             <VBox.margin>
                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </VBox.margin>

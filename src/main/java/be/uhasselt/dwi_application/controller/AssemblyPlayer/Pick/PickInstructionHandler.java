@@ -89,7 +89,7 @@ public class PickInstructionHandler {
             public void run() {
                 if (!isRunning) return; // Prevent execution after stopping
 
-                if (isPickCompleted(calculateQualityOfWorkScore())) {
+                if (isPickCompleted()) {
                     System.out.println("Pick Completed");
                     stop();
                     Platform.runLater(onCompleteCallback);
@@ -138,9 +138,7 @@ public class PickInstructionHandler {
         return Math.max(0, Math.min(maxScore, maxScore - (distance / maxDistance) * maxScore));
     }
 
-    private boolean isPickCompleted(double qualityOfWorkScore) {
-        boolean binClear = obstacleInBin.get();
-        System.out.println("Quality of work score: " + qualityOfWorkScore + ", Bin clear: " + binClear);
-        return qualityOfWorkScore > 85 && binClear;
+    private boolean isPickCompleted() {
+        return obstacleInBin.get();
     }
 }

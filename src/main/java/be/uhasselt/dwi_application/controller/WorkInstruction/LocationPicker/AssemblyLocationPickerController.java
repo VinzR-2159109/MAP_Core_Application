@@ -1,19 +1,23 @@
 package be.uhasselt.dwi_application.controller.WorkInstruction.LocationPicker;
 
 import be.uhasselt.dwi_application.controller.Controller;
+import be.uhasselt.dwi_application.controller.MainController;
+import be.uhasselt.dwi_application.controller.WorkInstruction.Manager.InstructionManagerController;
 import be.uhasselt.dwi_application.model.basic.Position;
+import be.uhasselt.dwi_application.model.workInstruction.Assembly;
 import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
+import be.uhasselt.dwi_application.utility.FxmlViews;
 import be.uhasselt.dwi_application.utility.database.repository.instruction.InstructionRepository;
 import be.uhasselt.dwi_application.utility.database.repository.position.PositionRepository;
 import be.uhasselt.dwi_application.utility.database.repository.settings.Settings;
 import be.uhasselt.dwi_application.utility.database.repository.settings.SettingsRepository;
 import be.uhasselt.dwi_application.utility.network.MjpegStreamReader;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TextField;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -25,6 +29,8 @@ import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import static be.uhasselt.dwi_application.utility.modules.Dialog.showExceptionDialog;
+
 public class AssemblyLocationPickerController implements Controller {
     @FXML private TextField locationX1_field;
     @FXML private TextField locationX2_field;
@@ -34,16 +40,18 @@ public class AssemblyLocationPickerController implements Controller {
     @FXML private Pane gridPane;
     @FXML private ImageView videoStream_img;
     @FXML private Spinner<Integer> gridSize_spinner;
+    @FXML private Button save_btn;
 
     private final AssemblyInstruction assemblyInstruction;
+    private final Assembly assembly;
     private double startX, startY;
     private Rectangle selectionRectangle;
     private MjpegStreamReader streamReader;
-
     private int gridSize;
     private int videoFeedEnlargement = 2;
 
-    public AssemblyLocationPickerController(AssemblyInstruction assemblyInstruction) {
+    public AssemblyLocationPickerController(Assembly assembly, AssemblyInstruction assemblyInstruction) {
+        this.assembly = assembly;
         this.assemblyInstruction = assemblyInstruction;
     }
 
@@ -64,6 +72,8 @@ public class AssemblyLocationPickerController implements Controller {
         locationPicker_pane.setOnMouseDragged(this::handleMouseDrag);
         locationPicker_pane.setOnMouseReleased(this::handleMouseRelease);
 
+        save_btn.setOnAction(this::handleSaveBtn);
+
         gridSize = SettingsRepository.loadSettings().getGridSize();
         gridSize_spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(10, 50, gridSize));
         gridSize_spinner.valueProperty().addListener((_, _, newValue) -> {
@@ -76,7 +86,7 @@ public class AssemblyLocationPickerController implements Controller {
             drawGrid();
         });
 
-        List<Position> positions = PositionRepository.getInstance().getAllByInstructionId(assemblyInstruction.getId());
+        List<Position> positions = PositionRepository.getInstance().getAllByInstructionId(assemblyInstruction.getId()).orElseGet(ArrayList::new);
         System.out.println("Loading positions: " + positions);
 
         if (!positions.isEmpty()) {
@@ -235,6 +245,20 @@ public class AssemblyLocationPickerController implements Controller {
 
             drawGrid();
         });
+    }
+
+    private void handleSaveBtn(ActionEvent actionEvent) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(FxmlViews.INSTRUCTION_CREATER));
+            loader.setControllerFactory(_-> new InstructionManagerController(assembly));
+            Parent instructionView = loader.load();
+            Controller controller = loader.getController();
+
+            MainController.getInstance().setContentView(instructionView, controller);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showExceptionDialog("Fault in handleTileClick", e);
+        }
     }
 
     @Override

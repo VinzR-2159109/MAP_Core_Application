@@ -40,8 +40,8 @@ public class PositionRepository {
         return dao.findAll();
     }
 
-    public List<Position> getAllByInstructionId(Long id) {
-        return dao.findAllByInstructionId(id);
+    public Optional<List<Position>> getAllByInstructionId(Long id) {
+        return Optional.ofNullable(dao.findAllByInstructionId(id));
     }
 
     public void deleteAllPositions() {
