@@ -20,6 +20,7 @@ module be.uhasselt.dwi_application {
     requires com.hivemq.client.mqtt;
     requires com.fasterxml.jackson.databind;
     requires org.apache.commons.imaging;
+    requires org.slf4j;
 
     // ✅ Open packages for JavaFX & JDBI Reflection
     opens be.uhasselt.dwi_application to javafx.fxml;
@@ -32,6 +33,7 @@ module be.uhasselt.dwi_application {
     opens be.uhasselt.dwi_application.controller.WorkInstruction.LocationPicker to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick to javafx.fxml;
+    opens be.uhasselt.dwi_application.controller.WorkInstruction.Manager.InstructionTreeItems to javafx.fxml;
 
     opens be.uhasselt.dwi_application.model.Jackson.StripLedConfig to com.fasterxml.jackson.databind;
 

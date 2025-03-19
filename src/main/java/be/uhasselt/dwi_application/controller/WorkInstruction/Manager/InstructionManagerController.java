@@ -3,6 +3,8 @@ package be.uhasselt.dwi_application.controller.WorkInstruction.Manager;
 import be.uhasselt.dwi_application.controller.Controller;
 import be.uhasselt.dwi_application.controller.MainController;
 import be.uhasselt.dwi_application.controller.WorkInstruction.LocationPicker.AssemblyLocationPickerController;
+import be.uhasselt.dwi_application.controller.WorkInstruction.Manager.InstructionTreeItems.AssemblyTreeItemController;
+import be.uhasselt.dwi_application.controller.WorkInstruction.Manager.InstructionTreeItems.PickingTreeItemController;
 import be.uhasselt.dwi_application.controller.WorkInstruction.Part.PartManagerController;
 import be.uhasselt.dwi_application.model.workInstruction.*;
 import be.uhasselt.dwi_application.model.picking.Part;
@@ -65,11 +67,27 @@ public class InstructionManagerController implements Controller {
     @FXML
     public void initialize() {
         System.out.println("---Initializing Instruction Manager---");
-        instructionTree.setOnMouseClicked(this::handleTreeSelection);
-        instructionTree.setCellFactory(_ -> new InstructionTreeItemController(assembly));
-
-
         instance = this;
+
+        instructionTree.setOnMouseClicked(this::handleTreeSelection);
+        instructionTree.setCellFactory(_ -> new TreeCell<>() {
+            @Override
+            protected void updateItem(Instruction item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+
+                if (item instanceof AssemblyInstruction) {
+                    setGraphic(new AssemblyTreeItemController(assembly).getGraphic());
+                } else if (item instanceof PickingInstruction) {
+                    setGraphic(new PickingTreeItemController().getGraphic());
+                }
+            }
+        });
 
         removeInstruction_btn.setOnAction(_ -> {
             helper.removeSelectedInstruction(selectedNode, instructionTree);

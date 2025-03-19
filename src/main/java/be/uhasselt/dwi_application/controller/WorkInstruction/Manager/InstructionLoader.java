@@ -69,6 +69,7 @@ public class InstructionLoader {
 
         instructionTree.setRoot(root);
         instructionTree.setShowRoot(true);
+        instructionTree.refresh();
 
         // Restore selection if possible
         if (nodeToSelect != null) {
