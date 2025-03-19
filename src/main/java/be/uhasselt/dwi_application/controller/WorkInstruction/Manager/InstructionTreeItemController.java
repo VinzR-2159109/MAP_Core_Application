@@ -58,12 +58,25 @@ public class InstructionTreeItemController extends TreeCell<Instruction> {
         });
 
         // Instruction Management Buttons
-        InstructionButtons_hbox.setVisible(false);
+        addSubInstruction_btn.setVisible(false);
+        deleteInstruction_btn.setVisible(false);
+        AddInstructionType_combo.setVisible(false);
+        AddInstructionType_combo.setManaged(false);
+        AddInstructionType_combo.setDisable(true);
+
         deleteInstruction_btn.setOnAction(_ -> deleteInstruction());
 
-        this.setOnMouseEntered(e -> InstructionButtons_hbox.setVisible(true));
+        this.setOnMouseEntered(e -> {
+            if (getItem() instanceof AssemblyInstruction) {
+                addSubInstruction_btn.setVisible(true);
+            }
+            deleteInstruction_btn.setVisible(true);
+        });
         this.setOnMouseExited(e -> {
-            InstructionButtons_hbox.setVisible(false);
+            addSubInstruction_btn.setVisible(false);
+            deleteInstruction_btn.setVisible(false);
+
+            AddInstructionType_combo.setDisable(false);
             AddInstructionType_combo.setVisible(false);
             AddInstructionType_combo.setManaged(false);
         });
@@ -104,7 +117,7 @@ public class InstructionTreeItemController extends TreeCell<Instruction> {
             String newName = instructionTextField.getText().trim();
             if (!newName.isEmpty() && !newName.equals(instruction.getDescription())) {
                 instruction.setDescription(newName);
-                InstructionRepository.getInstance().updateInstruction(instruction); // Update in database
+                InstructionRepository.getInstance().updateInstruction(instruction);
             }
             instructionLabel.setText(newName);
         }
@@ -168,9 +181,17 @@ public class InstructionTreeItemController extends TreeCell<Instruction> {
         if (empty || item == null) {
             setText(null);
             setGraphic(null);
-        } else {
-            instructionLabel.setText(item.getDescription());
-            setGraphic(root);
+            return;
         }
+
+        if (item instanceof AssemblyInstruction) {
+            instructionLabel.setText(item.getDescription());
+            instructionLabel.setStyle("-fx-text-fill: black;");
+        }
+        else if (item instanceof PickingInstruction) {
+            instructionLabel.setText("📦 " + item.getDescription());
+            instructionLabel.setStyle("-fx-text-fill: green;");
+        }
+        setGraphic(root);
     }
 }
