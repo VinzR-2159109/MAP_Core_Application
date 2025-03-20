@@ -139,4 +139,18 @@ public class HandTrackingHandler {
     public HandStatus getRightHandStatus() {
         return rightHandStatus;
     }
+
+    public void stop() {
+        rightHandPosition.set(new Position(-1,-1));
+        rightHandStatus = HandStatus.UNKNOWN;
+
+        leftHandPosition.set(new Position(-1, -1));
+        leftHandStatus = HandStatus.UNKNOWN;
+
+        mqttHandler.unsubscribe(HAND_TOPIC);
+    }
+
+    public void start() {
+        subscribeToHandPositions();
+    }
 }

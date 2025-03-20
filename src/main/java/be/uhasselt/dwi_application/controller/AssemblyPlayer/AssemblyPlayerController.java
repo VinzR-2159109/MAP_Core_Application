@@ -83,7 +83,14 @@ public class AssemblyPlayerController implements Controller {
             });
             return;
         }
-        assemblyInstructionHandler.stop();
+
+        if (assemblyInstructionHandler.isRunning()){
+            showErrorDialogWithChoice("Warning", "The system did not mark the picking as completed", "Are you sure that you completed the Picking Instruction correctly?", "Yes", "No",() -> {
+                assemblyInstructionHandler.stop();
+                setNextInstruction(manager.moveToNextInstruction(currentInstruction));
+            });
+            return;
+        }
 
         //Play Ok-sound, Green lights ...
         setNextInstruction(manager.moveToNextInstruction(currentInstruction));
@@ -108,8 +115,8 @@ public class AssemblyPlayerController implements Controller {
     private void handleAssemblyInstruction(AssemblyInstruction assemblyInstruction) {
         try {
             assemblyInstructionHandler.start(assemblyInstruction, () -> {
-                handleOk();
                 assemblyInstructionHandler.stop();
+                handleOk();
             });
         } catch (Exception e) {
             showExceptionDialog("Error", "handleAssemblyInstruction", e);

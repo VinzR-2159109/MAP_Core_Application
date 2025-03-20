@@ -90,18 +90,18 @@ public class AssemblyLocationPickerController implements Controller {
         System.out.println("Loading positions: " + positions);
 
         if (!positions.isEmpty()) {
-            double minX = snapToGrid(positions.stream().mapToDouble(Position::getX).min().orElse(0));
-            double minY = snapToGrid(positions.stream().mapToDouble(Position::getY).min().orElse(0));
-            double maxX = snapToGrid(positions.stream().mapToDouble(Position::getX).max().orElse(0));
-            double maxY = snapToGrid(positions.stream().mapToDouble(Position::getY).max().orElse(0));
+            double minX = (positions.stream().mapToDouble(Position::getX).min().orElse(0)) * videoFeedEnlargement;
+            double minY = (positions.stream().mapToDouble(Position::getY).min().orElse(0)) * videoFeedEnlargement;
+            double maxX = snapToGrid(positions.stream().mapToDouble(Position::getX).max().orElse(0)) * videoFeedEnlargement;
+            double maxY = snapToGrid(positions.stream().mapToDouble(Position::getY).max().orElse(0)) * videoFeedEnlargement;
 
             double width = maxX - minX;
             double height = maxY - minY;
 
-            locationX1_field.setText(String.format("%.0f", minX));
-            locationX2_field.setText(String.format("%.0f", maxX));
-            locationY1_field.setText(String.format("%.0f", minY));
-            locationY2_field.setText(String.format("%.0f", maxY));
+            locationX1_field.setText(String.format("%.0f", minX / videoFeedEnlargement));
+            locationX2_field.setText(String.format("%.0f", maxX / videoFeedEnlargement));
+            locationY1_field.setText(String.format("%.0f", minY / videoFeedEnlargement));
+            locationY2_field.setText(String.format("%.0f", maxY / videoFeedEnlargement));
 
             Rectangle rect = new Rectangle(minX, minY, width, height);
             rect.setFill(Color.TRANSPARENT);
@@ -121,14 +121,14 @@ public class AssemblyLocationPickerController implements Controller {
         assemblyInstruction.clearPositions();
         InstructionRepository.getInstance().clearPositionsOfAssemblyInstruction(assemblyInstruction);
 
-        startX = snapToGrid(event.getX());
-        startY = snapToGrid(event.getY());
+        startX = snapToGrid(event.getX()) / videoFeedEnlargement;
+        startY = snapToGrid(event.getY()) / videoFeedEnlargement;
 
         if (selectionRectangle != null) {
             locationPicker_pane.getChildren().remove(selectionRectangle);
         }
 
-        selectionRectangle = new Rectangle(startX, startY, 0, 0);
+        selectionRectangle = new Rectangle(startX * videoFeedEnlargement, startY * videoFeedEnlargement, 0, 0);
         selectionRectangle.setFill(Color.TRANSPARENT);
         selectionRectangle.setStroke(Color.BLUE);
         selectionRectangle.setStrokeWidth(2);
@@ -139,11 +139,11 @@ public class AssemblyLocationPickerController implements Controller {
         double endY = snapToGrid(event.getY());
 
         // Update rectangle size dynamically, snapped to the grid
-        double width = Math.abs(endX - startX);
-        double height = Math.abs(endY - startY);
+        double width = Math.abs(endX - startX * videoFeedEnlargement);
+        double height = Math.abs(endY - startY * videoFeedEnlargement);
 
-        selectionRectangle.setX(Math.min(startX, endX));
-        selectionRectangle.setY(Math.min(startY, endY));
+        selectionRectangle.setX(Math.min(startX * videoFeedEnlargement, endX));
+        selectionRectangle.setY(Math.min(startY * videoFeedEnlargement, endY));
         selectionRectangle.setWidth(width);
         selectionRectangle.setHeight(height);
 
@@ -154,8 +154,8 @@ public class AssemblyLocationPickerController implements Controller {
     }
 
     private void handleMouseRelease(MouseEvent event) {
-        double endX = snapToGrid(event.getX());
-        double endY = snapToGrid(event.getY());
+        double endX = snapToGrid(event.getX()) / videoFeedEnlargement;
+        double endY = snapToGrid(event.getY()) / videoFeedEnlargement;
 
         double minX = Math.min(startX, endX);
         double minY = Math.min(startY, endY);

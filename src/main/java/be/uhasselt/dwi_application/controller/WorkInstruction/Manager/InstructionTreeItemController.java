@@ -11,14 +11,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
 
 import java.io.IOException;
 
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showErrorDialog;
-import static be.uhasselt.dwi_application.utility.modules.Dialog.showInfoDialog;
 
 public class InstructionTreeItemController extends TreeCell<Instruction> {
     @FXML private Label instructionLabel;
@@ -26,7 +24,7 @@ public class InstructionTreeItemController extends TreeCell<Instruction> {
     @FXML private HBox InstructionButtons_hbox;
     @FXML private Button addSubInstruction_btn;
     @FXML private Button deleteInstruction_btn;
-    @FXML private ComboBox<String> AddInstructionType_combo;
+    @FXML private ComboBox<String> addInstructionType_combo;
 
     private final HBox root;
     private final Assembly assembly;
@@ -34,7 +32,6 @@ public class InstructionTreeItemController extends TreeCell<Instruction> {
     public InstructionTreeItemController(Assembly assembly) {
         this.assembly = assembly;
 
-        // Load Instruction Tree Item
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(FxmlViews.INSTRUCTION_TREE_ITEM));
             loader.setController(this);
@@ -44,8 +41,11 @@ public class InstructionTreeItemController extends TreeCell<Instruction> {
             throw new RuntimeException("Failed to load InstructionTreeCell.fxml", e);
         }
 
-        // Instruction Description
-        instructionLabel.setOnMouseClicked(this::startEditing);
+        instructionLabel.setOnMouseClicked(event-> {
+            if (event.getClickCount() == 2){
+                startEditing();
+            }
+        });
         instructionTextField.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 saveInstructionName();
@@ -60,9 +60,9 @@ public class InstructionTreeItemController extends TreeCell<Instruction> {
         // Instruction Management Buttons
         addSubInstruction_btn.setVisible(false);
         deleteInstruction_btn.setVisible(false);
-        AddInstructionType_combo.setVisible(false);
-        AddInstructionType_combo.setManaged(false);
-        AddInstructionType_combo.setDisable(true);
+        addInstructionType_combo.setVisible(false);
+        addInstructionType_combo.setManaged(false);
+        addInstructionType_combo.setDisable(true);
 
         deleteInstruction_btn.setOnAction(_ -> deleteInstruction());
 
@@ -76,39 +76,40 @@ public class InstructionTreeItemController extends TreeCell<Instruction> {
             addSubInstruction_btn.setVisible(false);
             deleteInstruction_btn.setVisible(false);
 
-            AddInstructionType_combo.setDisable(false);
-            AddInstructionType_combo.setVisible(false);
-            AddInstructionType_combo.setManaged(false);
+            addInstructionType_combo.setDisable(false);
+            addInstructionType_combo.setVisible(false);
+            addInstructionType_combo.setManaged(false);
         });
 
-        AddInstructionType_combo.setItems(FXCollections.observableArrayList("Assembly Instruction", "Picking Instruction"));
-        AddInstructionType_combo.setVisible(false);
+        addInstructionType_combo.setItems(FXCollections.observableArrayList("Assembly Instruction", "Picking Instruction"));
+        addInstructionType_combo.setVisible(false);
         InstructionButtons_hbox.setSpacing(5);
 
         addSubInstruction_btn.setOnAction(e -> {
-            AddInstructionType_combo.setVisible(true);
-            AddInstructionType_combo.setManaged(true);
-            AddInstructionType_combo.show();
+            addInstructionType_combo.setVisible(true);
+            addInstructionType_combo.setManaged(true);
+            addInstructionType_combo.show();
         });
 
-        AddInstructionType_combo.setOnAction(e -> {
-            String selectedType = AddInstructionType_combo.getValue();
+        addInstructionType_combo.setOnAction(e -> {
+            String selectedType = addInstructionType_combo.getValue();
             if (selectedType != null) {
                 addSubInstruction(getItem(), selectedType);
-                AddInstructionType_combo.setVisible(false);
-                AddInstructionType_combo.setManaged(false);
+                addInstructionType_combo.setVisible(false);
+                addInstructionType_combo.setManaged(false);
             }
         });
     }
 
-    private void startEditing(MouseEvent event) {
+    private void startEditing() {
         Instruction instruction = getItem();
-        if (instruction != null) {
-            instructionTextField.setText(instruction.getDescription());
-            toggleEditMode(true);
-            instructionTextField.requestFocus();
-            instructionTextField.selectAll();
-        }
+
+        instructionTextField.setText(instruction.getDescription());
+        toggleEditMode(true);
+        instructionTextField.requestFocus();
+        instructionTextField.selectAll();
+
+        instructionTextField.setPrefWidth(new Text(instructionTextField.getText()).getLayoutBounds().getWidth() + 10);
     }
 
     private void saveInstructionName() {

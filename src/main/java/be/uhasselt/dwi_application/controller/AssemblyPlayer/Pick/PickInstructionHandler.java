@@ -24,10 +24,12 @@ public class PickInstructionHandler {
     private final PickingHand pickingHand;
     private PickingBin bin;
     private Timer timer;
-    private boolean isRunning = false; // Track execution state
+    private boolean isRunning = false;
     private final AtomicBoolean obstacleInBin = new AtomicBoolean(false);
+    private final AtomicBoolean pickCompleted = new AtomicBoolean(false);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final PickMQTTHelper mqttHelper = new PickMQTTHelper();
+
     public enum PickingHand {
         LEFT, RIGHT;
     }
@@ -42,7 +44,8 @@ public class PickInstructionHandler {
     }
 
     public void start(PickingInstruction pickingInstruction, Runnable onCompleteCallback) throws BinNotFoundException {
-        if (isRunning) {stop();} ; System.out.println("Starting picking instruction");
+        if (isRunning) { stop(); }
+        System.out.println("Starting picking instruction");
 
         // Getting Bin
         try {
@@ -63,6 +66,7 @@ public class PickInstructionHandler {
         }
 
         mqttHelper.SendSetBinLEDGreen(bin.getId());
+
         // Receiving Obstacle Detection
         String topic = "Input/Bin/Obstacle";
         mqttHandler.subscribe(topic, s -> {
@@ -70,11 +74,17 @@ public class PickInstructionHandler {
                 ObstacleSensorData obstacleSensorData = objectMapper.readValue(s, ObstacleSensorData.class);
                 System.out.println("ObstacleSensorData: " + obstacleSensorData);
 
-                if (Objects.equals(obstacleSensorData.id(), bin.getId())){
-                    obstacleInBin.set(obstacleSensorData.obstacle());
-                    System.out.println("Obstacle update for Bin " + bin.getId() + ": " + obstacleSensorData.obstacle());
-                } else if (Objects.equals(obstacleSensorData.obstacle(), true)) {
-                    //HandleWrongBinPicked
+                if (Objects.equals(obstacleSensorData.id(), bin.getId())) {
+                    boolean currentObstacle = obstacleSensorData.obstacle();
+
+                    if (obstacleInBin.get() && !currentObstacle) {
+                        stop();
+                        Platform.runLater(onCompleteCallback);
+                    }
+
+                    obstacleInBin.set(currentObstacle);
+                    System.out.println("Obstacle update for Bin " + bin.getId() + ": " + currentObstacle);
+                } else if (obstacleSensorData.obstacle()) {
                     System.out.println("Wrong Bin Picked: " + bin.getId());
                 }
             } catch (JsonProcessingException e) {
@@ -89,11 +99,6 @@ public class PickInstructionHandler {
             public void run() {
                 if (!isRunning) return; // Prevent execution after stopping
 
-                if (isPickCompleted()) {
-                    System.out.println("Pick Completed");
-                    stop();
-                    Platform.runLater(onCompleteCallback);
-                }
             }
         }, 0, 500);
     }
@@ -104,6 +109,7 @@ public class PickInstructionHandler {
 
         isRunning = false;
         obstacleInBin.set(false);
+        pickCompleted.set(false);
 
         if (timer != null) {
             timer.cancel();
@@ -116,29 +122,5 @@ public class PickInstructionHandler {
         String topic = "Input/Bin/Obstacle";
         mqttHandler.unsubscribe(topic);
         System.out.println("Unsubscribed from " + topic);
-    }
-
-    private double calculateQualityOfWorkScore() {
-        if (bin == null) {
-            throw new IllegalStateException("Bin is null - did you call start() first?");
-        }
-
-        Position handPosition = pickingHand == PickingHand.LEFT ? handTracker.getLeftHandPosition() : handTracker.getRightHandPosition();
-        if (handPosition == null) {
-            throw new IllegalStateException("Hand position is null!");
-        }
-
-        Position binPosition = new Position(bin.getPos_x(), bin.getPos_y());
-        double distance = Math.sqrt(Math.pow(binPosition.getX() - handPosition.getX(), 2) + Math.pow(binPosition.getY() - handPosition.getY(), 2));
-        System.out.println("Distance: " + distance);
-
-        double maxDistance = 550.0;
-        double maxScore = 100;
-
-        return Math.max(0, Math.min(maxScore, maxScore - (distance / maxDistance) * maxScore));
-    }
-
-    private boolean isPickCompleted() {
-        return obstacleInBin.get();
     }
 }

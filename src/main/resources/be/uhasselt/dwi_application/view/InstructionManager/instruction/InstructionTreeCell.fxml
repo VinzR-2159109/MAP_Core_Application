@@ -19,7 +19,7 @@
 
     <HBox fx:id="InstructionButtons_hbox" alignment="CENTER_RIGHT" spacing="5.0">
         <Button fx:id="addSubInstruction_btn" text="+" />
-        <ComboBox fx:id="AddInstructionType_combo" managed="false" prefWidth="150.0" />
+        <ComboBox fx:id="addInstructionType_combo" managed="false" prefWidth="150.0" />
         <Button fx:id="deleteInstruction_btn" text="🗑️" />
     </HBox>
 </HBox>

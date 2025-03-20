@@ -49,12 +49,14 @@ public class InstructionManagerController implements Controller {
     private TreeItem<Instruction> selectedNode;
     private final Assembly assembly;
     private static InstructionManagerController instance;
-    private InstructionManagerHelper helper;
-    private DatabaseUpdater updater;
+    private final InstructionManagerHelper helper;
+    private final DatabaseUpdater updater;
 
     public InstructionManagerController(Assembly assembly) {
         helper = new InstructionManagerHelper(assembly);
         updater = new DatabaseUpdater();
+        instance = this;
+
         this.assembly = assembly;
     }
 
@@ -67,9 +69,6 @@ public class InstructionManagerController implements Controller {
         System.out.println("---Initializing Instruction Manager---");
         instructionTree.setOnMouseClicked(this::handleTreeSelection);
         instructionTree.setCellFactory(_ -> new InstructionTreeItemController(assembly));
-
-
-        instance = this;
 
         removeInstruction_btn.setOnAction(_ -> {
             helper.removeSelectedInstruction(selectedNode, instructionTree);
@@ -99,7 +98,6 @@ public class InstructionManagerController implements Controller {
         populatePartSelector();
         partSelector.valueProperty().addListener((_, _, selectedPart) -> updatePartInDB(selectedPart));
         partQuantiy_spinner.valueProperty().addListener((_, _, newValue) -> updateQuantityInDB(newValue));
-
     }
 
     private void openLocationPicker() {
