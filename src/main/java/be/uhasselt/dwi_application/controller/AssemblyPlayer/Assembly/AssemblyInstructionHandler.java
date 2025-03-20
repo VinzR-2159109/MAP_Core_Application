@@ -18,6 +18,13 @@ public class AssemblyInstructionHandler {
     private HandTrackingHandler handTracking = HandTrackingHandler.getInstance();
     private boolean isRunning = false;
 
+    // Store last hand position on LED grid
+    private int lastHandGridX = -1;
+    private int lastHandGridY = -1;
+
+    // Store assembly area boundaries
+    private int startRangeX, endRangeX, startRangeY, endRangeY;
+
     public AssemblyInstructionHandler(){
         helper = new AssemblyMQTTHelper();
     }
@@ -36,37 +43,76 @@ public class AssemblyInstructionHandler {
             return;
         }
 
-        // Determine startX, endX for LED Strip X
+        int gridSize = SettingsRepository.loadSettings().getGridSize() / 2;
+
+        // Get the min/max positions of the assembly area
         int startX = (int) positions.stream().mapToDouble(Position::getX).min().orElse(0);
         int endX = (int) positions.stream().mapToDouble(Position::getX).max().orElse(0);
-
-        // Determine startY, endY for LED Strip Y
         int startY = (int) positions.stream().mapToDouble(Position::getY).min().orElse(0);
         int endY = (int) positions.stream().mapToDouble(Position::getY).max().orElse(0);
 
+        // Convert assembly area to LED grid indices
+        startRangeX = 43 - endX / gridSize;
+        endRangeX = 43 - startX / gridSize;
+        startRangeY = 31 - endY / gridSize;
+        endRangeY = 31 - startY / gridSize;
 
-        int gridSize = SettingsRepository.loadSettings().getGridSize() / 2;
-
-        int startRangeX = 43 - endX/gridSize;
-        int endRangeX = 43 - startX/gridSize;
-
-        int startRangeY = 31 - endY/gridSize;
-        int endRangeY = 31 -  startY/gridSize;
-
-        // Send MQTT Commands
+        // Send MQTT Commands for assembly area
         helper.sendSetLedStripXGreenOnRange(startRangeX, endRangeX);
         helper.sendSetLedStripYGreenOnRange(startRangeY, endRangeY);
 
         this.timer = new Timer();
-        timer.schedule(new TimerTask() {
+        timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                System.out.println(calculateQualityOfWorkScore());
-                if (calculateQualityOfWorkScore() > 85){
-                    System.out.println("<Automatic Assembly Completion>");
-                    onCompleteCallback.run();
-                };
+                if (!isRunning) return;
 
+                double qualityScore = calculateQualityOfWorkScore();
+                System.out.println("Quality Score: " + qualityScore);
+
+                // Get hand position
+                Position handPosition = handTracking.getRightHandPosition();
+                if (handPosition != null) {
+                    // Convert hand position to LED grid
+                    int handGridX = 43 - (int) handPosition.getX() / gridSize;
+                    int handGridY = 31 - (int) handPosition.getY() / gridSize;
+
+                    // Only update if the hand has moved
+                    if (handGridX != lastHandGridX || handGridY != lastHandGridY) {
+                        // Restore last position:
+                        if (lastHandGridX != -1 && lastHandGridY != -1) {
+                            if (lastHandGridX >= startRangeX && lastHandGridX <= endRangeX) {
+                                helper.sendSetLedStripXGreenOnRange(lastHandGridX, lastHandGridX + 2); // Restore to green
+                            } else {
+                                helper.sendSetLedStripXOff(lastHandGridX); // Turn off
+                            }
+
+                            if (lastHandGridY >= startRangeY && lastHandGridY <= endRangeY) {
+                                helper.sendSetLedStripYGreenOnRange(lastHandGridY, lastHandGridY + 2); // Restore to green
+                            } else {
+                                helper.sendSetLedStripYOff(lastHandGridY); // Turn off
+                            }
+                        }
+
+                        // Turn on new hand position LEDs
+                        helper.sendSetLedStripXBlueOn(handGridX);
+                        helper.sendSetLedStripYBlueOn(handGridY);
+                        System.out.println("Hand position updated to LED: X=" + handGridX + " Y=" + handGridY);
+
+                        // Update last known hand position
+                        lastHandGridX = handGridX;
+                        lastHandGridY = handGridY;
+                    }
+                } else {
+                    System.out.println("Hand position not detected.");
+                }
+
+                // Check if assembly is completed
+                if (qualityScore > 85) {
+                    System.out.println("<Automatic Assembly Completion>");
+                    stop();
+                    onCompleteCallback.run();
+                }
             }
         }, 0, 500);
     }

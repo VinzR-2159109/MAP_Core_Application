@@ -27,6 +27,14 @@ public class AssemblyMQTTHelper {
         sendSetLedStripRange("y", start, end, new Color(0, 255, 0), 50, "on");
     }
 
+    public void sendSetLedStripXBlueOn(int handGridX) {
+        sendSetLedStripRange("x", handGridX, handGridX + 1, new Color(0, 0, 255), 50, "on");
+    }
+
+    public void sendSetLedStripYBlueOn(int handGridY) {
+        sendSetLedStripRange("y", handGridY, handGridY + 1, new Color(0, 0, 255), 50, "on");
+    }
+
     public void sendTurnOffAllLedStrip() {
         List<LEDStripRange> ledsX = List.of(new LEDStripRange(0, 43, new Color(0, 0, 0), 0, "off"));
         List<LEDStripRange> ledsY = List.of(new LEDStripRange(0, 28, new Color(0, 0, 0), 0, "off"));
@@ -44,5 +52,15 @@ public class AssemblyMQTTHelper {
             e.printStackTrace();
             throw new RuntimeException("Failed to serialize LED command", e);
         }
+    }
+
+    public void sendSetLedStripXOff(int lastHandGridX) {
+        List<LEDStripRange> ledsX = List.of(new LEDStripRange(lastHandGridX, lastHandGridX + 2, new Color(0, 0, 0), 0, "off"));
+        sendLedStripCommand("x", ledsX);
+    }
+
+    public void sendSetLedStripYOff(int lastHandGridY) {
+        List<LEDStripRange> ledsY = List.of(new LEDStripRange(lastHandGridY, lastHandGridY + 2, new Color(0, 0, 0), 0, "off"));
+        sendLedStripCommand("y", ledsY);
     }
 }
