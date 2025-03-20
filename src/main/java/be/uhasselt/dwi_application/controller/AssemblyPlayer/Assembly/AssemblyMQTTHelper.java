@@ -28,6 +28,7 @@ public class AssemblyMQTTHelper {
     }
 
     public void sendTurnOffAllLedStrip() {
+        System.out.println("<Turning Off All LED Strip>");
         List<LEDStripRange> ledsX = List.of(new LEDStripRange(0, 43, new Color(0, 0, 0), 0, "off"));
         List<LEDStripRange> ledsY = List.of(new LEDStripRange(0, 28, new Color(0, 0, 0), 0, "off"));
 

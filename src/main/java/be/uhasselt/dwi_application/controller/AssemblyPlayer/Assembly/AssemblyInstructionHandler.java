@@ -2,32 +2,37 @@ package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick.PickInstructionHandler;
 import be.uhasselt.dwi_application.model.basic.Position;
+import be.uhasselt.dwi_application.model.hands.HandStatus;
 import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
 import be.uhasselt.dwi_application.utility.database.repository.settings.SettingsRepository;
 import be.uhasselt.dwi_application.utility.handTracking.HandTrackingHandler;
+import javafx.application.Platform;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AssemblyInstructionHandler {
     private AssemblyInstruction assemblyInstruction;
     private AssemblyMQTTHelper helper;
     private Timer timer;
     private PickInstructionHandler.PickingHand pickingHand = PickInstructionHandler.PickingHand.RIGHT;
-    private HandTrackingHandler handTracking = HandTrackingHandler.getInstance();
-    private boolean isRunning = false;
+    private final HandTrackingHandler handTracking = HandTrackingHandler.getInstance();
+    private AtomicBoolean isCompleted;
 
     public AssemblyInstructionHandler(){
         helper = new AssemblyMQTTHelper();
     }
 
     public void start(AssemblyInstruction assemblyInstruction, Runnable onCompleteCallback){
+        System.out.println("<Starting Assembly Instruction Assistance>");
+
         helper.sendTurnOffAllLedStrip();
         handTracking.start();
-        isRunning = true;
 
         this.assemblyInstruction = assemblyInstruction;
+        this.isCompleted = new AtomicBoolean(false);
 
         List<Position> positions = assemblyInstruction.getAssemblyPositions();
 
@@ -36,26 +41,18 @@ public class AssemblyInstructionHandler {
             return;
         }
 
-        // Determine startX, endX for LED Strip X
-        int startX = (int) positions.stream().mapToDouble(Position::getX).min().orElse(0);
-        int endX = (int) positions.stream().mapToDouble(Position::getX).max().orElse(0);
-
-        // Determine startY, endY for LED Strip Y
-        int startY = (int) positions.stream().mapToDouble(Position::getY).min().orElse(0);
-        int endY = (int) positions.stream().mapToDouble(Position::getY).max().orElse(0);
-
-
         int gridSize = SettingsRepository.loadSettings().getGridSize() / 2;
 
-        int startRangeX = 43 - endX/gridSize;
-        int endRangeX = 43 - startX/gridSize;
+        helper.sendSetLedStripXGreenOnRange(
+                43 - (int) positions.stream().mapToDouble(Position::getX).max().orElse(0) / gridSize,
+                43 - (int) positions.stream().mapToDouble(Position::getX).min().orElse(0) / gridSize
+        );
 
-        int startRangeY = 31 - endY/gridSize;
-        int endRangeY = 31 -  startY/gridSize;
+        helper.sendSetLedStripYGreenOnRange(
+                31 - (int) positions.stream().mapToDouble(Position::getY).max().orElse(0) / gridSize,
+                31 - (int) positions.stream().mapToDouble(Position::getY).min().orElse(0) / gridSize
+        );
 
-        // Send MQTT Commands
-        helper.sendSetLedStripXGreenOnRange(startRangeX, endRangeX);
-        helper.sendSetLedStripYGreenOnRange(startRangeY, endRangeY);
 
         this.timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -63,8 +60,9 @@ public class AssemblyInstructionHandler {
             public void run() {
                 System.out.println(calculateQualityOfWorkScore());
                 if (calculateQualityOfWorkScore() > 85){
-                    System.out.println("<Automatic Assembly Completion>");
-                    onCompleteCallback.run();
+                    isCompleted.set(true);
+                    stop();
+                    Platform.runLater(onCompleteCallback);
                 };
 
             }
@@ -72,34 +70,39 @@ public class AssemblyInstructionHandler {
     }
 
     public void stop(){
+        System.out.println("<Stopping Assembly Instruction Assistance>");
         helper.sendTurnOffAllLedStrip();
 
         if (timer != null){
             timer.cancel();
             timer.purge();
         }
+
         handTracking.stop();
-        isRunning = false;
     }
 
     private double calculateQualityOfWorkScore() {
-        Position handPosition = pickingHand == PickInstructionHandler.PickingHand.LEFT ? handTracking.getLeftHandPosition() : handTracking.getRightHandPosition();
-        if (handPosition == null) {
-            throw new IllegalStateException("Hand position is null!");
+        Position handPosition;
+        if (pickingHand == PickInstructionHandler.PickingHand.LEFT && handTracking.getLeftHandStatus() != HandStatus.UNKNOWN){
+            handPosition = handTracking.getLeftHandPosition();
         }
+        else if (pickingHand == PickInstructionHandler.PickingHand.RIGHT && handTracking.getRightHandStatus() != HandStatus.UNKNOWN){
+            handPosition = handTracking.getRightHandPosition();
+        } else {
+            return -1.0;
+        }
+
+        System.out.println("Right hand position: " + handPosition.getX() + " " + handPosition.getY());
 
         double avgX = assemblyInstruction.getAssemblyPositions().stream().mapToDouble(Position::getX).average().orElse(0);
         double avgY = assemblyInstruction.getAssemblyPositions().stream().mapToDouble(Position::getY).average().orElse(0);
 
+
         double distance = Math.sqrt(Math.pow(avgX - handPosition.getX(), 2) + Math.pow(avgY - handPosition.getY(), 2));
-
-        double maxDistance = 550.0;
-        double maxScore = 100;
-
-        return Math.max(0, Math.min(maxScore, maxScore - (distance / maxDistance) * maxScore));
+        System.out.println("Distance: " + distance);
+        double maxDistance = 550;
+        return Math.max(0, Math.min(100, 100 - (distance / maxDistance) * 100));
     }
 
-    public boolean isRunning() {
-        return isRunning;
-    }
+    public boolean isCompleted() {return isCompleted.get();}
 }

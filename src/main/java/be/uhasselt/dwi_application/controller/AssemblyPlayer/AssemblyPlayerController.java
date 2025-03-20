@@ -28,13 +28,12 @@ public class AssemblyPlayerController implements Controller {
     private final AssemblyPlayerManager manager;
     private Instruction currentInstruction;
     private final Assembly assembly;
-    private final PickInstructionHandler pickInstructionHandler;
-    private final AssemblyInstructionHandler assemblyInstructionHandler;
+    private PickInstructionHandler pickInstructionHandler;
+    private AssemblyInstructionHandler assemblyInstructionHandler;
 
     public AssemblyPlayerController(Assembly assembly) {
         this.assembly = assembly;
-        pickInstructionHandler = new PickInstructionHandler(PickInstructionHandler.PickingHand.RIGHT);
-        assemblyInstructionHandler = new AssemblyInstructionHandler();
+
         manager = new AssemblyPlayerManager(assembly);
 
         this.currentInstruction = manager.moveToNextInstruction(null);
@@ -76,7 +75,7 @@ public class AssemblyPlayerController implements Controller {
     }
 
     private void handleOk() {
-        if (pickInstructionHandler.isRunning()){
+        if (!pickInstructionHandler.isCompleted()){
             showErrorDialogWithChoice("Warning", "The system did not mark the picking as completed", "Are you sure that you completed the Picking Instruction correctly?", "Yes", "No",() -> {
                 pickInstructionHandler.stop();
                 setNextInstruction(manager.moveToNextInstruction(currentInstruction));
@@ -84,8 +83,8 @@ public class AssemblyPlayerController implements Controller {
             return;
         }
 
-        if (assemblyInstructionHandler.isRunning()){
-            showErrorDialogWithChoice("Warning", "The system did not mark the picking as completed", "Are you sure that you completed the Picking Instruction correctly?", "Yes", "No",() -> {
+        if (!assemblyInstructionHandler.isCompleted()){
+            showErrorDialogWithChoice("Warning", "Het systeem heeft de assemblageInstructie niet as compleet gezien", "Ben je zeker dat de assemblage juist is uitgevoerd?", "Ja", "Nee",() -> {
                 assemblyInstructionHandler.stop();
                 setNextInstruction(manager.moveToNextInstruction(currentInstruction));
             });
@@ -102,10 +101,10 @@ public class AssemblyPlayerController implements Controller {
     }
 
     private void handlePickingInstruction(PickingInstruction pickingInstruction) {
+        this.pickInstructionHandler = new PickInstructionHandler();
         try {
-            pickInstructionHandler.start(pickingInstruction, () -> {
-                System.out.println("<Pick Completion detected automatically>");
-                handleOk();
+            pickInstructionHandler.start(pickingInstruction, () ->{
+                setNextInstruction(manager.moveToNextInstruction(currentInstruction));
             });
         } catch (BinNotFoundException e) {
             showExceptionDialog(e.getTitle(), e.getHeader(), e);
@@ -113,10 +112,10 @@ public class AssemblyPlayerController implements Controller {
     }
 
     private void handleAssemblyInstruction(AssemblyInstruction assemblyInstruction) {
+        this.assemblyInstructionHandler = new AssemblyInstructionHandler();
         try {
             assemblyInstructionHandler.start(assemblyInstruction, () -> {
-                assemblyInstructionHandler.stop();
-                handleOk();
+                setNextInstruction(manager.moveToNextInstruction(currentInstruction));
             });
         } catch (Exception e) {
             showExceptionDialog("Error", "handleAssemblyInstruction", e);
@@ -127,7 +126,7 @@ public class AssemblyPlayerController implements Controller {
     public void cleanup() {
         System.out.println("AssemblyPlayerController is being destroyed!");
         // Stop any running background tasks
-        if (pickInstructionHandler != null && pickInstructionHandler.isRunning()) {
+        if (pickInstructionHandler != null) {
             pickInstructionHandler.stop();
         }
 
@@ -135,6 +134,4 @@ public class AssemblyPlayerController implements Controller {
             assemblyInstructionHandler.stop();
         }
     }
-
-
 }

@@ -9,6 +9,7 @@ import be.uhasselt.dwi_application.utility.network.MqttHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -19,21 +20,17 @@ public class HandTrackingHandler {
     private final MqttHandler mqttHandler;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final AtomicReference<Position> leftHandPosition = new AtomicReference<>(new Position(-1, -1));
-    private final AtomicReference<Position> rightHandPosition = new AtomicReference<>(new Position(-1, -1));
+    private final AtomicReference<Position> leftHandPosition = new AtomicReference<>(new Position(Integer.MIN_VALUE,Integer.MIN_VALUE));
+    private final AtomicReference<Position> rightHandPosition = new AtomicReference<>(new Position(Integer.MIN_VALUE,Integer.MIN_VALUE));
 
     private HandStatus leftHandStatus = HandStatus.UNKNOWN;
     private HandStatus rightHandStatus = HandStatus.UNKNOWN;
-
-    private Consumer<Position> leftHandListener;
-    private Consumer<Position> rightHandListener;
 
     private static HandTrackingHandler instance;
 
     private HandTrackingHandler() {
         this.mqttHandler = MqttHandler.getInstance();
-        subscribeToHandPositions();
-        this.instance = this;
+        instance = this;
     }
 
     public static HandTrackingHandler getInstance() {
@@ -43,92 +40,76 @@ public class HandTrackingHandler {
         return instance;
     }
 
-    private void subscribeToHandPositions() {
-        System.out.println("Debug: Subscribing to hand positions");
+    public void stop() {
+        System.out.println("<Stopping Hand Tracking>");
+        rightHandPosition.set(new Position(Integer.MIN_VALUE,Integer.MIN_VALUE));
+        rightHandStatus = HandStatus.UNKNOWN;
+
+        leftHandPosition.set(new Position(Integer.MIN_VALUE, Integer.MIN_VALUE));
+        leftHandStatus = HandStatus.UNKNOWN;
+
+        mqttHandler.unsubscribe(HAND_TOPIC);
+    }
+
+    public void start() {
+        System.out.println("<Starting assembly instruction>");
+        rightHandPosition.set(new Position(Integer.MIN_VALUE,Integer.MIN_VALUE));
+        rightHandStatus = HandStatus.UNKNOWN;
+
+        leftHandPosition.set(new Position(Integer.MIN_VALUE, Integer.MIN_VALUE));
+        leftHandStatus = HandStatus.UNKNOWN;
+
+        System.out.println("<Subscribing to hand positions>");
         mqttHandler.subscribe(HAND_TOPIC, message -> {
             try {
                 List<Hand> handsList = objectMapper.readValue(message, new TypeReference<>() {});
                 Hands handsData = new Hands(handsList);
+
                 updateHandPositions(handsData);
+
             } catch (Exception e) {
-                System.err.println("Debug: Error parsing hand position JSON: " + e.getMessage());
+                System.err.println("Error:: parsing hand position JSON: " + e.getMessage());
             }
         });
     }
 
     private void updateHandPositions(Hands handsData) {
-        boolean leftUpdated = false;
-        boolean rightUpdated = false;
-
         for (Hand hand : handsData.getDetectedHands()) {
             Position newHandPos = hand.getPosition();
             HandStatus newHandStatus = hand.getStatus();
 
             if (hand.getLabel() == HandLabel.LEFT) {
-                if (leftHandStatus != newHandStatus || !leftHandPosition.get().equals(newHandPos)) {
-                    leftHandStatus = newHandStatus;
-                    leftUpdated = true;
-                }
+                if (leftHandStatus == HandStatus.UNKNOWN && leftHandStatus == newHandStatus) continue;
 
-                if (!leftHandStatus.equals(HandStatus.UNKNOWN)){
-                    checkAndNotify(leftHandPosition, newHandPos, leftHandListener);
+                if (leftHandStatus != newHandStatus || leftHandPosition.get() != newHandPos) {
+                    leftHandStatus = newHandStatus;
+                    leftHandPosition.set(newHandPos);
                 }
             }
 
             else if (hand.getLabel() == HandLabel.RIGHT) {
-                if (rightHandStatus != newHandStatus || !rightHandPosition.get().equals(newHandPos)) {
+                if (rightHandStatus == HandStatus.UNKNOWN && rightHandStatus == newHandStatus) continue;
+
+                if (rightHandStatus != newHandStatus || rightHandPosition.get() != newHandPos) {
                     rightHandStatus = newHandStatus;
-                    rightUpdated = true;
-                }
-
-                if (!rightHandStatus.equals(HandStatus.UNKNOWN)){
-                    checkAndNotify(rightHandPosition, newHandPos, rightHandListener);
-
+                    rightHandPosition.set(newHandPos);
                 }
             }
+
         }
-
-        if (!leftUpdated && leftHandStatus != HandStatus.UNKNOWN) {
-            leftHandStatus = HandStatus.UNKNOWN;
-            leftHandPosition.set(new Position(-1, -1));
-            if (leftHandListener != null) {
-                leftHandListener.accept(leftHandPosition.get());
-            }
-        }
-
-        if (!rightUpdated && rightHandStatus != HandStatus.UNKNOWN) {
-            rightHandStatus = HandStatus.UNKNOWN;
-            rightHandPosition.set(new Position(-1, -1));
-            if (rightHandListener != null) {
-                rightHandListener.accept(rightHandPosition.get());
-            }
-        }
-    }
-
-    private void checkAndNotify(AtomicReference<Position> storedPosition, Position newPosition, Consumer<Position> listener) {
-        Position oldPosition = storedPosition.get();
-
-        if (!oldPosition.equals(newPosition)) {
-            storedPosition.set(newPosition);
-            if (listener != null) {
-                listener.accept(newPosition);
-            }
-        }
-    }
-
-    public void setLeftHandListener(Consumer<Position> listener) {
-        this.leftHandListener = listener;
-    }
-
-    public void setRightHandListener(Consumer<Position> listener) {
-        this.rightHandListener = listener;
     }
 
     public Position getLeftHandPosition() {
+        if (leftHandStatus == HandStatus.UNKNOWN) {
+            return new Position(Integer.MIN_VALUE, Integer.MIN_VALUE);
+        }
         return leftHandPosition.get();
     }
 
     public Position getRightHandPosition() {
+        if (rightHandStatus == HandStatus.UNKNOWN) {
+            return new Position(Integer.MIN_VALUE, Integer.MIN_VALUE);
+        }
         return rightHandPosition.get();
     }
 
@@ -138,19 +119,5 @@ public class HandTrackingHandler {
 
     public HandStatus getRightHandStatus() {
         return rightHandStatus;
-    }
-
-    public void stop() {
-        rightHandPosition.set(new Position(-1,-1));
-        rightHandStatus = HandStatus.UNKNOWN;
-
-        leftHandPosition.set(new Position(-1, -1));
-        leftHandStatus = HandStatus.UNKNOWN;
-
-        mqttHandler.unsubscribe(HAND_TOPIC);
-    }
-
-    public void start() {
-        subscribeToHandPositions();
     }
 }
