@@ -1,7 +1,7 @@
 package be.uhasselt.dwi_application.controller.BinManager;
 
 import be.uhasselt.dwi_application.controller.Controller;
-import be.uhasselt.dwi_application.model.picking.PickingBin;
+import be.uhasselt.dwi_application.model.workInstruction.picking.PickingBin;
 import be.uhasselt.dwi_application.utility.FxmlViews;
 import be.uhasselt.dwi_application.utility.database.repository.pickingBin.BinRepository;
 import be.uhasselt.dwi_application.utility.network.MjpegStreamReader;

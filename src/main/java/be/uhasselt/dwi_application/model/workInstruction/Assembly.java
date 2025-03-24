@@ -1,6 +1,6 @@
 package be.uhasselt.dwi_application.model.workInstruction;
 
-import be.uhasselt.dwi_application.model.picking.Part;
+import be.uhasselt.dwi_application.model.workInstruction.picking.Part;
 import be.uhasselt.dwi_application.utility.database.repository.part.PartRepository;
 import javafx.scene.paint.Color;
 import org.jdbi.v3.core.mapper.reflect.ColumnName;

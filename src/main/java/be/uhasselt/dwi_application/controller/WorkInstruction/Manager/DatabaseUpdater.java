@@ -1,14 +1,12 @@
 package be.uhasselt.dwi_application.controller.WorkInstruction.Manager;
 
-import be.uhasselt.dwi_application.model.picking.Part;
+import be.uhasselt.dwi_application.model.workInstruction.picking.Part;
 import be.uhasselt.dwi_application.model.workInstruction.Instruction;
-import be.uhasselt.dwi_application.model.workInstruction.PickingInstruction;
+import be.uhasselt.dwi_application.model.workInstruction.picking.PickingInstruction;
 import be.uhasselt.dwi_application.utility.database.repository.instruction.InstructionRepository;
 import javafx.scene.control.TreeItem;
 
 import java.util.Objects;
-
-import static be.uhasselt.dwi_application.controller.WorkInstruction.Manager.InstructionLoader.loadInstructions;
 
 public class DatabaseUpdater {
     private String originalHint;

@@ -1,8 +1,9 @@
 package be.uhasselt.dwi_application.utility.database.repository.instruction;
 
 import be.uhasselt.dwi_application.model.basic.Position;
-import be.uhasselt.dwi_application.model.picking.Part;
+import be.uhasselt.dwi_application.model.workInstruction.picking.Part;
 import be.uhasselt.dwi_application.model.workInstruction.*;
+import be.uhasselt.dwi_application.model.workInstruction.picking.PickingInstruction;
 import be.uhasselt.dwi_application.utility.database.Database;
 import be.uhasselt.dwi_application.utility.database.repository.part.PartDao;
 import be.uhasselt.dwi_application.utility.database.repository.position.PositionRepository;

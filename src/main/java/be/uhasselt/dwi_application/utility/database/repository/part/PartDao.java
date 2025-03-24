@@ -1,13 +1,12 @@
 package be.uhasselt.dwi_application.utility.database.repository.part;
 
-import be.uhasselt.dwi_application.model.picking.Part;
+import be.uhasselt.dwi_application.model.workInstruction.picking.Part;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RegisterBeanMapper(Part.class)
 public interface PartDao {

@@ -1,4 +1,4 @@
-package be.uhasselt.dwi_application.model.picking;
+package be.uhasselt.dwi_application.model.workInstruction.picking;
 
 import org.jdbi.v3.core.mapper.reflect.JdbiConstructor;
 

@@ -1,6 +1,6 @@
-package be.uhasselt.dwi_application.model.workInstruction;
+package be.uhasselt.dwi_application.model.workInstruction.picking;
 
-import be.uhasselt.dwi_application.model.picking.Part;
+import be.uhasselt.dwi_application.model.workInstruction.Instruction;
 
 public class PickingInstruction extends Instruction {
     private Part partToPick;

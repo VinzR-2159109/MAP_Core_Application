@@ -3,7 +3,7 @@ package be.uhasselt.dwi_application.controller.WorkInstruction.Manager;
 import be.uhasselt.dwi_application.model.workInstruction.Assembly;
 import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
 import be.uhasselt.dwi_application.model.workInstruction.Instruction;
-import be.uhasselt.dwi_application.model.workInstruction.PickingInstruction;
+import be.uhasselt.dwi_application.model.workInstruction.picking.PickingInstruction;
 import be.uhasselt.dwi_application.utility.FxmlViews;
 import be.uhasselt.dwi_application.utility.database.repository.instruction.InstructionRepository;
 import javafx.collections.FXCollections;

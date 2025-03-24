@@ -1,7 +1,7 @@
 package be.uhasselt.dwi_application.utility.database.repository.part;
 
-import be.uhasselt.dwi_application.model.picking.Part;
-import be.uhasselt.dwi_application.model.picking.PickingBin;
+import be.uhasselt.dwi_application.model.workInstruction.picking.Part;
+import be.uhasselt.dwi_application.model.workInstruction.picking.PickingBin;
 import be.uhasselt.dwi_application.utility.database.Database;
 import be.uhasselt.dwi_application.utility.database.repository.pickingBin.BinDao;
 import org.jdbi.v3.core.Jdbi;

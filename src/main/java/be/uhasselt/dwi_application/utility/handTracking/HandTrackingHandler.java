@@ -81,7 +81,7 @@ public class HandTrackingHandler {
             if (hand.getLabel() == HandLabel.LEFT) {
                 if (leftHandStatus == HandStatus.UNKNOWN && leftHandStatus == newHandStatus) continue;
 
-                if (leftHandStatus != newHandStatus || leftHandPosition.get() != newHandPos) {
+                if (leftHandStatus != newHandStatus || !leftHandPosition.get().equals(newHandPos)){
                     leftHandStatus = newHandStatus;
                     leftHandPosition.set(newHandPos);
                 }
@@ -90,7 +90,7 @@ public class HandTrackingHandler {
             else if (hand.getLabel() == HandLabel.RIGHT) {
                 if (rightHandStatus == HandStatus.UNKNOWN && rightHandStatus == newHandStatus) continue;
 
-                if (rightHandStatus != newHandStatus || rightHandPosition.get() != newHandPos) {
+                if (rightHandStatus != newHandStatus || !rightHandPosition.get().equals(newHandPos)) {
                     rightHandStatus = newHandStatus;
                     rightHandPosition.set(newHandPos);
                 }

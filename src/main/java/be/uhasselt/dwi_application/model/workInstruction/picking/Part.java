@@ -1,4 +1,4 @@
-package be.uhasselt.dwi_application.model.picking;
+package be.uhasselt.dwi_application.model.workInstruction.picking;
 
 import be.uhasselt.dwi_application.model.workInstruction.Assembly;
 import be.uhasselt.dwi_application.utility.database.repository.assembly.AssemblyRepository;

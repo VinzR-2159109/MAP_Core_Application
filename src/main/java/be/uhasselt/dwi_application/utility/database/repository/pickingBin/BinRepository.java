@@ -1,12 +1,11 @@
 package be.uhasselt.dwi_application.utility.database.repository.pickingBin;
 
-import be.uhasselt.dwi_application.model.picking.Part;
-import be.uhasselt.dwi_application.model.picking.PickingBin;
+import be.uhasselt.dwi_application.model.workInstruction.picking.Part;
+import be.uhasselt.dwi_application.model.workInstruction.picking.PickingBin;
 import be.uhasselt.dwi_application.utility.database.Database;
 import be.uhasselt.dwi_application.utility.database.repository.part.PartDao;
 import org.jdbi.v3.core.Jdbi;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class BinRepository {

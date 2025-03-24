@@ -1,11 +1,9 @@
 package be.uhasselt.dwi_application.controller.BinManager;
 
-import be.uhasselt.dwi_application.controller.Controller;
-import be.uhasselt.dwi_application.model.picking.PickingBin;
+import be.uhasselt.dwi_application.model.workInstruction.picking.PickingBin;
 import be.uhasselt.dwi_application.utility.database.repository.pickingBin.BinRepository;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 

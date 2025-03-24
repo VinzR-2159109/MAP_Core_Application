@@ -11,10 +11,10 @@ public class BinLedConfig {
     private int brightness;
     private String effect;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL) // Only include if not null
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer duration;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL) // Only include if not null
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer cycles;
 
     @JsonCreator
@@ -31,7 +31,6 @@ public class BinLedConfig {
         this.brightness = brightness;
         this.effect = effect;
 
-        // Only set duration and cycles if effect is "flash"
         if ("flash".equalsIgnoreCase(effect)) {
             this.duration = duration;
             this.cycles = cycles;
@@ -52,7 +51,6 @@ public class BinLedConfig {
     public void setEffect(String effect) {
         this.effect = effect;
 
-        // Reset duration and cycles if effect is not "flash"
         if (!"flash".equalsIgnoreCase(effect)) {
             this.duration = null;
             this.cycles = null;

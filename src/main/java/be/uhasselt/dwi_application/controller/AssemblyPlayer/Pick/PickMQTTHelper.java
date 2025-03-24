@@ -1,6 +1,7 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick;
 
 import be.uhasselt.dwi_application.model.Jackson.BinLedConfig;
+import be.uhasselt.dwi_application.model.Jackson.DisplayConfig;
 import be.uhasselt.dwi_application.model.basic.Color;
 import be.uhasselt.dwi_application.utility.network.MqttHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,6 +42,32 @@ public class PickMQTTHelper {
             String jsonString = objectMapper.writeValueAsString(ledConfig);
             MqttHandler.getInstance().publish("Output/Bin/LED", jsonString);
         } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void SendSetDisplayNumber(int id, int quantity) {
+        DisplayConfig displayConfig = DisplayConfig.on(id, quantity);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String jsonString = objectMapper.writeValueAsString(displayConfig);
+            MqttHandler.getInstance().publish("Output/Bin/Display", jsonString);
+        }
+        catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void SendSetDisplayOff(int id) {
+        DisplayConfig displayConfig = DisplayConfig.off(id);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String jsonString = objectMapper.writeValueAsString(displayConfig);
+            MqttHandler.getInstance().publish("Output/Bin/Display", jsonString);
+        }
+        catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }

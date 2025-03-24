@@ -14,25 +14,33 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AssemblyInstructionHandler {
+    private AtomicBoolean isCompleted;
+    private Boolean isRunning;
+
     private AssemblyInstruction assemblyInstruction;
     private AssemblyMQTTHelper helper;
     private Timer timer;
     private PickInstructionHandler.PickingHand pickingHand = PickInstructionHandler.PickingHand.RIGHT;
     private final HandTrackingHandler handTracking = HandTrackingHandler.getInstance();
-    private AtomicBoolean isCompleted;
 
     public AssemblyInstructionHandler(){
-        helper = new AssemblyMQTTHelper();
+        System.out.println("<Constructing AssemblyInstructionHandler>");
+
+        this.helper = new AssemblyMQTTHelper();
+        this.isCompleted = new AtomicBoolean(false);
+        this.isRunning = false;
     }
 
     public void start(AssemblyInstruction assemblyInstruction, Runnable onCompleteCallback){
-        System.out.println("<Starting Assembly Instruction Assistance>");
+        System.out.println("\u001B[32m" +  "Starting Assembly Instruction Assistance>" + "\u001B[0m");
+
+        isRunning = true;
+        isCompleted.set(false);
 
         helper.sendTurnOffAllLedStrip();
         handTracking.start();
 
         this.assemblyInstruction = assemblyInstruction;
-        this.isCompleted = new AtomicBoolean(false);
 
         List<Position> positions = assemblyInstruction.getAssemblyPositions();
 
@@ -58,7 +66,7 @@ public class AssemblyInstructionHandler {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                System.out.println(calculateQualityOfWorkScore());
+                //System.out.println(calculateQualityOfWorkScore());
                 if (calculateQualityOfWorkScore() > 85){
                     isCompleted.set(true);
                     stop();
@@ -79,6 +87,7 @@ public class AssemblyInstructionHandler {
         }
 
         handTracking.stop();
+        isRunning = false;
     }
 
     private double calculateQualityOfWorkScore() {
@@ -105,4 +114,6 @@ public class AssemblyInstructionHandler {
     }
 
     public boolean isCompleted() {return isCompleted.get();}
+
+    public boolean isRunning() {return isRunning;}
 }

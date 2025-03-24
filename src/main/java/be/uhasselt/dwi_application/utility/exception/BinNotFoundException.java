@@ -1,6 +1,6 @@
 package be.uhasselt.dwi_application.utility.exception;
 
-import be.uhasselt.dwi_application.model.picking.Part;
+import be.uhasselt.dwi_application.model.workInstruction.picking.Part;
 
 public class BinNotFoundException extends Exception {
     private final Part part;

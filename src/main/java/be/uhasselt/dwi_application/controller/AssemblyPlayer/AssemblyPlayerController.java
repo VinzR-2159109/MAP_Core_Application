@@ -6,7 +6,7 @@ import be.uhasselt.dwi_application.controller.Controller;
 import be.uhasselt.dwi_application.model.workInstruction.Assembly;
 import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
 import be.uhasselt.dwi_application.model.workInstruction.Instruction;
-import be.uhasselt.dwi_application.model.workInstruction.PickingInstruction;
+import be.uhasselt.dwi_application.model.workInstruction.picking.PickingInstruction;
 import be.uhasselt.dwi_application.utility.exception.BinNotFoundException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -32,10 +32,13 @@ public class AssemblyPlayerController implements Controller {
     private AssemblyInstructionHandler assemblyInstructionHandler;
 
     public AssemblyPlayerController(Assembly assembly) {
+        System.out.println("\u001B[32m" +  "<Creating Assembly Player>" + "\u001B[0m");
         this.assembly = assembly;
 
-        manager = new AssemblyPlayerManager(assembly);
+        this.assemblyInstructionHandler = new AssemblyInstructionHandler();
+        this.pickInstructionHandler = new PickInstructionHandler();
 
+        manager = new AssemblyPlayerManager(assembly);
         this.currentInstruction = manager.moveToNextInstruction(null);
         setNextInstruction(currentInstruction);
     }
@@ -52,11 +55,15 @@ public class AssemblyPlayerController implements Controller {
 
     public void setNextInstruction(Instruction instruction) {
         this.currentInstruction = instruction;
+        System.out.println("\u001B[36m" + "/Next Instruction " + instruction + "\u001B[0m");
+
         if (instruction == null) {
+            System.out.println("\u001B[31m" + "<All Instructions Completed>" + "\u001B[0m");
             instructionDescription_lbl.setText("All instructions completed!");
             InstructionImageView.setImage(null);
             ok_btn.setDisable(true);
             nok_btn.setDisable(true);
+            currentInstruction = null;
             return;
         }
 
@@ -75,7 +82,7 @@ public class AssemblyPlayerController implements Controller {
     }
 
     private void handleOk() {
-        if (!pickInstructionHandler.isCompleted()){
+        if (!pickInstructionHandler.isCompleted() && pickInstructionHandler.isRunning()){
             showErrorDialogWithChoice("Warning", "The system did not mark the picking as completed", "Are you sure that you completed the Picking Instruction correctly?", "Yes", "No",() -> {
                 pickInstructionHandler.stop();
                 setNextInstruction(manager.moveToNextInstruction(currentInstruction));
@@ -83,7 +90,7 @@ public class AssemblyPlayerController implements Controller {
             return;
         }
 
-        if (!assemblyInstructionHandler.isCompleted()){
+        if (!assemblyInstructionHandler.isCompleted() && assemblyInstructionHandler.isRunning()){
             showErrorDialogWithChoice("Warning", "Het systeem heeft de assemblageInstructie niet as compleet gezien", "Ben je zeker dat de assemblage juist is uitgevoerd?", "Ja", "Nee",() -> {
                 assemblyInstructionHandler.stop();
                 setNextInstruction(manager.moveToNextInstruction(currentInstruction));
@@ -101,10 +108,10 @@ public class AssemblyPlayerController implements Controller {
     }
 
     private void handlePickingInstruction(PickingInstruction pickingInstruction) {
-        this.pickInstructionHandler = new PickInstructionHandler();
+        System.out.println("\u001B[34m" + "<handlePickingInstruction>" + "\u001B[0m");
         try {
             pickInstructionHandler.start(pickingInstruction, () ->{
-                setNextInstruction(manager.moveToNextInstruction(currentInstruction));
+                //setNextInstruction(manager.moveToNextInstruction(currentInstruction));
             });
         } catch (BinNotFoundException e) {
             showExceptionDialog(e.getTitle(), e.getHeader(), e);
@@ -112,10 +119,10 @@ public class AssemblyPlayerController implements Controller {
     }
 
     private void handleAssemblyInstruction(AssemblyInstruction assemblyInstruction) {
-        this.assemblyInstructionHandler = new AssemblyInstructionHandler();
+        System.out.println("\u001B[33m" + "<handleAssemblyInstruction>" + "\u001B[0m");
         try {
             assemblyInstructionHandler.start(assemblyInstruction, () -> {
-                setNextInstruction(manager.moveToNextInstruction(currentInstruction));
+                //setNextInstruction(manager.moveToNextInstruction(currentInstruction));
             });
         } catch (Exception e) {
             showExceptionDialog("Error", "handleAssemblyInstruction", e);

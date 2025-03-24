@@ -5,7 +5,8 @@ import be.uhasselt.dwi_application.controller.MainController;
 import be.uhasselt.dwi_application.controller.WorkInstruction.LocationPicker.AssemblyLocationPickerController;
 import be.uhasselt.dwi_application.controller.WorkInstruction.Part.PartManagerController;
 import be.uhasselt.dwi_application.model.workInstruction.*;
-import be.uhasselt.dwi_application.model.picking.Part;
+import be.uhasselt.dwi_application.model.workInstruction.picking.Part;
+import be.uhasselt.dwi_application.model.workInstruction.picking.PickingInstruction;
 import be.uhasselt.dwi_application.utility.FxmlViews;
 import be.uhasselt.dwi_application.utility.database.repository.instruction.InstructionRepository;
 import be.uhasselt.dwi_application.utility.modules.ImageHandler;
@@ -30,7 +31,6 @@ import static be.uhasselt.dwi_application.utility.modules.Dialog.*;
 import static be.uhasselt.dwi_application.utility.modules.ImageHandler.uploadImage;
 
 public class InstructionManagerController implements Controller {
-    @FXML private Button removeInstruction_btn;
     @FXML private TreeView<Instruction> instructionTree;
     @FXML private HBox pickInstructionSettings_hbox;
     @FXML private ComboBox<Part> partSelector;
@@ -49,11 +49,9 @@ public class InstructionManagerController implements Controller {
     private TreeItem<Instruction> selectedNode;
     private final Assembly assembly;
     private static InstructionManagerController instance;
-    private final InstructionManagerHelper helper;
     private final DatabaseUpdater updater;
 
     public InstructionManagerController(Assembly assembly) {
-        helper = new InstructionManagerHelper(assembly);
         updater = new DatabaseUpdater();
         instance = this;
 
@@ -70,18 +68,13 @@ public class InstructionManagerController implements Controller {
         instructionTree.setOnMouseClicked(this::handleTreeSelection);
         instructionTree.setCellFactory(_ -> new InstructionTreeItemController(assembly));
 
-        removeInstruction_btn.setOnAction(_ -> {
-            helper.removeSelectedInstruction(selectedNode, instructionTree);
-            selectedNode = null;
-        });
-
         uploadImage_btn.setOnAction(_ -> uploadInstructionImage());
         deleteImage_btn.setOnAction(_ -> deleteImage());
         disableHint_checkbox.setOnAction(_ -> toggleDisableHint());
         skipDuringPlay_checkbox.setOnAction(_ -> toggleSkipDuringPlay());
         pickLocation_btn.setOnAction(_-> openLocationPicker());
         pickInstructionSettings_hbox.setDisable(true);
-        partQuantiy_spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
+        partQuantiy_spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 9999, 1));
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(FxmlViews.PART_MANAGER));
@@ -147,6 +140,7 @@ public class InstructionManagerController implements Controller {
                 partSelector.setValue(pickingInstruction.getPartToPick());
                 partQuantiy_spinner.getValueFactory().setValue(pickingInstruction.getQuantity());
                 location_hbox.setDisable(true);
+
             } else if (instruction instanceof AssemblyInstruction assemblyInstruction) {
                 location_hbox.setDisable(false);
                 pickInstructionSettings_hbox.setDisable(true);

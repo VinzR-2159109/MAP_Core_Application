@@ -15,7 +15,10 @@ public class AssemblyPlayerManager {
     }
 
     public Instruction moveToNextInstruction(Instruction previousInstruction) {
+        System.out.println("\u001B[33m" + "<Moving to Next Instruction>" + "\u001B[0m");
+
         if (previousInstruction == null) {
+            System.out.println("!! Finding First !!");
             return findFirstInstruction();
         }
 
@@ -23,7 +26,7 @@ public class AssemblyPlayerManager {
         if (next != null) {
             return next;
         } else {
-            System.out.println("End of instructions reached.");
+            System.out.println("\u001B[31m" + "<No Next Instruction Found>" + "\u001B[0m");
             return null;
         }
     }
@@ -45,7 +48,7 @@ public class AssemblyPlayerManager {
     }
 
     private Instruction getNextInstruction(Instruction instruction) {
-        System.out.println("getting next instruction");
+        System.out.println("<Getting Next Instruction>");
         // if it's an AssemblyInstruction with sub-instructions, go deeper
         if (instruction instanceof AssemblyInstruction) {
             List<Instruction> subInstructions = ((AssemblyInstruction) instruction).getSubInstructions();
