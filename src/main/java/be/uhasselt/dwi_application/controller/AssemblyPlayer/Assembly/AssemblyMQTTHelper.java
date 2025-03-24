@@ -2,6 +2,7 @@ package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripRange;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.StripLedConfig;
+import be.uhasselt.dwi_application.model.Jackson.VibrationConfig;
 import be.uhasselt.dwi_application.model.basic.Color;
 import be.uhasselt.dwi_application.utility.network.MqttHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,14 +37,36 @@ public class AssemblyMQTTHelper {
         sendLedStripCommand("y", ledsY);
     }
 
-    private void sendLedStripCommand(String stripId, List<LEDStripRange> ranges) {
+    public void sendLedStripCommand(String stripId, List<LEDStripRange> ranges) {
         try {
             StripLedConfig ledConfig = new StripLedConfig(stripId, ranges);
             String jsonString = objectMapper.writeValueAsString(ledConfig);
-            MqttHandler.getInstance().publish(MQTT_TOPIC, jsonString);
+            MqttHandler.getInstance().publish("Output/LEDStrip", jsonString);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to serialize LED command", e);
+        }
+    }
+
+    public void sendVibrationCommand(int amplitude, double qow) {
+        try {
+            VibrationConfig config = VibrationConfig.on(amplitude, qow);
+            String jsonString = objectMapper.writeValueAsString(config);
+            MqttHandler.getInstance().publish("Output/Vibration", jsonString);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to serialize Vibration command", e);
+        }
+    }
+
+    public void CancelVibration(){
+        try {
+            VibrationConfig config = VibrationConfig.off();
+            String jsonString = objectMapper.writeValueAsString(config);
+            MqttHandler.getInstance().publish("Output/Vibration", jsonString);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to serialize Vibration command", e);
         }
     }
 }

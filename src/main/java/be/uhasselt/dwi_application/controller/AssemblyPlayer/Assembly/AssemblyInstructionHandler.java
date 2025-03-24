@@ -14,11 +14,11 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AssemblyInstructionHandler {
-    private AtomicBoolean isCompleted;
+    private final AtomicBoolean isCompleted;
     private Boolean isRunning;
 
     private AssemblyInstruction assemblyInstruction;
-    private AssemblyMQTTHelper helper;
+    private final AssemblyMQTTHelper mqtt;
     private Timer timer;
     private PickInstructionHandler.PickingHand pickingHand = PickInstructionHandler.PickingHand.RIGHT;
     private final HandTrackingHandler handTracking = HandTrackingHandler.getInstance();
@@ -26,7 +26,7 @@ public class AssemblyInstructionHandler {
     public AssemblyInstructionHandler(){
         System.out.println("<Constructing AssemblyInstructionHandler>");
 
-        this.helper = new AssemblyMQTTHelper();
+        this.mqtt = new AssemblyMQTTHelper();
         this.isCompleted = new AtomicBoolean(false);
         this.isRunning = false;
     }
@@ -37,7 +37,7 @@ public class AssemblyInstructionHandler {
         isRunning = true;
         isCompleted.set(false);
 
-        helper.sendTurnOffAllLedStrip();
+        mqtt.sendTurnOffAllLedStrip();
         handTracking.start();
 
         this.assemblyInstruction = assemblyInstruction;
@@ -51,12 +51,12 @@ public class AssemblyInstructionHandler {
 
         int gridSize = SettingsRepository.loadSettings().getGridSize() / 2;
 
-        helper.sendSetLedStripXGreenOnRange(
+        mqtt.sendSetLedStripXGreenOnRange(
                 43 - (int) positions.stream().mapToDouble(Position::getX).max().orElse(0) / gridSize,
                 43 - (int) positions.stream().mapToDouble(Position::getX).min().orElse(0) / gridSize
         );
 
-        helper.sendSetLedStripYGreenOnRange(
+        mqtt.sendSetLedStripYGreenOnRange(
                 31 - (int) positions.stream().mapToDouble(Position::getY).max().orElse(0) / gridSize,
                 31 - (int) positions.stream().mapToDouble(Position::getY).min().orElse(0) / gridSize
         );
@@ -66,8 +66,12 @@ public class AssemblyInstructionHandler {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                //System.out.println(calculateQualityOfWorkScore());
-                if (calculateQualityOfWorkScore() > 85){
+                int qowScore = calculateQualityOfWorkScore();
+                if (qowScore < 0) return;
+
+                mqtt.sendVibrationCommand(255, qowScore);
+
+                if (qowScore> 85){
                     isCompleted.set(true);
                     stop();
                     Platform.runLater(onCompleteCallback);
@@ -79,7 +83,8 @@ public class AssemblyInstructionHandler {
 
     public void stop(){
         System.out.println("<Stopping Assembly Instruction Assistance>");
-        helper.sendTurnOffAllLedStrip();
+        mqtt.sendTurnOffAllLedStrip();
+        mqtt.CancelVibration();
 
         if (timer != null){
             timer.cancel();
@@ -90,7 +95,7 @@ public class AssemblyInstructionHandler {
         isRunning = false;
     }
 
-    private double calculateQualityOfWorkScore() {
+    private int calculateQualityOfWorkScore() {
         Position handPosition;
         if (pickingHand == PickInstructionHandler.PickingHand.LEFT && handTracking.getLeftHandStatus() != HandStatus.UNKNOWN){
             handPosition = handTracking.getLeftHandPosition();
@@ -98,7 +103,7 @@ public class AssemblyInstructionHandler {
         else if (pickingHand == PickInstructionHandler.PickingHand.RIGHT && handTracking.getRightHandStatus() != HandStatus.UNKNOWN){
             handPosition = handTracking.getRightHandPosition();
         } else {
-            return -1.0;
+            return -1;
         }
 
         System.out.println("Right hand position: " + handPosition.getX() + " " + handPosition.getY());
@@ -110,7 +115,7 @@ public class AssemblyInstructionHandler {
         double distance = Math.sqrt(Math.pow(avgX - handPosition.getX(), 2) + Math.pow(avgY - handPosition.getY(), 2));
         System.out.println("Distance: " + distance);
         double maxDistance = 550;
-        return Math.max(0, Math.min(100, 100 - (distance / maxDistance) * 100));
+        return (int) Math.max(0, Math.min(100, 100 - (distance / maxDistance) * 100));
     }
 
     public boolean isCompleted() {return isCompleted.get();}
