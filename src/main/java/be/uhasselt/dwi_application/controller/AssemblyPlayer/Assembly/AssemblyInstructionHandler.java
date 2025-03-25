@@ -69,10 +69,11 @@ public class AssemblyInstructionHandler {
                 int qowScore = calculateQualityOfWorkScore();
                 if (qowScore < 0) return;
 
-                mqtt.sendVibrationCommand(255, qowScore);
+                mqtt.sendVibrationCommand((int) Math.round((qowScore / 100.0) * 255), qowScore);
 
-                if (qowScore> 85){
+                if (qowScore > 85){
                     isCompleted.set(true);
+                    mqtt.CancelVibration();
                     stop();
                     Platform.runLater(onCompleteCallback);
                 };
