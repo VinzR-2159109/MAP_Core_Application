@@ -15,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -30,6 +31,8 @@ public class AssemblyTileController implements Controller {
     @FXML private Label assemblyName_lbl;
     @FXML private TextField assemblyName_txt;
     @FXML private Rectangle colorBox;
+    @FXML private StackPane colorBoxStack;
+    @FXML private Label playIcon;
 
     private final Assembly assembly;
     private final Consumer<Assembly> onSelectionChange;
@@ -69,6 +72,10 @@ public class AssemblyTileController implements Controller {
                 saveAssemblyName();
             }
         });
+
+        colorBoxStack.setOnMouseEntered(e -> playIcon.setVisible(true));
+        colorBoxStack.setOnMouseExited(e -> playIcon.setVisible(false));
+
     }
 
     private void playAssembly() {

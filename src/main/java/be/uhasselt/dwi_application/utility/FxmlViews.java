@@ -1,7 +1,7 @@
 package be.uhasselt.dwi_application.utility;
 
 public class FxmlViews {
-    public static final String MAIN_VIEW = "/be/uhasselt/dwi_application/view/main-view.fxml";
+    public static final String MAIN_VIEW = "/be/uhasselt/dwi_application/view/mainView/main-view.fxml";
     public static final String BIN_MANAGER = "/be/uhasselt/dwi_application/view/BinManager/PickingBin_Manager.fxml";
     public static final String BIN_ITEM = "/be/uhasselt/dwi_application/view/BinManager/bin_item.fxml";
     public static final String INSTRUCTION_CREATER = "/be/uhasselt/dwi_application/view/InstructionManager/instruction/InstructionManager.fxml";

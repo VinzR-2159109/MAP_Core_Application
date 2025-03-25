@@ -14,6 +14,7 @@ public class DWI_Core_Application extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(DWI_Core_Application.class.getResource(FxmlViews.MAIN_VIEW));
 
         Scene scene = new Scene(fxmlLoader.load(), 800, 600);
+        scene.getStylesheets().add(getClass().getResource("/be/uhasselt/dwi_application/view/styles.css").toExternalForm());
         stage.setTitle("DWI Application");
         stage.setScene(scene);
         stage.show();

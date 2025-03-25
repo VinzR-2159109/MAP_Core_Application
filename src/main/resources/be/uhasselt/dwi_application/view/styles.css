@@ -1,0 +1,84 @@
+/* Common box styling */
+.hbox-menu {
+    -fx-background-color: #f4f4f4;
+    -fx-padding: 10;
+    -fx-spacing: 10;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0.2, 0, 2);
+}
+
+/* On hover effect */
+.hbox-menu:hover {
+    -fx-background-color: #e0f0ff;
+    -fx-border-color: #0078d7;
+}
+
+/* Optional label styling */
+.label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* Tile container */
+.tile-box {
+    -fx-background-color: #f9f9f9;
+    -fx-border-color: #d0d0d0;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 4, 0.2, 0, 1);
+}
+
+
+/* Rounded rectangle styling */
+#colorBox {
+    -fx-arc-width: 12;
+    -fx-arc-height: 12;
+}
+
+/* Play icon label styling */
+.play-icon {
+    -fx-font-size: 48px;
+    -fx-text-fill: white;
+    -fx-opacity: 0.8;
+}
+
+/* Show play icon on hover */
+.stack-pane:hover .play-icon {
+    -fx-visible: true;
+    -fx-opacity: 1.0;
+}
+
+.subtle-scrollpane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* Remove background from the viewport */
+.subtle-scrollpane .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Scrollbar track and thumb styling */
+.subtle-scrollpane .scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.subtle-scrollpane .scroll-bar:vertical .thumb,
+.subtle-scrollpane .scroll-bar:horizontal .thumb {
+    -fx-background-color: #cccccc;
+    -fx-background-insets: 2;
+    -fx-background-radius: 4;
+}
+
+.subtle-scrollpane .scroll-bar:vertical:hover .thumb,
+.subtle-scrollpane .scroll-bar:horizontal:hover .thumb {
+    -fx-background-color: #aaaaaa;
+}
+
+
+

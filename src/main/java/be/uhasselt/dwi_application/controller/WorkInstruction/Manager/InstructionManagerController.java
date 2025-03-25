@@ -43,8 +43,8 @@ public class InstructionManagerController implements Controller {
     @FXML private TextField hintField;
     @FXML private CheckBox skipDuringPlay_checkbox;
     @FXML private Spinner<Integer> partQuantiy_spinner;
-    @FXML private Button pickLocation_btn;
     @FXML private HBox location_hbox;
+    @FXML private Button pickLocation_btn;
 
     private TreeItem<Instruction> selectedNode;
     private final Assembly assembly;
@@ -73,7 +73,8 @@ public class InstructionManagerController implements Controller {
         disableHint_checkbox.setOnAction(_ -> toggleDisableHint());
         skipDuringPlay_checkbox.setOnAction(_ -> toggleSkipDuringPlay());
         pickLocation_btn.setOnAction(_-> openLocationPicker());
-        pickInstructionSettings_hbox.setDisable(true);
+        pickLocation_btn.setDisable(true);
+        location_hbox.setDisable(true);
         partQuantiy_spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 9999, 1));
 
         try {

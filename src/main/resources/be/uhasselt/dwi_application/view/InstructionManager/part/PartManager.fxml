@@ -9,34 +9,34 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="1000.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.uhasselt.dwi_application.controller.WorkInstruction.Part.PartManagerController">
+<VBox maxWidth="400.0" minWidth="400.0" prefHeight="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.uhasselt.dwi_application.controller.WorkInstruction.Part.PartManagerController">
     <children>
-      <HBox alignment="CENTER">
+      <HBox alignment="CENTER_LEFT">
          <children>
-              <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="58.0" prefWidth="189.0" text="Part Manager" textAlignment="JUSTIFY">
+              <Label alignment="CENTER" contentDisplay="CENTER" minWidth="200.0" style="-fx-font-size: 24px" text="Part Manager" textAlignment="JUSTIFY">
                   <font>
                       <Font size="24.0" />
                   </font>
+               <HBox.margin>
+                  <Insets right="65.0" />
+               </HBox.margin>
               </Label>
-            <Button fx:id="addPart_btn" mnemonicParsing="false" prefHeight="40.0" prefWidth="86.0" text="Add Part">
+            <Button fx:id="addPart_btn" minWidth="50.0" mnemonicParsing="false" text="+">
                <HBox.margin>
                   <Insets right="5.0" />
                </HBox.margin></Button>
-            <Button fx:id="deleteSelectedParts_btn" layoutX="284.0" layoutY="30.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="135.0" text="Delete Selected">
+            <Button fx:id="deleteSelectedParts_btn" layoutX="284.0" layoutY="30.0" minWidth="50.0" mnemonicParsing="false" text="🗑️" textAlignment="CENTER">
                <HBox.margin>
-                  <Insets left="5.0" />
+                  <Insets />
                </HBox.margin>
             </Button>
          </children>
          <VBox.margin>
-            <Insets />
+            <Insets top="20.0" />
          </VBox.margin>
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
       </HBox>
-        <ScrollPane>
-            <VBox fx:id="PartContainer_vbox" prefHeight="920.0" prefWidth="376.0">
+        <ScrollPane maxWidth="400.0" minHeight="900.0" styleClass="subtle-scrollpane" VBox.vgrow="ALWAYS">
+            <VBox fx:id="PartContainer_vbox" minHeight="900.0">
                 <cursor>
                     <Cursor fx:constant="DEFAULT" />
                 </cursor>

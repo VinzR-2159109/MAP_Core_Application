@@ -10,36 +10,40 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
 
-<VBox fx:id="tileContainer_vbox" alignment="CENTER" prefHeight="170.0" prefWidth="255.0" spacing="5" style="-fx-border-color: black; -fx-padding: 10; -fx-background-color: #F0F0F0; -fx-border-radius: 10;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.uhasselt.dwi_application.controller.WorkInstruction.Assembly.AssemblyTileController">
+<VBox fx:id="tileContainer_vbox" styleClass="tile-box" alignment="CENTER" prefHeight="170.0" prefWidth="255.0" spacing="5" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.uhasselt.dwi_application.controller.WorkInstruction.Assembly.AssemblyTileController">
 
     <!-- Selection Checkbox -->
     <HBox alignment="CENTER_RIGHT">
-        <VBox.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-        </VBox.margin>
-        <children>
+        <VBox.margin> <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" /> </VBox.margin>
+        <padding> <Insets top="5.0" /> </padding>
 
-          <!-- Edit/Save Button -->
-          <Button fx:id="editAssembly_btn" prefHeight="26.0" prefWidth="92.0" text="Edit">
+        <!-- Edit/Save Button -->
+        <Button fx:id="editAssembly_btn" prefHeight="26.0" prefWidth="92.0" text="Edit">
             <padding>
-               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
             </padding>
             <HBox.margin>
-               <Insets right="66.0" />
-            </HBox.margin></Button>
-            <CheckBox fx:id="selectCheckBox">
+              <Insets right="66.0" />
+            </HBox.margin>
+        </Button>
+
+        <CheckBox fx:id="selectCheckBox">
             <HBox.margin>
-               <Insets right="23.0" />
-            </HBox.margin></CheckBox>
-        </children>
-        <padding>
-            <Insets top="5.0" />
-        </padding>
+                <Insets right="23.0" />
+            </HBox.margin>
+        </CheckBox>
     </HBox>
 
     <!-- Colored Box -->
-    <Rectangle fx:id="colorBox" fill="LIGHTBLUE" height="98.0" width="175.0" />
-   <HBox alignment="CENTER">
+    <StackPane fx:id="colorBoxStack" prefHeight="98.0" prefWidth="175.0">
+        <!-- The rectangle -->
+        <Rectangle fx:id="colorBox" fill="LIGHTBLUE" height="98.0" width="175.0" />
+
+        <!-- The play icon (initially hidden) -->
+        <Label fx:id="playIcon" text="▶" visible="false" styleClass="play-icon" />
+    </StackPane>
+
+    <HBox alignment="CENTER">
       <children>
 
           <!-- StackPane to overlay Label & TextField in the same position -->

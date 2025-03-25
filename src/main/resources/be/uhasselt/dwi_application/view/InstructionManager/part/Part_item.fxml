@@ -11,18 +11,18 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="88.0" prefWidth="386.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.uhasselt.dwi_application.controller.WorkInstruction.Part.PartItemController">
+<AnchorPane maxWidth="380.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.uhasselt.dwi_application.controller.WorkInstruction.Part.PartItemController">
 
     <children>
-        <VBox alignment="CENTER" layoutY="22.0" prefHeight="76.0" prefWidth="430.0" style="-fx-border-color: black; -fx-padding: 10; -fx-background-color: #F0F0F0; -fx-border-radius: 10;" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+        <VBox alignment="CENTER" layoutY="22.0" prefHeight="76.0" prefWidth="430.0" style="-fx-border-color: black; -fx-padding: 10; -fx-background-color: #F0F0F0; -fx-border-radius: 10;" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
             <children>
 
                 <!-- Part Name Section -->
                 <HBox alignment="CENTER">
                     <children>
-                        <StackPane prefHeight="38.0" prefWidth="211.0">
+                        <StackPane>
                             <children>
-                                <Label fx:id="partName_lbl" alignment="CENTER_RIGHT" contentDisplay="CENTER" prefHeight="26.0" prefWidth="216.0" text="Part Name">
+                                <Label fx:id="partName_lbl" alignment="CENTER_RIGHT" contentDisplay="CENTER" text="Part Name">
                                     <StackPane.margin>
                                         <Insets />
                                     </StackPane.margin>
@@ -31,7 +31,7 @@
                             </children>
                         </StackPane>
 
-                        <Button fx:id="editSave_btn" mnemonicParsing="false" prefHeight="26.0" prefWidth="100.0" text="Edit">
+                        <Button fx:id="editSave_btn" mnemonicParsing="false" prefHeight="26.0" prefWidth="137.0" text="Edit">
                      <HBox.margin>
                         <Insets left="10.0" right="22.0" />
                      </HBox.margin></Button>
@@ -42,12 +42,12 @@
                 <!-- Bin Number Section -->
                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                     <children>
-                        <Label prefHeight="26.0" prefWidth="91.0" text="Bin Number:">
+                        <Label minWidth="100.0" text="Bin Number:">
                             <HBox.margin>
                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                             </HBox.margin>
                         </Label>
-                        <ComboBox fx:id="binNum_cbx" prefWidth="150.0" />
+                        <ComboBox fx:id="binNum_cbx" minWidth="150.0" prefHeight="26.0" prefWidth="126.0" />
                     </children>
                 </HBox>
 
