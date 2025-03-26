@@ -52,7 +52,7 @@
                   <Font size="28.0" />
                </font>
             </Label>
-            <Label fx:id="instructionDescription_lbl" prefHeight="63.0" prefWidth="820.0" style="-fx-font-size: 24" text="Instruction" GridPane.rowIndex="1" GridPane.rowSpan="2">
+            <Label fx:id="instructionDescription_lbl" style="-fx-font-size: 24" text="Instruction" GridPane.rowIndex="1" GridPane.rowSpan="2">
                <font>
                   <Font size="28.0" />
                </font>
@@ -60,6 +60,20 @@
                   <Insets bottom="5.0" left="20.0" right="5.0" top="5.0" />
                </GridPane.margin>
             </Label>
+            <HBox fx:id="hint_hbox" alignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.rowSpan="2" styleClass="hint-box">
+               <children>
+                  <Label minWidth="-Infinity" prefWidth="100.0" style="-fx-font-size: 24" text="ⓘ Hint: ">
+                     <font>
+                        <Font size="28.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="hint_lbl" maxWidth="-Infinity" prefWidth="700.0" style="-fx-font-size: 24">
+                     <font>
+                        <Font size="28.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
          </children>
       </GridPane>
       <ImageView fx:id="InstructionImageView" fitHeight="661.0" fitWidth="1509.0" layoutX="47.0" layoutY="132.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="207.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="132.0" />

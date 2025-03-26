@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showErrorDialogWithChoice;
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showExceptionDialog;
@@ -24,6 +25,8 @@ public class AssemblyPlayerController implements Controller {
     @FXML private Label instructionDescription_lbl;
     @FXML private Label assemblyName_lbl;
     @FXML private ImageView InstructionImageView;
+    @FXML private HBox hint_hbox;
+    @FXML private Label hint_lbl;
 
     private Instruction currentInstruction;
 
@@ -58,6 +61,8 @@ public class AssemblyPlayerController implements Controller {
 
         instructionDescription_lbl.setText(currentInstruction.getDescription());
         InstructionImageView.setImage(loadImage(currentInstruction.getImagePath()));
+
+        hint_hbox.setVisible(false);
 
         setNextInstruction(currentInstruction);
     }
@@ -115,9 +120,14 @@ public class AssemblyPlayerController implements Controller {
     }
 
     private void handleNok() {
-        System.out.println("Nok");
+        System.out.println("\u001B[31m" + "<handleNok>" + "\u001B[0m");
+
+        if (!currentInstruction.getHint().isEmpty() && !currentInstruction.hasProperty(Instruction.InstructionProperty.HINT_DISABLED)){
+            hint_hbox.setVisible(true);
+            hint_lbl.setText(currentInstruction.getHint());
+        }
+
         applyButtonStatus(InstructionStatus.COMPLETED_NOK);
-        //Play Nok-sound, Red lights ...
     }
 
     private void handlePickingInstruction(PickingInstruction pickingInstruction) {
@@ -149,12 +159,12 @@ public class AssemblyPlayerController implements Controller {
     private void applyButtonStatus(InstructionStatus status) {
         switch (status) {
             case PENDING:
-                ok_btn.setStyle("-fx-background-color: rgb(255,149,0); -fx-text-fill: white;");
-                nok_btn.setStyle("-fx-background-color: #cc0000; -fx-text-fill: white;");
+                ok_btn.setStyle("-fx-background-color: rgb(255,149,0); -fx-text-fill: white; -fx-font-size: 72px");
+                nok_btn.setStyle("-fx-background-color: #cc0000; -fx-text-fill: white; -fx-font-size: 72px");
                 break;
             case COMPLETED_OK:
-                ok_btn.setStyle("-fx-background-color: #00ff00; -fx-text-fill: white; -fx-font-weight: bold;");
-                nok_btn.setStyle("-fx-background-color: #cc0000; -fx-text-fill: white;");
+                ok_btn.setStyle("-fx-background-color: #00ff00; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 72px");
+                nok_btn.setStyle("-fx-background-color: #cc0000; -fx-text-fill: white; -fx-font-size: 72px");
                 break;
             case COMPLETED_NOK:
                 nok_btn.setStyle("-fx-background-color: #cc0000; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 72px");
