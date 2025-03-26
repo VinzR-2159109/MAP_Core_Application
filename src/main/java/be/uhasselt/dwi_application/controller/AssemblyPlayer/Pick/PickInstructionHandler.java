@@ -5,6 +5,7 @@ import be.uhasselt.dwi_application.model.workInstruction.picking.PickingBin;
 import be.uhasselt.dwi_application.model.workInstruction.picking.PickingInstruction;
 import be.uhasselt.dwi_application.utility.database.repository.pickingBin.BinRepository;
 import be.uhasselt.dwi_application.utility.exception.BinNotFoundException;
+import be.uhasselt.dwi_application.utility.modules.SoundPlayer;
 import be.uhasselt.dwi_application.utility.network.MqttHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +17,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class PickInstructionHandler {
     private PickingBin bin;
     private Boolean isRunning;
+
+    private static final String OBSTACLE_TOPIC = "Input/Bin/Obstacle";
 
     private final AtomicBoolean obstacleInBin;
     private final AtomicBoolean isCompleted;
@@ -57,7 +60,7 @@ public class PickInstructionHandler {
         mqttHelper.SendSetBinLEDGreen(bin.getId());
         mqttHelper.SendSetDisplayNumber(bin.getId().intValue(), pickingInstruction.getQuantity());
 
-        mqttHandler.subscribe("Input/Bin/Obstacle", s -> {
+        mqttHandler.subscribe(OBSTACLE_TOPIC, s -> {
             try {
                 ObstacleSensorData obstacleSensorData = objectMapper.readValue(s, ObstacleSensorData.class);
                 if (Objects.equals(obstacleSensorData.id(), bin.getId())) {
@@ -65,6 +68,8 @@ public class PickInstructionHandler {
 
                     if (obstacleInBin.get() && !currentObstacle) {
                         isCompleted.set(true);
+                        SoundPlayer.play(SoundPlayer.SoundType.OK);
+
                         stop();
                         Platform.runLater(onCompleteCallback);
                     }
@@ -86,10 +91,7 @@ public class PickInstructionHandler {
         mqttHelper.SendSetBinLEDOff(bin.getId());
         mqttHelper.SendSetDisplayOff(bin.getId().intValue());
 
-        // Unsubscribe from MQTT
-        String topic = "Input/Bin/Obstacle";
-        mqttHandler.unsubscribe(topic);
-        System.out.println("Unsubscribed from " + topic);
+        mqttHandler.unsubscribe(OBSTACLE_TOPIC);
 
         isRunning = false;
     }

@@ -20,6 +20,7 @@ module be.uhasselt.dwi_application {
     requires com.hivemq.client.mqtt;
     requires com.fasterxml.jackson.databind;
     requires org.apache.commons.imaging;
+    requires javafx.media;
 
     // ✅ Open packages for JavaFX & JDBI Reflection
     opens be.uhasselt.dwi_application to javafx.fxml;

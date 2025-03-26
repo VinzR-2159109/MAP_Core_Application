@@ -11,12 +11,11 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-
 <AnchorPane prefHeight="1000.0" prefWidth="1600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.uhasselt.dwi_application.controller.AssemblyPlayer.AssemblyPlayerController">
    <children>
       <HBox alignment="CENTER" layoutX="708.0" layoutY="869.0" prefHeight="100.0" prefWidth="869.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
          <children>
-            <Button fx:id="nok_btn" mnemonicParsing="false" prefHeight="100.0" prefWidth="500.0" style="-fx-background-color: red;" text="X" textFill="WHITE">
+            <Button fx:id="nok_btn" maxHeight="150.0" maxWidth="500.0" minHeight="150.0" minWidth="500.0" mnemonicParsing="false" prefHeight="150.0" prefWidth="500.0" style="-fx-background-color: red;" text="X" textFill="WHITE">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="100.0" top="5.0" />
                </HBox.margin>
@@ -24,7 +23,7 @@
                   <Font size="72.0" />
                </font>
             </Button>
-            <Button fx:id="ok_btn" alignment="CENTER" mnemonicParsing="false" prefHeight="100.0" prefWidth="500.0" style="-fx-background-color: green;" text="OK" textFill="WHITE">
+            <Button fx:id="ok_btn" alignment="CENTER" maxHeight="150.0" maxWidth="500.0" minHeight="150.0" minWidth="500.0" mnemonicParsing="false" prefHeight="150.0" prefWidth="500.0" style="-fx-background-color: green;" text="OK" textFill="WHITE">
                <HBox.margin>
                   <Insets bottom="5.0" left="100.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -45,7 +44,7 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label fx:id="assemblyName_lbl" prefHeight="61.0" prefWidth="837.0" text="ASSEMBLY NAME" underline="true">
+            <Label fx:id="assemblyName_lbl" prefHeight="61.0" prefWidth="837.0" style="-fx-font-size: 28" text="ASSEMBLY NAME" underline="true">
                <GridPane.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </GridPane.margin>
@@ -53,7 +52,7 @@
                   <Font size="28.0" />
                </font>
             </Label>
-            <Label fx:id="instructionDescription_lbl" prefHeight="63.0" prefWidth="820.0" text="Instruction" GridPane.rowIndex="1" GridPane.rowSpan="2">
+            <Label fx:id="instructionDescription_lbl" prefHeight="63.0" prefWidth="820.0" style="-fx-font-size: 24" text="Instruction" GridPane.rowIndex="1" GridPane.rowSpan="2">
                <font>
                   <Font size="28.0" />
                </font>

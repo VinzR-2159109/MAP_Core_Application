@@ -6,6 +6,7 @@ import be.uhasselt.dwi_application.model.hands.HandStatus;
 import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
 import be.uhasselt.dwi_application.utility.database.repository.settings.SettingsRepository;
 import be.uhasselt.dwi_application.utility.handTracking.HandTrackingHandler;
+import be.uhasselt.dwi_application.utility.modules.SoundPlayer;
 import javafx.application.Platform;
 
 import java.util.List;
@@ -68,12 +69,15 @@ public class AssemblyInstructionHandler {
             public void run() {
                 int qowScore = calculateQualityOfWorkScore();
                 if (qowScore < 0) return;
-
+                System.out.println("QoW Score: " + qowScore);
                 mqtt.sendVibrationCommand((int) Math.round((qowScore / 100.0) * 255), qowScore);
 
                 if (qowScore > 85){
                     isCompleted.set(true);
+                    SoundPlayer.play(SoundPlayer.SoundType.OK);
+
                     mqtt.CancelVibration();
+
                     stop();
                     Platform.runLater(onCompleteCallback);
                 };
@@ -107,14 +111,12 @@ public class AssemblyInstructionHandler {
             return -1;
         }
 
-        System.out.println("Right hand position: " + handPosition.getX() + " " + handPosition.getY());
-
         double avgX = assemblyInstruction.getAssemblyPositions().stream().mapToDouble(Position::getX).average().orElse(0);
         double avgY = assemblyInstruction.getAssemblyPositions().stream().mapToDouble(Position::getY).average().orElse(0);
 
 
         double distance = Math.sqrt(Math.pow(avgX - handPosition.getX(), 2) + Math.pow(avgY - handPosition.getY(), 2));
-        System.out.println("Distance: " + distance);
+
         double maxDistance = 550;
         return (int) Math.max(0, Math.min(100, 100 - (distance / maxDistance) * 100));
     }

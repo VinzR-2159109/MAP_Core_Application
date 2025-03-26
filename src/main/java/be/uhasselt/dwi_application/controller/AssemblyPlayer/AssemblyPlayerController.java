@@ -25,11 +25,18 @@ public class AssemblyPlayerController implements Controller {
     @FXML private Label assemblyName_lbl;
     @FXML private ImageView InstructionImageView;
 
-    private final AssemblyPlayerManager manager;
     private Instruction currentInstruction;
+
     private final Assembly assembly;
-    private PickInstructionHandler pickInstructionHandler;
-    private AssemblyInstructionHandler assemblyInstructionHandler;
+    private final AssemblyPlayerManager manager;
+    private final PickInstructionHandler pickInstructionHandler;
+    private final AssemblyInstructionHandler assemblyInstructionHandler;
+
+    private enum InstructionStatus {
+        PENDING,
+        COMPLETED_OK,
+        COMPLETED_NOK
+    }
 
     public AssemblyPlayerController(Assembly assembly) {
         System.out.println("\u001B[32m" +  "<Creating Assembly Player>" + "\u001B[0m");
@@ -38,19 +45,21 @@ public class AssemblyPlayerController implements Controller {
         this.assemblyInstructionHandler = new AssemblyInstructionHandler();
         this.pickInstructionHandler = new PickInstructionHandler();
 
-        manager = new AssemblyPlayerManager(assembly);
+        this.manager = new AssemblyPlayerManager(assembly);
         this.currentInstruction = manager.moveToNextInstruction(null);
-        setNextInstruction(currentInstruction);
     }
 
     @FXML
     private void initialize() {
+        assemblyName_lbl.setText(assembly.getName());
+
         nok_btn.setOnAction(_ -> handleNok());
         ok_btn.setOnAction(_ -> handleOk());
-        assemblyName_lbl.setText(assembly.getName());
 
         instructionDescription_lbl.setText(currentInstruction.getDescription());
         InstructionImageView.setImage(loadImage(currentInstruction.getImagePath()));
+
+        setNextInstruction(currentInstruction);
     }
 
     public void setNextInstruction(Instruction instruction) {
@@ -59,10 +68,13 @@ public class AssemblyPlayerController implements Controller {
 
         if (instruction == null) {
             System.out.println("\u001B[31m" + "<All Instructions Completed>" + "\u001B[0m");
+
             instructionDescription_lbl.setText("All instructions completed!");
             InstructionImageView.setImage(null);
+
             ok_btn.setDisable(true);
             nok_btn.setDisable(true);
+
             currentInstruction = null;
             return;
         }
@@ -104,6 +116,7 @@ public class AssemblyPlayerController implements Controller {
 
     private void handleNok() {
         System.out.println("Nok");
+        applyButtonStatus(InstructionStatus.COMPLETED_NOK);
         //Play Nok-sound, Red lights ...
     }
 
@@ -111,8 +124,10 @@ public class AssemblyPlayerController implements Controller {
         System.out.println("\u001B[34m" + "<handlePickingInstruction>" + "\u001B[0m");
         try {
             pickInstructionHandler.start(pickingInstruction, () ->{
+                applyButtonStatus(InstructionStatus.COMPLETED_OK);
                 //setNextInstruction(manager.moveToNextInstruction(currentInstruction));
             });
+            applyButtonStatus(InstructionStatus.PENDING);
         } catch (BinNotFoundException e) {
             showExceptionDialog(e.getTitle(), e.getHeader(), e);
         }
@@ -122,13 +137,30 @@ public class AssemblyPlayerController implements Controller {
         System.out.println("\u001B[33m" + "<handleAssemblyInstruction>" + "\u001B[0m");
         try {
             assemblyInstructionHandler.start(assemblyInstruction, () -> {
+                applyButtonStatus(InstructionStatus.COMPLETED_OK);
                 //setNextInstruction(manager.moveToNextInstruction(currentInstruction));
             });
+            applyButtonStatus(InstructionStatus.PENDING);
         } catch (Exception e) {
             showExceptionDialog("Error", "handleAssemblyInstruction", e);
         }
     }
 
+    private void applyButtonStatus(InstructionStatus status) {
+        switch (status) {
+            case PENDING:
+                ok_btn.setStyle("-fx-background-color: rgb(255,149,0); -fx-text-fill: white;");
+                nok_btn.setStyle("-fx-background-color: #cc0000; -fx-text-fill: white;");
+                break;
+            case COMPLETED_OK:
+                ok_btn.setStyle("-fx-background-color: #00ff00; -fx-text-fill: white; -fx-font-weight: bold;");
+                nok_btn.setStyle("-fx-background-color: #cc0000; -fx-text-fill: white;");
+                break;
+            case COMPLETED_NOK:
+                nok_btn.setStyle("-fx-background-color: #cc0000; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 72px");
+                break;
+        }
+    }
 
     public void cleanup() {
         System.out.println("AssemblyPlayerController is being destroyed!");
