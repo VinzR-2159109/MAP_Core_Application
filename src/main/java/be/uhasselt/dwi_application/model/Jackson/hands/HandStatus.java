@@ -1,4 +1,4 @@
-package be.uhasselt.dwi_application.model.hands;
+package be.uhasselt.dwi_application.model.Jackson.hands;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

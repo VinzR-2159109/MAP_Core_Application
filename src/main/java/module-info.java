@@ -52,7 +52,7 @@ module be.uhasselt.dwi_application {
     exports be.uhasselt.dwi_application.controller.WorkInstruction.Assembly to javafx.fxml;
 
     exports be.uhasselt.dwi_application.model.workInstruction;
-    exports be.uhasselt.dwi_application.model.hands to com.fasterxml.jackson.databind;
+    exports be.uhasselt.dwi_application.model.Jackson.hands to com.fasterxml.jackson.databind;
     exports be.uhasselt.dwi_application.model.basic to com.fasterxml.jackson.databind;
     exports be.uhasselt.dwi_application.model.Jackson to com.fasterxml.jackson.databind;
     exports be.uhasselt.dwi_application.utility.database.repository.assembly;

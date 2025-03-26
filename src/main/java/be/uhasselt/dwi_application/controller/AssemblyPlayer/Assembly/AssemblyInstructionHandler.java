@@ -2,7 +2,7 @@ package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick.PickInstructionHandler;
 import be.uhasselt.dwi_application.model.basic.Position;
-import be.uhasselt.dwi_application.model.hands.HandStatus;
+import be.uhasselt.dwi_application.model.Jackson.hands.HandStatus;
 import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
 import be.uhasselt.dwi_application.utility.database.repository.settings.SettingsRepository;
 import be.uhasselt.dwi_application.utility.handTracking.HandTrackingHandler;
@@ -68,7 +68,10 @@ public class AssemblyInstructionHandler {
             @Override
             public void run() {
                 int qowScore = calculateQualityOfWorkScore();
+                double[] direction = calculateDirectionToAssembly();
+                System.out.println("Direction: " + direction[0] + " : " + direction[1]);
                 if (qowScore < 0) return;
+
                 System.out.println("QoW Score: " + qowScore);
                 mqtt.sendVibrationCommand((int) Math.round((qowScore / 100.0) * 255), qowScore);
 
@@ -120,6 +123,65 @@ public class AssemblyInstructionHandler {
         double maxDistance = 550;
         return (int) Math.max(0, Math.min(100, 100 - (distance / maxDistance) * 100));
     }
+
+    private double[] calculateDirectionToAssembly() {
+        Position handPosition;
+        double handRotation;
+
+        if (pickingHand == PickInstructionHandler.PickingHand.LEFT && handTracking.getLeftHandStatus() != HandStatus.UNKNOWN) {
+            handPosition = handTracking.getLeftHandPosition();
+            handRotation = handTracking.getLeftHandRotation();
+        } else if (pickingHand == PickInstructionHandler.PickingHand.RIGHT && handTracking.getRightHandStatus() != HandStatus.UNKNOWN) {
+            handPosition = handTracking.getRightHandPosition();
+            handRotation = handTracking.getRightHandRotation();
+        } else {
+            return new double[] {0.0, 0.0}; // Unknown or invalid
+        }
+
+        double avgX = assemblyInstruction.getAssemblyPositions().stream().mapToDouble(Position::getX).average().orElse(0);
+        double avgY = assemblyInstruction.getAssemblyPositions().stream().mapToDouble(Position::getY).average().orElse(0);
+
+        double dx = avgX - handPosition.getX();
+        double dy = avgY - handPosition.getY();
+
+        // Convert hand rotation from degrees to radians and invert to rotate coordinate system
+//        double angleRad = Math.toRadians(-handRotation);
+//
+//        // Rotate the vector (dx, dy) by -handRotation
+//        double relX = dx * Math.cos(angleRad) - dy * Math.sin(angleRad);
+//        double relY = dx * Math.sin(angleRad) + dy * Math.cos(angleRad);
+//
+//        // Normalize to range [-1, 1]
+//        double length = Math.sqrt(relX * relX + relY * relY);
+//        if (length != 0) {
+//            relX /= length;
+//            relY /= length;
+//        }
+
+        double length = Math.sqrt(dx * dx + dy * dy);
+        double relX = (length != 0) ? dx / length : 0;
+        double relY = (length != 0) ? dy / length : 0;
+
+        String direction = interpretDirection(relX, relY);
+        System.out.printf("Direction to target: %s (%.2f, %.2f)%n", direction, relX, relY);
+
+        return new double[] {relX, relY};
+    }
+
+    private String interpretDirection(double x, double y) {
+        if (Math.abs(x) < 0.3 && y > 0.7) return "FORWARD";
+        if (Math.abs(x) < 0.3 && y < -0.7) return "BACKWARD";
+        if (x < -0.7 && Math.abs(y) < 0.3) return "LEFT";
+        if (x > 0.7 && Math.abs(y) < 0.3) return "RIGHT";
+
+        if (x < -0.5 && y > 0.5) return "FORWARD-LEFT";
+        if (x > 0.5 && y > 0.5) return "FORWARD-RIGHT";
+        if (x < -0.5 && y < -0.5) return "BACKWARD-LEFT";
+        if (x > 0.5 && y < -0.5) return "BACKWARD-RIGHT";
+
+        return "CENTERED";
+    }
+
 
     public boolean isCompleted() {return isCompleted.get();}
 

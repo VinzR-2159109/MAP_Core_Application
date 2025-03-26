@@ -102,6 +102,8 @@ public class AssemblyPlayerController implements Controller {
         if (!pickInstructionHandler.isCompleted() && pickInstructionHandler.isRunning()){
             showErrorDialogWithChoice("Warning", "The system did not mark the picking as completed", "Are you sure that you completed the Picking Instruction correctly?", "Yes", "No",() -> {
                 pickInstructionHandler.stop();
+
+                hint_hbox.setVisible(false);
                 setNextInstruction(manager.moveToNextInstruction(currentInstruction));
             });
             return;
@@ -110,12 +112,15 @@ public class AssemblyPlayerController implements Controller {
         if (!assemblyInstructionHandler.isCompleted() && assemblyInstructionHandler.isRunning()){
             showErrorDialogWithChoice("Warning", "Het systeem heeft de assemblageInstructie niet as compleet gezien", "Ben je zeker dat de assemblage juist is uitgevoerd?", "Ja", "Nee",() -> {
                 assemblyInstructionHandler.stop();
+
+                hint_hbox.setVisible(false);
                 setNextInstruction(manager.moveToNextInstruction(currentInstruction));
             });
             return;
         }
 
-        //Play Ok-sound, Green lights ...
+
+        hint_hbox.setVisible(false);
         setNextInstruction(manager.moveToNextInstruction(currentInstruction));
     }
 

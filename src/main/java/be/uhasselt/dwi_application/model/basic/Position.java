@@ -6,7 +6,7 @@ import org.jdbi.v3.core.mapper.reflect.JdbiConstructor;
 
 import java.io.Serializable;
 
-public class Position implements Serializable {
+public class Position {
     private Long id;
 
     @JsonProperty("x")
