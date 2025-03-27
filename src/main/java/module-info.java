@@ -21,9 +21,11 @@ module be.uhasselt.dwi_application {
     requires com.fasterxml.jackson.databind;
     requires org.apache.commons.imaging;
     requires javafx.media;
+    requires org.apache.poi.ooxml;
 
     // ✅ Open packages for JavaFX & JDBI Reflection
     opens be.uhasselt.dwi_application to javafx.fxml;
+    opens be.uhasselt.dwi_application.utility.modules to javafx.fxml;
     opens be.uhasselt.dwi_application.controller to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.BinManager to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.AssemblyPlayer to javafx.fxml;

@@ -1,5 +1,6 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick;
 
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.InstructionMeasurementHandler;
 import be.uhasselt.dwi_application.model.Jackson.ObstacleSensorData;
 import be.uhasselt.dwi_application.model.workInstruction.picking.PickingBin;
 import be.uhasselt.dwi_application.model.workInstruction.picking.PickingInstruction;
@@ -16,7 +17,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PickInstructionHandler {
     private PickingBin bin;
-    private Boolean isRunning;
+    private InstructionMeasurementHandler measurement;
+
+    private boolean isRunning;
+    private String sessionId;
 
     private static final String OBSTACLE_TOPIC = "Input/Bin/Obstacle";
 
@@ -31,12 +35,13 @@ public class PickInstructionHandler {
         LEFT, RIGHT;
     }
 
-    public PickInstructionHandler(){
+    public PickInstructionHandler(String sessionId) {
         this.objectMapper = new ObjectMapper();
         this.mqttHelper = new PickMQTTHelper();
         this.obstacleInBin = new AtomicBoolean(false);
         this.isCompleted = new AtomicBoolean(false);
 
+        this.sessionId = sessionId;
         this.isRunning = false;
     }
 
@@ -83,10 +88,17 @@ public class PickInstructionHandler {
                 e.printStackTrace();
             }
         });
+
+        measurement = new InstructionMeasurementHandler(pickingInstruction.getAssembly(), pickingInstruction, sessionId);
+        measurement.startMeasurement();
     }
 
     public void stop() {
+        if (!isRunning) return;
+
         System.out.println("\u001B[31m" + "<Stopping PickInstructionHandler>" + "\u001B[0m");
+
+        measurement.stopMeasurement();
 
         mqttHelper.SendSetBinLEDOff(bin.getId());
         mqttHelper.SendSetDisplayOff(bin.getId().intValue());

@@ -8,6 +8,7 @@ import be.uhasselt.dwi_application.model.workInstruction.Assembly;
 import be.uhasselt.dwi_application.utility.database.repository.assembly.AssemblyRepository;
 import be.uhasselt.dwi_application.utility.database.repository.part.PartRepository;
 import be.uhasselt.dwi_application.utility.database.repository.pickingBin.BinRepository;
+import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
@@ -65,7 +66,6 @@ public class PartItemController implements Controller {
 
     private void toggleSelection() {
         if (partCheckbox.isSelected()) {
-            //Veranderen naar een consumer:
             PartManagerController.getInstance().addSelectedPart(part);
         } else {
             PartManagerController.getInstance().removeSelectedPart(part);
@@ -116,13 +116,14 @@ public class PartItemController implements Controller {
     }
 
     private void updatePartBin() {
+        System.out.println(ConsoleColors.BLUE + "<Updating Part Bin>" + ConsoleColors.RESET);
         if (part == null) {
-            return; // No part selected, nothing to update
+            return;
         }
 
         PickingBin selectedBin = binNum_cbx.getSelectionModel().getSelectedItem();
         if (selectedBin == null) {
-            return; // No bin selected, nothing to update
+            return;
         }
 
         List<PickingBin> binsWithPart = binRepository.getBinsByPartId(part.getId());

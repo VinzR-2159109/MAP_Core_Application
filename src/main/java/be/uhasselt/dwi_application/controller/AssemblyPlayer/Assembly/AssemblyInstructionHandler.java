@@ -1,11 +1,13 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.InstructionMeasurementHandler;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick.PickInstructionHandler;
 import be.uhasselt.dwi_application.model.basic.Position;
 import be.uhasselt.dwi_application.model.Jackson.hands.HandStatus;
 import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
 import be.uhasselt.dwi_application.utility.database.repository.settings.SettingsRepository;
 import be.uhasselt.dwi_application.utility.handTracking.HandTrackingHandler;
+import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
 import be.uhasselt.dwi_application.utility.modules.SoundPlayer;
 import javafx.application.Platform;
 
@@ -15,29 +17,34 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AssemblyInstructionHandler {
-    private final AtomicBoolean isCompleted;
-    private Boolean isRunning;
+    private boolean isRunning;
 
+    private Timer clk;
+    private String sessionId;
     private AssemblyInstruction assemblyInstruction;
-    private final AssemblyMQTTHelper mqtt;
-    private Timer timer;
+    private InstructionMeasurementHandler measurement;
     private PickInstructionHandler.PickingHand pickingHand = PickInstructionHandler.PickingHand.RIGHT;
+
+    private final AssemblyMQTTHelper mqtt;
+    private final AtomicBoolean isCompleted;
     private final HandTrackingHandler handTracking = HandTrackingHandler.getInstance();
 
     private HandStatus leftHandStatus = HandStatus.UNKNOWN;
     private HandStatus rightHandStatus = HandStatus.UNKNOWN;
     private HandStatus lastQoWStatus = HandStatus.UNKNOWN;
 
-    public AssemblyInstructionHandler(){
+    public AssemblyInstructionHandler(String sessionId){
         System.out.println("<Constructing AssemblyInstructionHandler>");
+
+        this.isRunning = false;
 
         this.mqtt = new AssemblyMQTTHelper();
         this.isCompleted = new AtomicBoolean(false);
-        this.isRunning = false;
+        this.sessionId = sessionId;
     }
 
     public void start(AssemblyInstruction assemblyInstruction, Runnable onCompleteCallback) {
-        System.out.println("\u001B[32m" + "Starting Assembly Instruction Assistance>" + "\u001B[0m");
+        System.out.println(ConsoleColors.GREEN + "Starting Assembly Instruction Assistance>" + ConsoleColors.RESET);
 
         isRunning = true;
         isCompleted.set(false);
@@ -46,7 +53,6 @@ public class AssemblyInstructionHandler {
         handTracking.start();
 
         this.assemblyInstruction = assemblyInstruction;
-
         List<Position> positions = assemblyInstruction.getAssemblyPositions();
 
         if (positions.isEmpty()) {
@@ -66,27 +72,33 @@ public class AssemblyInstructionHandler {
                 31 - (int) positions.stream().mapToDouble(Position::getY).min().orElse(0) / gridSize
         );
 
-        this.timer = new Timer();
-        timer.schedule(new TimerTask() {
+        this.measurement = new InstructionMeasurementHandler(assemblyInstruction.getAssembly(), assemblyInstruction, sessionId);
+        measurement.startMeasurement();
+
+        this.clk = new Timer();
+        clk.schedule(new TimerTask() {
             @Override
             public void run() {
                 updateDirection();
                 updateVibrationFeedback(onCompleteCallback);
             }
-        }, 0, 500);
-
-
+        }, 0, 200);
 
     }
 
     public void stop(){
-        System.out.println("<Stopping Assembly Instruction Assistance>");
+        if (!isRunning) return;
+
+        System.out.println(ConsoleColors.RED + "<Stopping Assembly Instruction Assistance>" + ConsoleColors.RESET);
+
+        measurement.stopMeasurement();
+
         mqtt.sendTurnOffAllLedStrip();
         mqtt.cancelVibration();
 
-        if (timer != null){
-            timer.cancel();
-            timer.purge();
+        if (clk != null){
+            clk.cancel();
+            clk.purge();
         }
 
         handTracking.stop();
@@ -183,8 +195,9 @@ public class AssemblyInstructionHandler {
 
         double dx = avgX - handPosition.getX();
         double dy = avgY - handPosition.getY();
-        System.out.println("\u001B[31m" + "<> Direction: " + dx + ", " + dy +  "\u001B[0m");
+
         double length = Math.sqrt(dx * dx + dy * dy);
+
         double relX = (length != 0) ? dx / length : 0;
         double relY = (length != 0) ? dy / length : 0;
 

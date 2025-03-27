@@ -1,6 +1,7 @@
 package be.uhasselt.dwi_application.model.workInstruction;
 
 
+import be.uhasselt.dwi_application.utility.database.repository.assembly.AssemblyRepository;
 import org.jdbi.v3.core.mapper.reflect.ColumnName;
 import org.jdbi.v3.core.mapper.reflect.JdbiConstructor;
 
@@ -50,6 +51,7 @@ public class Instruction {
     public void setType(String type) { this.type = type; }
 
     public Long getAssemblyId() { return assemblyId; }
+    public Assembly getAssembly() {return AssemblyRepository.getInstance().getById(assemblyId);}
     public void setAssemblyId(Long assemblyId) { this.assemblyId = assemblyId; }
 
     public Long getParentInstructionId() {return parentInstructionId;}

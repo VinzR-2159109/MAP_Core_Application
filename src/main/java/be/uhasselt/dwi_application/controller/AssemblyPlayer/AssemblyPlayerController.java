@@ -15,9 +15,12 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 
+import java.util.UUID;
+
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showErrorDialogWithChoice;
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showExceptionDialog;
 import static be.uhasselt.dwi_application.utility.modules.ImageHandler.loadImage;
+import static be.uhasselt.dwi_application.utility.modules.SessionIDGenerator.generateSessionId;
 
 public class AssemblyPlayerController implements Controller {
     @FXML private Button nok_btn;
@@ -45,8 +48,9 @@ public class AssemblyPlayerController implements Controller {
         System.out.println("\u001B[32m" +  "<Creating Assembly Player>" + "\u001B[0m");
         this.assembly = assembly;
 
-        this.assemblyInstructionHandler = new AssemblyInstructionHandler();
-        this.pickInstructionHandler = new PickInstructionHandler();
+        String sessionId = generateSessionId();
+        this.assemblyInstructionHandler = new AssemblyInstructionHandler(sessionId);
+        this.pickInstructionHandler = new PickInstructionHandler(sessionId);
 
         this.manager = new AssemblyPlayerManager(assembly);
         this.currentInstruction = manager.moveToNextInstruction(null);
@@ -140,7 +144,6 @@ public class AssemblyPlayerController implements Controller {
         try {
             pickInstructionHandler.start(pickingInstruction, () ->{
                 applyButtonStatus(InstructionStatus.COMPLETED_OK);
-                //setNextInstruction(manager.moveToNextInstruction(currentInstruction));
             });
             applyButtonStatus(InstructionStatus.PENDING);
         } catch (BinNotFoundException e) {
@@ -153,7 +156,6 @@ public class AssemblyPlayerController implements Controller {
         try {
             assemblyInstructionHandler.start(assemblyInstruction, () -> {
                 applyButtonStatus(InstructionStatus.COMPLETED_OK);
-                //setNextInstruction(manager.moveToNextInstruction(currentInstruction));
             });
             applyButtonStatus(InstructionStatus.PENDING);
         } catch (Exception e) {
