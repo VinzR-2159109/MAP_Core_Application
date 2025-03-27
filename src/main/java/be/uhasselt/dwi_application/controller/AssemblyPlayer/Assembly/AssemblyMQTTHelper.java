@@ -12,8 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 
 public class AssemblyMQTTHelper {
-
-    private static final String MQTT_TOPIC = "Output/LEDStrip";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void sendSetLedStripRange(String stripId, int start, int end, Color color, int brightness, String status) {
@@ -84,4 +82,16 @@ public class AssemblyMQTTHelper {
             throw new RuntimeException(e);
         }
     }
+
+    public void sendDirectionUnknown() {
+        DirectionConfig directionConfig = DirectionConfig.unknown();
+
+        try {
+            String jsonDirection = objectMapper.writeValueAsString(directionConfig);
+            MqttHandler.getInstance().publish("Output/Direction", jsonDirection);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

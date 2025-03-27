@@ -73,7 +73,7 @@ public class InstructionManagerController implements Controller {
         disableHint_checkbox.setOnAction(_ -> toggleDisableHint());
         skipDuringPlay_checkbox.setOnAction(_ -> toggleSkipDuringPlay());
         pickLocation_btn.setOnAction(_-> openLocationPicker());
-        pickLocation_btn.setDisable(true);
+
         location_hbox.setDisable(true);
         partQuantiy_spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 9999, 1));
 
