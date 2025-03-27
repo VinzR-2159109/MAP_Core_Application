@@ -1,5 +1,6 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
+import be.uhasselt.dwi_application.model.Jackson.DirectionConfig;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripRange;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.StripLedConfig;
 import be.uhasselt.dwi_application.model.Jackson.VibrationConfig;
@@ -38,8 +39,9 @@ public class AssemblyMQTTHelper {
     }
 
     public void sendLedStripCommand(String stripId, List<LEDStripRange> ranges) {
+        StripLedConfig ledConfig = new StripLedConfig(stripId, ranges);
+
         try {
-            StripLedConfig ledConfig = new StripLedConfig(stripId, ranges);
             String jsonString = objectMapper.writeValueAsString(ledConfig);
             MqttHandler.getInstance().publish("Output/LEDStrip", jsonString);
         } catch (JsonProcessingException e) {
@@ -49,8 +51,9 @@ public class AssemblyMQTTHelper {
     }
 
     public void sendVibrationCommand(int amplitude, double qow) {
+        VibrationConfig config = VibrationConfig.on(amplitude, qow);
+
         try {
-            VibrationConfig config = VibrationConfig.on(amplitude, qow);
             String jsonString = objectMapper.writeValueAsString(config);
             MqttHandler.getInstance().publish("Output/Vibration", jsonString);
         } catch (JsonProcessingException e) {
@@ -59,14 +62,26 @@ public class AssemblyMQTTHelper {
         }
     }
 
-    public void CancelVibration(){
+    public void cancelVibration(){
+        VibrationConfig config = VibrationConfig.off();
+
         try {
-            VibrationConfig config = VibrationConfig.off();
-            String jsonString = objectMapper.writeValueAsString(config);
-            MqttHandler.getInstance().publish("Output/Vibration", jsonString);
+            String jsonVibration = objectMapper.writeValueAsString(config);
+            MqttHandler.getInstance().publish("Output/Vibration", jsonVibration);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to serialize Vibration command", e);
+        }
+    }
+
+    public void sendDirectionCommand(double x, double y) {
+        DirectionConfig directionConfig = DirectionConfig.config(x,y);
+
+        try {
+            String jsonDirection = objectMapper.writeValueAsString(directionConfig);
+            MqttHandler.getInstance().publish("Output/Direction", jsonDirection);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 }

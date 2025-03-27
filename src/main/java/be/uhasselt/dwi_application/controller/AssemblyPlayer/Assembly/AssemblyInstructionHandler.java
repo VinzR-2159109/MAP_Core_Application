@@ -79,7 +79,7 @@ public class AssemblyInstructionHandler {
                     isCompleted.set(true);
                     SoundPlayer.play(SoundPlayer.SoundType.OK);
 
-                    mqtt.CancelVibration();
+                    mqtt.cancelVibration();
 
                     stop();
                     Platform.runLater(onCompleteCallback);
@@ -92,7 +92,7 @@ public class AssemblyInstructionHandler {
     public void stop(){
         System.out.println("<Stopping Assembly Instruction Assistance>");
         mqtt.sendTurnOffAllLedStrip();
-        mqtt.CancelVibration();
+        mqtt.cancelVibration();
 
         if (timer != null){
             timer.cancel();
@@ -163,7 +163,7 @@ public class AssemblyInstructionHandler {
         double relY = (length != 0) ? dy / length : 0;
 
         String direction = interpretDirection(relX, relY);
-        System.out.printf("Direction to target: %s (%.2f, %.2f)%n", direction, relX, relY);
+        mqtt.sendDirectionCommand(relX, relY);
 
         return new double[] {relX, relY};
     }

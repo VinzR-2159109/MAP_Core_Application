@@ -29,6 +29,14 @@ public class DisplayConfig {
         this.brightness = brightness;
     }
 
+    public static DisplayConfig off(int id) {
+        return new DisplayConfig(id, 0, 0, DisplayStatus.OFF);
+    }
+
+    public static DisplayConfig on(int id, int quantity) {
+        return new DisplayConfig(id, quantity, 7, DisplayStatus.ON);
+    }
+
     public int getId() {return id;}
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -38,11 +46,5 @@ public class DisplayConfig {
 
     public int getBrightness() {return brightness;}
 
-    public static DisplayConfig off(int id) {
-        return new DisplayConfig(id, 0, 0, DisplayStatus.OFF);
-    }
 
-    public static DisplayConfig on(int id, int quantity) {
-        return new DisplayConfig(id, quantity, 7, DisplayStatus.ON);
-    }
 }

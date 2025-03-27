@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class HandTrackingHandler {
-    private static final String HAND_TOPIC = "sensor/hands/position";
+    private static final String HAND_TOPIC = "Input/HandsPosition";
 
     private final MqttHandler mqttHandler;
     private final ObjectMapper objectMapper = new ObjectMapper();
