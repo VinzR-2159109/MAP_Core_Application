@@ -128,14 +128,6 @@ public class PartItemController implements Controller {
 
         List<PickingBin> binsWithPart = binRepository.getBinsByPartId(part.getId());
 
-        // Remove part from previous bins
-        for (PickingBin bin : binsWithPart) {
-            if (!bin.getId().equals(selectedBin.getId())) {
-                bin.removePart();
-                binRepository.updateBin(bin);
-            }
-        }
-
         // Assign part to new bin
         selectedBin.setPart(part);
         binRepository.updateBin(selectedBin);

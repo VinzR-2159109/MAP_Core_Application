@@ -15,6 +15,8 @@ import javafx.application.Platform;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static be.uhasselt.dwi_application.utility.modules.Dialog.showErrorDialog;
+
 public class PickInstructionHandler {
     private PickingBin bin;
     private InstructionMeasurementHandler measurement;
@@ -53,14 +55,9 @@ public class PickInstructionHandler {
         obstacleInBin.set(false);
         isCompleted.set(false);
 
-        try {
-            this.bin = BinRepository.getInstance().getBinsByPartId(pickingInstruction.getPartId()).stream().findFirst()
-                    .orElseThrow(() -> new BinNotFoundException(pickingInstruction.getPartToPick()));
-        } catch (BinNotFoundException e) {
-            System.err.println("Bin not found: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Unexpected error fetching bin: " + e.getMessage());
-        }
+
+        this.bin = BinRepository.getInstance().getBinsByPartId(pickingInstruction.getPartId()).stream().findFirst()
+                .orElseThrow(() -> new BinNotFoundException(pickingInstruction.getPartToPick()));
 
         mqttHelper.SendSetBinLEDGreen(bin.getId());
         mqttHelper.SendSetDisplayNumber(bin.getId().intValue(), pickingInstruction.getQuantity());
