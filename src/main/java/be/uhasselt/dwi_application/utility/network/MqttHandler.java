@@ -18,6 +18,14 @@ public class MqttHandler {
     private static volatile MqttHandler instance;
     private final Mqtt5BlockingClient client;
 
+    public static final class Topics {
+        public static final String LED_STRIP = "Output/LEDStrip";
+
+        private Topics() {
+            // Prevent instantiation
+        }
+    }
+
     private MqttHandler() {
         client = MqttClient.builder()
                 .useMqttVersion5()

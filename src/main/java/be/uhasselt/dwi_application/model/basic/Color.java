@@ -8,11 +8,28 @@ public class Color {
     private int g;
     private int b;
 
+    public enum BasicColors {
+        BLUE, GREEN, RED;
+    }
+
     @JsonCreator
     public Color(@JsonProperty("r") int r, @JsonProperty("g") int g, @JsonProperty("b") int b) {
         this.r = r;
         this.g = g;
         this.b = b;
+    }
+
+    public static Color fromBasics(BasicColors basicColor) {
+        if (basicColor == BasicColors.BLUE) {
+            return new Color(0, 0, 255);
+        }
+        if (basicColor == BasicColors.GREEN) {
+            return new Color(0, 255, 0);
+        }
+        if (basicColor == BasicColors.RED) {
+            return new Color(255, 0, 0);
+        }
+        return null;
     }
 
     // Getters and Setters

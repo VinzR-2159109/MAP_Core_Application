@@ -1,9 +1,9 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.InstructionMeasurementHandler;
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick.PickInstructionHandler;
 import be.uhasselt.dwi_application.model.Jackson.hands.HandLabel;
-import be.uhasselt.dwi_application.model.Jackson.hands.LandmarkPosition;
+import be.uhasselt.dwi_application.model.basic.Color;
+import be.uhasselt.dwi_application.model.basic.LEDStripRange;
 import be.uhasselt.dwi_application.model.basic.Position;
 import be.uhasselt.dwi_application.model.Jackson.hands.HandStatus;
 import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
@@ -18,14 +18,17 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static be.uhasselt.dwi_application.utility.modules.ConvertToStripCoords.convertToStripCoords;
+
 public class AssemblyInstructionHandler {
     private boolean isRunning;
+    private final int gridSize;
 
     private Timer clk;
-    private String sessionId;
+    private final String sessionId;
     private AssemblyInstruction assemblyInstruction;
     private InstructionMeasurementHandler measurement;
-    private HandLabel pickingHand = HandLabel.RIGHT;
+    private final HandLabel pickingHand = HandLabel.RIGHT;
 
     private final AssemblyMQTTHelper mqtt;
     private final AtomicBoolean isCompleted;
@@ -35,14 +38,22 @@ public class AssemblyInstructionHandler {
     private HandStatus rightHandStatus = HandStatus.UNKNOWN;
     private HandStatus lastQoWStatus = HandStatus.UNKNOWN;
 
+    private Position cachedHandPosition;
+    private LEDStripRange lastXRange = null;
+    private LEDStripRange lastYRange = null;
+
+
     public AssemblyInstructionHandler(String sessionId){
         System.out.println("<Constructing AssemblyInstructionHandler>");
+
+        this.gridSize = SettingsRepository.loadSettings().getGridSize() / 2;
 
         this.isRunning = false;
 
         this.mqtt = new AssemblyMQTTHelper();
         this.isCompleted = new AtomicBoolean(false);
         this.sessionId = sessionId;
+        this.cachedHandPosition = new Position(Double.MIN_VALUE, Double.MIN_VALUE);
     }
 
     public void start(AssemblyInstruction assemblyInstruction, Runnable onCompleteCallback) {
@@ -67,8 +78,6 @@ public class AssemblyInstructionHandler {
             return;
         }
 
-        int gridSize = SettingsRepository.loadSettings().getGridSize() / 2;
-
         mqtt.sendSetLedStripXGreenOnRange(
                 43 - (int) positions.stream().mapToDouble(Position::getX).max().orElse(0) / gridSize,
                 43 - (int) positions.stream().mapToDouble(Position::getX).min().orElse(0) / gridSize
@@ -88,6 +97,7 @@ public class AssemblyInstructionHandler {
             public void run() {
                 updateDirection();
                 updateVibrationFeedback(onCompleteCallback);
+                showLiveLight();
             }
         }, 0, 200);
 
@@ -128,7 +138,6 @@ public class AssemblyInstructionHandler {
         Position handPosition = handTracking.getAvgHandPosition(pickingHand);
         int qowScore = calculateQualityOfWorkScore(handPosition);
 
-        System.out.println("QoW Score: " + qowScore);
         mqtt.sendVibrationCommand((int) Math.round((qowScore / 100.0) * 255), qowScore);
 
         if (qowScore > 85) {
@@ -207,6 +216,38 @@ public class AssemblyInstructionHandler {
         double relY = (length != 0) ? dy / length : 0;
 
         return new double[]{relX, relY};
+    }
+
+    private void showLiveLight() {
+        if (handTracking.getHandStatus(pickingHand) == HandStatus.UNKNOWN) {
+            turnOffLastLitArea();
+            return;
+        }
+
+        Position avgHandPosition = handTracking.getAvgHandPosition(HandLabel.RIGHT);
+
+        if (!cachedHandPosition.isFarEnoughFrom(avgHandPosition, 10)) return;
+        cachedHandPosition = avgHandPosition;
+
+        Position gridPosition = convertToStripCoords(avgHandPosition);
+        LEDStripRange currentXRange = new LEDStripRange((int) gridPosition.getX() - 2, (int) gridPosition.getX() + 2);
+        LEDStripRange currentYRange = new LEDStripRange((int) gridPosition.getY() - 2, (int) gridPosition.getY() + 2);
+
+        turnOffLastLitArea();
+
+        System.out.println(ConsoleColors.BLUE + "y1: " + currentYRange.start() + "y2: " + currentYRange.end() + ConsoleColors.RESET);
+        mqtt.sendSetLedStripOnRange(currentXRange, currentYRange, Color.BasicColors.BLUE);
+
+        lastXRange = currentXRange;
+        lastYRange = currentYRange;
+    }
+
+    private void turnOffLastLitArea() {
+        if (lastXRange != null && lastYRange != null) {
+            mqtt.sendTurnOffLedStripRange(lastXRange, lastYRange);
+            lastXRange = null;
+            lastYRange = null;
+        }
     }
 
 

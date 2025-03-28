@@ -1,47 +1,48 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
 import be.uhasselt.dwi_application.model.Jackson.DirectionConfig;
-import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripRange;
-import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.StripLedConfig;
+import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripConfig;
 import be.uhasselt.dwi_application.model.Jackson.VibrationConfig;
 import be.uhasselt.dwi_application.model.basic.Color;
+import be.uhasselt.dwi_application.model.basic.LEDStripRange;
+import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
 import be.uhasselt.dwi_application.utility.network.MqttHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.List;
-
 public class AssemblyMQTTHelper {
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final int BASE_BRIGHTNESS = 50;
 
-    public void sendSetLedStripRange(String stripId, int start, int end, Color color, int brightness, String status) {
-        LEDStripRange range = new LEDStripRange(start, end, color, brightness, status);
-        sendLedStripCommand(stripId, List.of(range));
+    private void sendSetLedStripRange(LEDStripConfig.LEDStripId id, int start, int end, Color color, int brightness, LEDStripConfig.LEDStripStatus status) {
+        if (status == LEDStripConfig.LEDStripStatus.ON) {
+            LEDStripConfig stripON = LEDStripConfig.on(id, start, end, color, brightness);
+            sendLedStripCommand(stripON);
+        }
     }
 
     public void sendSetLedStripXGreenOnRange(int start, int end) {
-        sendSetLedStripRange("x", start, end, new Color(0, 255, 0), 50, "on");
+        sendSetLedStripRange(LEDStripConfig.LEDStripId.X, start, end, new Color(0, 255, 0), BASE_BRIGHTNESS, LEDStripConfig.LEDStripStatus.ON);
     }
 
     public void sendSetLedStripYGreenOnRange(int start, int end) {
-        sendSetLedStripRange("y", start, end, new Color(0, 255, 0), 50, "on");
+        sendSetLedStripRange(LEDStripConfig.LEDStripId.Y, start, end, new Color(0, 255, 0), BASE_BRIGHTNESS, LEDStripConfig.LEDStripStatus.ON);
     }
 
     public void sendTurnOffAllLedStrip() {
-        System.out.println("<Turning Off All LED Strip>");
-        List<LEDStripRange> ledsX = List.of(new LEDStripRange(0, 43, new Color(0, 0, 0), 0, "off"));
-        List<LEDStripRange> ledsY = List.of(new LEDStripRange(0, 28, new Color(0, 0, 0), 0, "off"));
+        System.out.println(ConsoleColors.RED + "<Turning off all LED strips>" + ConsoleColors.RESET);
 
-        sendLedStripCommand("x", ledsX);
-        sendLedStripCommand("y", ledsY);
+        LEDStripConfig stripXOFF = LEDStripConfig.off(LEDStripConfig.LEDStripId.X, 0, 43);
+        LEDStripConfig stripYOFF = LEDStripConfig.off(LEDStripConfig.LEDStripId.Y, 0, 28);
+
+        sendLedStripCommand(stripXOFF);
+        sendLedStripCommand(stripYOFF);
     }
 
-    public void sendLedStripCommand(String stripId, List<LEDStripRange> ranges) {
-        StripLedConfig ledConfig = new StripLedConfig(stripId, ranges);
-
+    public void sendLedStripCommand(LEDStripConfig config) {
         try {
-            String jsonString = objectMapper.writeValueAsString(ledConfig);
-            MqttHandler.getInstance().publish("Output/LEDStrip", jsonString);
+            String jsonLEDStripConfig = objectMapper.writeValueAsString(config);
+            MqttHandler.getInstance().publish("Output/LEDStrip", jsonLEDStripConfig);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to serialize LED command", e);
@@ -94,4 +95,46 @@ public class AssemblyMQTTHelper {
         }
     }
 
+    private void sendFlashXBlueOnRange(int startX, int endX){
+        LEDStripConfig pulseConfig = LEDStripConfig.pulse(LEDStripConfig.LEDStripId.X, startX, endX, Color.fromBasics(Color.BasicColors.BLUE), 50, BASE_BRIGHTNESS);
+
+        try {
+            String jsonPulseConfig = objectMapper.writeValueAsString(pulseConfig);
+            MqttHandler.getInstance().publish(MqttHandler.Topics.LED_STRIP, jsonPulseConfig);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public void sendSetLedStripOnRange(LEDStripRange xRange, LEDStripRange yRange, Color.BasicColors basicColors) {
+        LEDStripConfig blueXConfig = LEDStripConfig.on(LEDStripConfig.LEDStripId.X, xRange.start(), xRange.end(), Color.fromBasics(basicColors), BASE_BRIGHTNESS);
+        LEDStripConfig blueYConfig = LEDStripConfig.on(LEDStripConfig.LEDStripId.Y, yRange.start(), yRange.end(), Color.fromBasics(basicColors), BASE_BRIGHTNESS);
+
+        try {
+            String jsonXConfig = objectMapper.writeValueAsString(blueXConfig);
+            MqttHandler.getInstance().publish(MqttHandler.Topics.LED_STRIP, jsonXConfig);
+
+            String jsonYConfig = objectMapper.writeValueAsString(blueYConfig);
+            MqttHandler.getInstance().publish(MqttHandler.Topics.LED_STRIP, jsonYConfig);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public void sendTurnOffLedStripRange(LEDStripRange lastXRange, LEDStripRange lastYRange) {
+        LEDStripConfig offXConfig = LEDStripConfig.off(LEDStripConfig.LEDStripId.X, lastXRange.start(), lastXRange.end());
+        LEDStripConfig offYConfig = LEDStripConfig.off(LEDStripConfig.LEDStripId.Y, lastYRange.start(), lastYRange.end());
+
+        try {
+            String jsonXConfig = objectMapper.writeValueAsString(offXConfig);
+            MqttHandler.getInstance().publish(MqttHandler.Topics.LED_STRIP, jsonXConfig);
+
+            String jsonYConfig = objectMapper.writeValueAsString(offYConfig);
+            MqttHandler.getInstance().publish(MqttHandler.Topics.LED_STRIP, jsonYConfig);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

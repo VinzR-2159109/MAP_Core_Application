@@ -46,6 +46,14 @@ public class Position {
         this.y = y;
     }
 
+    public boolean isFarEnoughFrom(Position other, double minDistance) {
+        double dx = this.x - other.x;
+        double dy = this.y - other.y;
+        double distanceSquared = dx * dx + dy * dy;
+        return distanceSquared >= (minDistance * minDistance);
+    }
+
+
     @Override
     public String toString() {
         return "{x=" + x + ", y=" + y + "}";
