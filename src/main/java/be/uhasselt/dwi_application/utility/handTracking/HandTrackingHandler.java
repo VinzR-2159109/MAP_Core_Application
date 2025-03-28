@@ -15,8 +15,11 @@ public class HandTrackingHandler {
     private final MqttHandler mqttHandler;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final AtomicReference<Position> leftHandPosition = new AtomicReference<>(new Position(Integer.MIN_VALUE,Integer.MIN_VALUE));
-    private final AtomicReference<Position> rightHandPosition = new AtomicReference<>(new Position(Integer.MIN_VALUE,Integer.MIN_VALUE));
+    private final AtomicReference<Hand> latestLeftHand = new AtomicReference<>(null);
+    private final AtomicReference<Hand> latestRightHand = new AtomicReference<>(null);
+
+    private final AtomicReference<Position> leftAvgHandPosition = new AtomicReference<>(new Position(Integer.MIN_VALUE,Integer.MIN_VALUE));
+    private final AtomicReference<Position> rightAvgHandPosition = new AtomicReference<>(new Position(Integer.MIN_VALUE,Integer.MIN_VALUE));
 
     private final AtomicReference<Double> leftHandRotation = new AtomicReference<>(Double.MIN_VALUE);
     private final AtomicReference<Double> rightHandRotation = new AtomicReference<>(Double.MIN_VALUE);
@@ -40,10 +43,10 @@ public class HandTrackingHandler {
 
     public void stop() {
         System.out.println("<Stopping Hand Tracking>");
-        rightHandPosition.set(new Position(Integer.MIN_VALUE,Integer.MIN_VALUE));
+        rightAvgHandPosition.set(new Position(Integer.MIN_VALUE,Integer.MIN_VALUE));
         rightHandStatus = HandStatus.UNKNOWN;
 
-        leftHandPosition.set(new Position(Integer.MIN_VALUE, Integer.MIN_VALUE));
+        leftAvgHandPosition.set(new Position(Integer.MIN_VALUE, Integer.MIN_VALUE));
         leftHandStatus = HandStatus.UNKNOWN;
 
         mqttHandler.unsubscribe(HAND_TOPIC);
@@ -51,10 +54,10 @@ public class HandTrackingHandler {
 
     public void start() {
         System.out.println("<Starting assembly instruction>");
-        rightHandPosition.set(new Position(Integer.MIN_VALUE,Integer.MIN_VALUE));
+        rightAvgHandPosition.set(new Position(Integer.MIN_VALUE,Integer.MIN_VALUE));
         rightHandStatus = HandStatus.UNKNOWN;
 
-        leftHandPosition.set(new Position(Integer.MIN_VALUE, Integer.MIN_VALUE));
+        leftAvgHandPosition.set(new Position(Integer.MIN_VALUE, Integer.MIN_VALUE));
         leftHandStatus = HandStatus.UNKNOWN;
 
         System.out.println("<Subscribing to hand positions>");
@@ -80,36 +83,38 @@ public class HandTrackingHandler {
             if (hand.getLabel() == HandLabel.LEFT) {
                 if (leftHandStatus == HandStatus.UNKNOWN && leftHandStatus == newHandStatus) continue;
 
-                if (leftHandStatus != newHandStatus || !leftHandPosition.get().equals(newHandPos)){
+                if (leftHandStatus != newHandStatus || !leftAvgHandPosition.get().equals(newHandPos)){
                     leftHandStatus = newHandStatus;
-                    leftHandPosition.set(newHandPos);
+                    leftAvgHandPosition.set(newHandPos);
                 }
             }
 
             else if (hand.getLabel() == HandLabel.RIGHT) {
                 if (rightHandStatus == HandStatus.UNKNOWN && rightHandStatus == newHandStatus) continue;
 
-                if (rightHandStatus != newHandStatus || !rightHandPosition.get().equals(newHandPos)) {
+                if (rightHandStatus != newHandStatus || !rightAvgHandPosition.get().equals(newHandPos)) {
                     rightHandStatus = newHandStatus;
-                    rightHandPosition.set(newHandPos);
+                    rightAvgHandPosition.set(newHandPos);
                 }
             }
 
+            if (hand.getLabel() == HandLabel.LEFT) {
+                latestLeftHand.set(hand);
+            } else if (hand.getLabel() == HandLabel.RIGHT) {
+                latestRightHand.set(hand);
+            }
         }
     }
 
     private void updateHandRotation(Hands handsData) {
         for (Hand hand : handsData.getDetectedHands()) {
-            List<LandmarkPosition> landmarks = hand.getLandmarks();
-
             LandmarkPosition wrist = null;
             LandmarkPosition middleTip = null;
 
-            for (LandmarkPosition lm : landmarks) {
-                if ("WRIST".equalsIgnoreCase(lm.getIndex())) {
+            for (LandmarkPosition lm : hand.getLandmarks()) {
+                if (lm.getIndex() == LandmarkPosition.HandIndex.WRIST) {
                     wrist = lm;
-                }
-                else if ("MIDDLE_FINGER_TIP".equalsIgnoreCase(lm.getIndex())) {
+                } else if (lm.getIndex() == LandmarkPosition.HandIndex.MIDDLE_FINGER_TIP) {
                     middleTip = lm;
                 }
             }
@@ -131,33 +136,72 @@ public class HandTrackingHandler {
                     leftHandRotation.set(angleDegrees);
                 }
             }
-
         }
     }
 
-
-    public Position getLeftHandPosition() {
+    public Position getAvgLeftHandPosition() {
         if (leftHandStatus == HandStatus.UNKNOWN) {
             return new Position(Integer.MIN_VALUE, Integer.MIN_VALUE);
         }
-        return leftHandPosition.get();
+        return leftAvgHandPosition.get();
     }
 
-    public Position getRightHandPosition() {
+    public Position getAvgRightHandPosition() {
         if (rightHandStatus == HandStatus.UNKNOWN) {
             return new Position(Integer.MIN_VALUE, Integer.MIN_VALUE);
         }
-        return rightHandPosition.get();
+        return rightAvgHandPosition.get();
     }
 
-    public Double getLeftHandRotation() {
+    public Position getIndexHandPosition(LandmarkPosition.HandIndex index, HandLabel label) {
+        Hand hand = (label == HandLabel.LEFT) ? latestLeftHand.get() : latestRightHand.get();
+        if (hand == null) return new Position(Integer.MIN_VALUE, Integer.MIN_VALUE);
+
+        for (LandmarkPosition landmark : hand.getLandmarks()) {
+            if (index == landmark.getIndex()) {
+                return new Position(landmark.getX(), landmark.getY());
+            }
+        }
+
+        return new Position(Integer.MIN_VALUE, Integer.MIN_VALUE);
+    }
+
+    public Double getHandRotation(HandLabel label) {
+        if (label == HandLabel.LEFT) {
+            return leftHandRotation.get();
+        } else if (label == HandLabel.RIGHT) {
+            return rightHandRotation.get();
+        }
+        return null;
+    }
+
+    public Position getAvgHandPosition(HandLabel label) {
+        if (label == HandLabel.LEFT) {
+            return getAvgLeftHandPosition();
+        } else if (label == HandLabel.RIGHT) {
+            return getAvgRightHandPosition();
+        }
+        return null;
+    }
+
+    public HandStatus getHandStatus(HandLabel label) {
+        if (label == HandLabel.LEFT) {
+            return leftHandStatus;
+        } else if (label == HandLabel.RIGHT) {
+            return rightHandStatus;
+        }
+        return HandStatus.UNKNOWN;
+    }
+
+
+    private Double getLeftHandRotation() {
         if (leftHandStatus == HandStatus.UNKNOWN) {
             return Double.MIN_VALUE;
         }
         return leftHandRotation.get();
     }
 
-    public Double getRightHandRotation() {
+    private Double getRightHandRotation() {
         if (rightHandStatus == HandStatus.UNKNOWN) {
             return Double.MIN_VALUE;
         }
@@ -168,8 +212,5 @@ public class HandTrackingHandler {
     public HandStatus getLeftHandStatus() {
         return leftHandStatus;
     }
-
-    public HandStatus getRightHandStatus() {
-        return rightHandStatus;
-    }
+    public HandStatus getRightHandStatus() {return rightHandStatus;}
 }

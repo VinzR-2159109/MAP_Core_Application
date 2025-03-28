@@ -2,6 +2,8 @@ package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.InstructionMeasurementHandler;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick.PickInstructionHandler;
+import be.uhasselt.dwi_application.model.Jackson.hands.HandLabel;
+import be.uhasselt.dwi_application.model.Jackson.hands.LandmarkPosition;
 import be.uhasselt.dwi_application.model.basic.Position;
 import be.uhasselt.dwi_application.model.Jackson.hands.HandStatus;
 import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
@@ -23,7 +25,7 @@ public class AssemblyInstructionHandler {
     private String sessionId;
     private AssemblyInstruction assemblyInstruction;
     private InstructionMeasurementHandler measurement;
-    private PickInstructionHandler.PickingHand pickingHand = PickInstructionHandler.PickingHand.RIGHT;
+    private HandLabel pickingHand = HandLabel.RIGHT;
 
     private final AssemblyMQTTHelper mqtt;
     private final AtomicBoolean isCompleted;
@@ -44,6 +46,11 @@ public class AssemblyInstructionHandler {
     }
 
     public void start(AssemblyInstruction assemblyInstruction, Runnable onCompleteCallback) {
+        if (isRunning) {
+            System.out.println(ConsoleColors.RED_BOLD + "<AssemblyInstructionHandler Already Running>" + ConsoleColors.RESET);
+            return;
+        }
+
         System.out.println(ConsoleColors.GREEN + "Starting Assembly Instruction Assistance>" + ConsoleColors.RESET);
 
         isRunning = true;
@@ -106,8 +113,7 @@ public class AssemblyInstructionHandler {
     }
 
     private void updateVibrationFeedback(Runnable onCompleteCallback) {
-        boolean isRight = pickingHand == PickInstructionHandler.PickingHand.RIGHT;
-        HandStatus currentStatus = isRight ? handTracking.getRightHandStatus() : handTracking.getLeftHandStatus();
+        HandStatus currentStatus = handTracking.getHandStatus(pickingHand);
 
         if (currentStatus == HandStatus.UNKNOWN) {
             if (lastQoWStatus != HandStatus.UNKNOWN) {
@@ -119,7 +125,7 @@ public class AssemblyInstructionHandler {
 
         lastQoWStatus = currentStatus;
 
-        Position handPosition = isRight ? handTracking.getRightHandPosition() : handTracking.getLeftHandPosition();
+        Position handPosition = handTracking.getAvgHandPosition(pickingHand);
         int qowScore = calculateQualityOfWorkScore(handPosition);
 
         System.out.println("QoW Score: " + qowScore);
@@ -136,13 +142,11 @@ public class AssemblyInstructionHandler {
 
 
     private void updateDirection() {
-        boolean isRight = pickingHand == PickInstructionHandler.PickingHand.RIGHT;
-
-        HandStatus newStatus = isRight ? handTracking.getRightHandStatus() : handTracking.getLeftHandStatus();
-        HandStatus cachedStatus = isRight ? rightHandStatus : leftHandStatus;
+        HandStatus newStatus = handTracking.getHandStatus(pickingHand);
+        HandStatus cachedStatus = pickingHand == HandLabel.RIGHT ? rightHandStatus : leftHandStatus;
 
         if (!newStatus.equals(cachedStatus)) {
-            if (isRight) rightHandStatus = newStatus;
+            if (pickingHand == HandLabel.RIGHT) rightHandStatus = newStatus;
             else leftHandStatus = newStatus;
 
             if (newStatus == HandStatus.UNKNOWN) {
@@ -155,8 +159,9 @@ public class AssemblyInstructionHandler {
             return;
         }
 
-        Position handPosition = isRight ? handTracking.getRightHandPosition() : handTracking.getLeftHandPosition();
-        double[] direction = calculateDirectionToAssembly(handPosition);
+        Position avgHandPosition = handTracking.getAvgHandPosition(HandLabel.RIGHT);
+
+        double[] direction = calculateDirectionToAssembly(avgHandPosition);
         mqtt.sendDirectionCommand(direction[0], direction[1]);
     }
 
