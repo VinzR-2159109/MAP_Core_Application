@@ -61,5 +61,6 @@ module be.uhasselt.dwi_application {
     exports be.uhasselt.dwi_application.utility.database.repository.instruction;
     exports be.uhasselt.dwi_application.utility.database.repository.settings;
     exports be.uhasselt.dwi_application.model.workInstruction.picking;
+    opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyMQTTHelper to javafx.fxml;
 
 }

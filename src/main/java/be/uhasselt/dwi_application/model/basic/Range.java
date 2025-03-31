@@ -1,12 +1,20 @@
 package be.uhasselt.dwi_application.model.basic;
 
-public class LEDStripRange {
+import javafx.util.Pair;
+
+import java.util.ArrayList;
+
+public class Range {
     private int start;
     private int end;
 
-    public LEDStripRange(int start, int end) {
+    public Range(int start, int end) {
         this.start = start;
         this.end = end;
+    }
+
+    public static Range empty() {
+        return new Range(-1, -1);
     }
 
     public int start() {
@@ -17,15 +25,15 @@ public class LEDStripRange {
         return end;
     }
 
-    public boolean rangesOverlap(LEDStripRange other) {
+    public boolean rangesOverlap(Range other) {
         return end >= other.start && other.end >= start;
     }
 
-    public boolean equalsRange(LEDStripRange other) {
+    public boolean equalsRange(Range other) {
         return this.start == other.start && this.end == other.end;
     }
 
-    public boolean resolvedOverlap(LEDStripRange other) {
+    public boolean resolvedOverlap(Range other) {
         if (!rangesOverlap(other)) return true;
 
         if (other.start <= start && other.end >= end) {
@@ -43,6 +51,9 @@ public class LEDStripRange {
         return start <= end;
     }
 
+    public boolean isEmpty() {
+        return start == -1 && end == -1;
+    }
 
     @Override
     public String toString() {
