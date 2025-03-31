@@ -1,6 +1,7 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.InstructionMeasurementHandler;
+import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripConfig;
 import be.uhasselt.dwi_application.model.Jackson.hands.HandLabel;
 import be.uhasselt.dwi_application.model.basic.Color;
 import be.uhasselt.dwi_application.model.basic.LEDStripRange;
@@ -38,10 +39,11 @@ public class AssemblyInstructionHandler {
     private HandStatus rightHandStatus = HandStatus.UNKNOWN;
     private HandStatus lastQoWStatus = HandStatus.UNKNOWN;
 
-    private Position cachedHandPosition;
-    private LEDStripRange lastXRange = null;
-    private LEDStripRange lastYRange = null;
+    private LEDStripRange assemblyXRange;
+    private LEDStripRange assemblyYRange;
 
+    private LEDStripRange cachedBlueXRange;
+    private LEDStripRange cachedBlueYRange;
 
     public AssemblyInstructionHandler(String sessionId){
         System.out.println("<Constructing AssemblyInstructionHandler>");
@@ -53,7 +55,9 @@ public class AssemblyInstructionHandler {
         this.mqtt = new AssemblyMQTTHelper();
         this.isCompleted = new AtomicBoolean(false);
         this.sessionId = sessionId;
-        this.cachedHandPosition = new Position(Double.MIN_VALUE, Double.MIN_VALUE);
+
+        this.cachedBlueXRange = new LEDStripRange(-1, -1);
+        this.cachedBlueYRange = new LEDStripRange(-1, -1);
     }
 
     public void start(AssemblyInstruction assemblyInstruction, Runnable onCompleteCallback) {
@@ -78,15 +82,19 @@ public class AssemblyInstructionHandler {
             return;
         }
 
-        mqtt.sendSetLedStripXGreenOnRange(
-                43 - (int) positions.stream().mapToDouble(Position::getX).max().orElse(0) / gridSize,
-                43 - (int) positions.stream().mapToDouble(Position::getX).min().orElse(0) / gridSize
-        );
+        int greenXStart = 43 - (int) positions.stream().mapToDouble(Position::getX).max().orElse(0) / gridSize;
+        int greenXEnd   = 43 - (int) positions.stream().mapToDouble(Position::getX).min().orElse(0) / gridSize;
+        int greenYStart = 31 - (int) positions.stream().mapToDouble(Position::getY).max().orElse(0) / gridSize;
+        int greenYEnd   = 31 - (int) positions.stream().mapToDouble(Position::getY).min().orElse(0) / gridSize;
 
-        mqtt.sendSetLedStripYGreenOnRange(
-                31 - (int) positions.stream().mapToDouble(Position::getY).max().orElse(0) / gridSize,
-                31 - (int) positions.stream().mapToDouble(Position::getY).min().orElse(0) / gridSize
-        );
+        assemblyXRange = new LEDStripRange(greenXStart, greenXEnd);
+        assemblyYRange = new LEDStripRange(greenYStart, greenYEnd);
+
+        System.out.println("AssemblyXRange: " + assemblyXRange);
+        System.out.println("AssemblyYRange: " + assemblyYRange);
+
+        mqtt.sendSetLedStrip(LEDStripConfig.LEDStripId.X, assemblyXRange, Color.fromBasics(Color.BasicColors.GREEN));
+        mqtt.sendSetLedStrip(LEDStripConfig.LEDStripId.Y, assemblyYRange, Color.fromBasics(Color.BasicColors.GREEN));
 
         this.measurement = new InstructionMeasurementHandler(assemblyInstruction.getAssembly(), assemblyInstruction, sessionId);
         measurement.startMeasurement();
@@ -220,36 +228,38 @@ public class AssemblyInstructionHandler {
 
     private void showLiveLight() {
         if (handTracking.getHandStatus(pickingHand) == HandStatus.UNKNOWN) {
-            turnOffLastLitArea();
+            mqtt.sendTurnOffLedStripIdRange(LEDStripConfig.LEDStripId.X, cachedBlueXRange);
+            mqtt.sendTurnOffLedStripIdRange(LEDStripConfig.LEDStripId.Y, cachedBlueYRange);
             return;
         }
 
-        Position avgHandPosition = handTracking.getAvgHandPosition(HandLabel.RIGHT);
-
-        if (!cachedHandPosition.isFarEnoughFrom(avgHandPosition, 10)) return;
-        cachedHandPosition = avgHandPosition;
-
+        Position avgHandPosition = handTracking.getAvgHandPosition(pickingHand);
         Position gridPosition = convertToStripCoords(avgHandPosition);
-        LEDStripRange currentXRange = new LEDStripRange((int) gridPosition.getX() - 2, (int) gridPosition.getX() + 2);
-        LEDStripRange currentYRange = new LEDStripRange((int) gridPosition.getY() - 2, (int) gridPosition.getY() + 2);
 
-        turnOffLastLitArea();
+        int newXStart = (int) gridPosition.getX() - 2;
+        int newXEnd   = (int) gridPosition.getX() + 2;
+        int newYStart = (int) gridPosition.getY() - 2;
+        int newYEnd   = (int) gridPosition.getY() + 2;
 
-        System.out.println(ConsoleColors.BLUE + "y1: " + currentYRange.start() + "y2: " + currentYRange.end() + ConsoleColors.RESET);
-        mqtt.sendSetLedStripOnRange(currentXRange, currentYRange, Color.BasicColors.BLUE);
+        LEDStripRange newXRange = new LEDStripRange(newXStart, newXEnd);
+        LEDStripRange newYRange = new LEDStripRange(newYStart, newYEnd);
 
-        lastXRange = currentXRange;
-        lastYRange = currentYRange;
-    }
+        if (!cachedBlueXRange.equalsRange(newXRange)) {
+            mqtt.sendTurnOffLedStripIdRange(LEDStripConfig.LEDStripId.X, cachedBlueXRange);
+            if (newXRange.resolvedOverlap(assemblyXRange)){
+                mqtt.sendSetLedStrip(LEDStripConfig.LEDStripId.X, newXRange, Color.fromBasics(Color.BasicColors.BLUE));
+            };
+            cachedBlueXRange = newXRange;
+        }
 
-    private void turnOffLastLitArea() {
-        if (lastXRange != null && lastYRange != null) {
-            mqtt.sendTurnOffLedStripRange(lastXRange, lastYRange);
-            lastXRange = null;
-            lastYRange = null;
+        if(!cachedBlueYRange.equalsRange(newYRange)) {
+            mqtt.sendTurnOffLedStripIdRange(LEDStripConfig.LEDStripId.Y, cachedBlueYRange);
+            if (newYRange.resolvedOverlap(assemblyYRange)){
+                mqtt.sendSetLedStrip(LEDStripConfig.LEDStripId.Y, newYRange, Color.fromBasics(Color.BasicColors.BLUE));
+            }
+            cachedBlueYRange = newYRange;
         }
     }
-
 
 
     public boolean isCompleted() {return isCompleted.get();}

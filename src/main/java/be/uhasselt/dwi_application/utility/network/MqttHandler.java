@@ -78,7 +78,7 @@ public class MqttHandler {
                 .topic(topic)
                 .payload(StandardCharsets.UTF_8.encode(message))
                 .send();
-        System.out.println("Published to [" + topic + "]: " + message);
+        //System.out.println("Published to [" + topic + "]: " + message);
     }
 
     public void unsubscribe(String topic) {

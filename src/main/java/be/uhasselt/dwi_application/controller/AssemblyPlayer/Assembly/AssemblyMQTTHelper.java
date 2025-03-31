@@ -21,6 +21,11 @@ public class AssemblyMQTTHelper {
         }
     }
 
+    public void sendSetLedStrip(LEDStripConfig.LEDStripId id, LEDStripRange range, Color color) {
+        LEDStripConfig Config = LEDStripConfig.on(id, range.start(), range.end(), color, BASE_BRIGHTNESS);
+        sendLedStripCommand(Config);
+    }
+
     public void sendSetLedStripXGreenOnRange(int start, int end) {
         sendSetLedStripRange(LEDStripConfig.LEDStripId.X, start, end, new Color(0, 255, 0), BASE_BRIGHTNESS, LEDStripConfig.LEDStripStatus.ON);
     }
@@ -116,11 +121,23 @@ public class AssemblyMQTTHelper {
             MqttHandler.getInstance().publish(MqttHandler.Topics.LED_STRIP, jsonXConfig);
 
             String jsonYConfig = objectMapper.writeValueAsString(blueYConfig);
+            System.out.println(ConsoleColors.PURPLE_BOLD + "Sending LiveLight " + blueXConfig.getRange() + ConsoleColors.RESET);
             MqttHandler.getInstance().publish(MqttHandler.Topics.LED_STRIP, jsonYConfig);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public void sendTurnOffLedStripIdRange(LEDStripConfig.LEDStripId id, LEDStripRange range) {
+        LEDStripConfig offConfig = LEDStripConfig.off(id, range.start(), range.end());
+
+        try {
+            String jsonXConfig = objectMapper.writeValueAsString(offConfig);
+            MqttHandler.getInstance().publish(MqttHandler.Topics.LED_STRIP, jsonXConfig);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void sendTurnOffLedStripRange(LEDStripRange lastXRange, LEDStripRange lastYRange) {
