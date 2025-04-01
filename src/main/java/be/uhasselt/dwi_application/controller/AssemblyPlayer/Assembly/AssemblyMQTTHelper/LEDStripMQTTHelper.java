@@ -39,38 +39,45 @@ public class LEDStripMQTTHelper {
         sendOFF(LEDStripConfig.LEDStripId.Y, new Range(0,28));
     }
 
-    public void sendDirectionalLight(LEDStripConfig.LEDStripId id, Range range, double[] direction) {
+    public void sendDirectionalLight(
+            LEDStripConfig.LEDStripId id,
+            Range range,
+            double[] direction,
+            int qowScore
+    ) {
         int size = Math.max(0, range.end() - range.start() + 1);
+        if (size <= 1) return;
+
         ArrayList<LEDStripRange> ranges = new ArrayList<>(size);
 
-        if (size <= 1) return;
+        // Clamp QoW between 0 and 100
+        qowScore = Math.max(0, Math.min(100, qowScore));
+
+        // Calculate color from QoW (red to green)
+        int r = (int) (255 * (1 - qowScore / 100.0));
+        int g = (int) (255 * (qowScore / 100.0));
+        int b = 0;
+        Color color = new Color(r, g, b);
 
         for (int i = 0; i < size; i++) {
             int index = range.start() + i;
-            int relativeIndex;
 
+            int relativeIndex;
             if (id == LEDStripConfig.LEDStripId.X) {
                 relativeIndex = direction[id.ordinal()] < 0 ? i : (size - 1 - i);
             } else {
                 relativeIndex = direction[id.ordinal()] > 0 ? i : (size - 1 - i);
             }
 
-            // Brightness: fade from dim to bright
-            int brightness = 5 + (int)((250L * relativeIndex) / (size - 1));
+            // Brightness fade based on position along direction
+            int brightness = 5 + (int) ((250L * relativeIndex) / (size - 1));
 
-            // Color gradient: blue to bluish-cyan
-            int r = 0;
-            int g = (int) ((100.0 * relativeIndex) / (size - 1)); // 0 to 100 green
-            int b = 255; // keep blue full
-
-            Color color = new Color(r, g, b);
             ranges.add(LEDStripRange.on(index, index, color, brightness));
         }
 
         LEDStripConfig config = new LEDStripConfig(id, ranges);
         sendConfig(config);
     }
-
 
     private void sendConfig(LEDStripConfig config) {
         try {
