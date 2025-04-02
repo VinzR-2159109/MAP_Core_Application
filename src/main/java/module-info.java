@@ -53,8 +53,8 @@ module be.uhasselt.dwi_application {
     exports be.uhasselt.dwi_application.controller.WorkInstruction.Part;
     exports be.uhasselt.dwi_application.controller.WorkInstruction.Manager to javafx.fxml;
     exports be.uhasselt.dwi_application.controller.WorkInstruction.Assembly to javafx.fxml;
+    exports be.uhasselt.dwi_application.utility.handTracking;
 
-    exports be.uhasselt.dwi_application.utility.network.WebSocket;
     exports be.uhasselt.dwi_application.model.workInstruction;
     exports be.uhasselt.dwi_application.model.Jackson.Commands.Websocket to com.fasterxml.jackson.databind;
     exports be.uhasselt.dwi_application.model.Jackson.hands to com.fasterxml.jackson.databind;
@@ -64,4 +64,6 @@ module be.uhasselt.dwi_application {
     exports be.uhasselt.dwi_application.utility.database.repository.instruction;
     exports be.uhasselt.dwi_application.utility.database.repository.settings;
     exports be.uhasselt.dwi_application.model.workInstruction.picking;
+    exports be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients;
+    opens be.uhasselt.dwi_application.utility.network.WebSocket to javafx.fxml;
 }

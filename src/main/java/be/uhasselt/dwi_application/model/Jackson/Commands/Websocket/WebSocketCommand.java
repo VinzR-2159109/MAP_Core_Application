@@ -35,8 +35,8 @@ public class WebSocketCommand {
         this.data = data;
     }
 
-    public static WebSocketCommand connect(String url) {
-        return new WebSocketCommand(WebSocketAction.CONNECT, url);
+    public static WebSocketCommand connect(String url, String topic) {
+        return new WebSocketCommand(WebSocketAction.CONNECT, url + "/" + topic);
     }
 
     public static WebSocketCommand disconnect() {

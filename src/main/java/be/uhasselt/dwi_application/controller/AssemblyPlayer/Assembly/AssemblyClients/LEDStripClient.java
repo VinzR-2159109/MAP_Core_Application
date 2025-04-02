@@ -6,7 +6,6 @@ import be.uhasselt.dwi_application.model.basic.Color;
 import be.uhasselt.dwi_application.model.basic.Range;
 import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
 import be.uhasselt.dwi_application.utility.network.MqttHandler;
-import be.uhasselt.dwi_application.utility.network.WebSocket.WebSocketEndpoint;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -95,7 +94,7 @@ public class LEDStripClient {
                 MqttHandler.getInstance().publish(TOPIC, jsonConfig);
 
             case Clients.WS:
-                WebSocketEndpoint.broadcast(jsonConfig);
+                LiveLightWebSocketEndpoint.broadcast(jsonConfig);
         }
 
     }

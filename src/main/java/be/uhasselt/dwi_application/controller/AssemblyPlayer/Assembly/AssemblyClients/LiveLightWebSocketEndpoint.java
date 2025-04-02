@@ -1,4 +1,4 @@
-package be.uhasselt.dwi_application.utility.network.WebSocket;
+package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients;
 
 import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
 
@@ -8,12 +8,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
 
-
-@ServerEndpoint("/ws")
-public class WebSocketEndpoint {
+@ServerEndpoint("/ws/liveLight")
+public class LiveLightWebSocketEndpoint {
     private static final Set<Session> sessions = new CopyOnWriteArraySet<>();
 
-    public WebSocketEndpoint() {}
+    public LiveLightWebSocketEndpoint() {}
 
     @OnOpen
     public void onOpen(Session session) {

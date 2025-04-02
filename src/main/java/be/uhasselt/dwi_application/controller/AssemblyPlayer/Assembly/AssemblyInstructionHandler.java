@@ -4,7 +4,6 @@ import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyCl
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStripClient;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.VibrationMQTTHelper;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.InstructionMeasurementHandler;
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.WebSocketRunner;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripConfig;
 import be.uhasselt.dwi_application.model.Jackson.hands.HandLabel;
 import be.uhasselt.dwi_application.model.basic.Color;

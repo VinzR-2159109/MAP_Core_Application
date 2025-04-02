@@ -8,14 +8,13 @@ import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
 import be.uhasselt.dwi_application.model.workInstruction.Instruction;
 import be.uhasselt.dwi_application.model.workInstruction.picking.PickingInstruction;
 import be.uhasselt.dwi_application.utility.exception.BinNotFoundException;
+import be.uhasselt.dwi_application.utility.network.WebSocket.WebSocketRunner;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-
-import java.util.UUID;
 
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showErrorDialogWithChoice;
 import static be.uhasselt.dwi_application.utility.modules.Dialog.showExceptionDialog;

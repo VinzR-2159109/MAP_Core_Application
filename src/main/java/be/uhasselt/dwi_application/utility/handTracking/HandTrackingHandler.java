@@ -153,28 +153,6 @@ public class HandTrackingHandler {
         return rightAvgHandPosition.get();
     }
 
-    public Position getIndexHandPosition(LandmarkPosition.HandIndex index, HandLabel label) {
-        Hand hand = (label == HandLabel.LEFT) ? latestLeftHand.get() : latestRightHand.get();
-        if (hand == null) return new Position(Integer.MIN_VALUE, Integer.MIN_VALUE);
-
-        for (LandmarkPosition landmark : hand.getLandmarks()) {
-            if (index == landmark.getIndex()) {
-                return new Position(landmark.getX(), landmark.getY());
-            }
-        }
-
-        return new Position(Integer.MIN_VALUE, Integer.MIN_VALUE);
-    }
-
-    public Double getHandRotation(HandLabel label) {
-        if (label == HandLabel.LEFT) {
-            return leftHandRotation.get();
-        } else if (label == HandLabel.RIGHT) {
-            return rightHandRotation.get();
-        }
-        return null;
-    }
-
     public Position getAvgHandPosition(HandLabel label) {
         if (label == HandLabel.LEFT) {
             return getAvgLeftHandPosition();
@@ -213,4 +191,8 @@ public class HandTrackingHandler {
         return leftHandStatus;
     }
     public HandStatus getRightHandStatus() {return rightHandStatus;}
+
+    public void updateFromWebSocket(Hands handsData) {
+        updateHandsPosition(handsData);
+    }
 }
