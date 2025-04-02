@@ -6,6 +6,7 @@ import be.uhasselt.dwi_application.model.basic.Color;
 import be.uhasselt.dwi_application.model.basic.Range;
 import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
 import be.uhasselt.dwi_application.utility.network.MqttHandler;
+import be.uhasselt.dwi_application.utility.network.WebSocketClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.util.Pair;
@@ -39,46 +40,6 @@ public class LEDStripMQTTHelper {
         sendOFF(LEDStripConfig.LEDStripId.Y, new Range(0,28));
     }
 
-    public void sendDirectionalLight(
-            LEDStripConfig.LEDStripId id,
-            Range range,
-            double[] direction,
-            int qowScore
-    ) {
-        int size = Math.max(0, range.end() - range.start() + 1);
-        if (size <= 1) return;
-
-        ArrayList<LEDStripRange> ranges = new ArrayList<>(size);
-
-        // Clamp QoW between 0 and 100
-        qowScore = Math.max(0, Math.min(100, qowScore));
-
-        // Calculate color from QoW (red to green)
-        int r = (int) (255 * (1 - qowScore / 100.0));
-        int g = (int) (255 * (qowScore / 100.0));
-        int b = 0;
-        Color color = new Color(r, g, b);
-
-        for (int i = 0; i < size; i++) {
-            int index = range.start() + i;
-
-            int relativeIndex;
-            if (id == LEDStripConfig.LEDStripId.X) {
-                relativeIndex = direction[id.ordinal()] < 0 ? i : (size - 1 - i);
-            } else {
-                relativeIndex = direction[id.ordinal()] > 0 ? i : (size - 1 - i);
-            }
-
-            // Brightness fade based on position along direction
-            int brightness = 5 + (int) ((250L * relativeIndex) / (size - 1));
-
-            ranges.add(LEDStripRange.on(index, index, color, brightness));
-        }
-
-        LEDStripConfig config = new LEDStripConfig(id, ranges);
-        sendConfig(config);
-    }
-
     private void sendConfig(LEDStripConfig config) {
         try {
             String jsonConfig = objectMapper.writeValueAsString(config);
@@ -88,4 +49,5 @@ public class LEDStripMQTTHelper {
             throw new RuntimeException("Failed to serialize LED command", e);
         }
     }
+
 }
