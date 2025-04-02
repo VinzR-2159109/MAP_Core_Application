@@ -81,7 +81,13 @@ public class AssemblyTileController implements Controller {
     private void playAssembly() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(FxmlViews.ASSEMBLY_PLAYER));
-            loader.setControllerFactory(_ -> new AssemblyPlayerController(assembly));
+            loader.setControllerFactory(_ -> {
+                try {
+                    return new AssemblyPlayerController(assembly);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
             Parent assemblyPlayer = loader.load();
             Controller controller = loader.getController();
             MainController.getInstance().setContentView(assemblyPlayer, controller);

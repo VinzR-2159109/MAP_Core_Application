@@ -11,7 +11,6 @@ module be.uhasselt.dwi_application {
     requires org.kordamp.bootstrapfx.core;
 
     // Database Dependencies
-    requires java.naming;
     requires java.sql;
     requires org.jdbi.v3.core;
     requires org.jdbi.v3.sqlobject;
@@ -22,6 +21,8 @@ module be.uhasselt.dwi_application {
     requires org.apache.commons.imaging;
     requires javafx.media;
     requires org.apache.poi.ooxml;
+    requires org.eclipse.jetty.ee10.websocket.jakarta.server;
+    requires org.eclipse.jetty.servlet;
 
     // ✅ Open packages for JavaFX & JDBI Reflection
     opens be.uhasselt.dwi_application to javafx.fxml;
@@ -35,7 +36,7 @@ module be.uhasselt.dwi_application {
     opens be.uhasselt.dwi_application.controller.WorkInstruction.LocationPicker to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick to javafx.fxml;
-
+    opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients to javafx.fxml;
     opens be.uhasselt.dwi_application.model.Jackson.StripLedConfig to com.fasterxml.jackson.databind;
 
     opens be.uhasselt.dwi_application.model.basic to org.jdbi.v3.core;
@@ -53,7 +54,9 @@ module be.uhasselt.dwi_application {
     exports be.uhasselt.dwi_application.controller.WorkInstruction.Manager to javafx.fxml;
     exports be.uhasselt.dwi_application.controller.WorkInstruction.Assembly to javafx.fxml;
 
+    exports be.uhasselt.dwi_application.utility.network.WebSocket;
     exports be.uhasselt.dwi_application.model.workInstruction;
+    exports be.uhasselt.dwi_application.model.Jackson.Commands.Websocket to com.fasterxml.jackson.databind;
     exports be.uhasselt.dwi_application.model.Jackson.hands to com.fasterxml.jackson.databind;
     exports be.uhasselt.dwi_application.model.basic to com.fasterxml.jackson.databind;
     exports be.uhasselt.dwi_application.model.Jackson to com.fasterxml.jackson.databind;
@@ -61,6 +64,4 @@ module be.uhasselt.dwi_application {
     exports be.uhasselt.dwi_application.utility.database.repository.instruction;
     exports be.uhasselt.dwi_application.utility.database.repository.settings;
     exports be.uhasselt.dwi_application.model.workInstruction.picking;
-    opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyMQTTHelper to javafx.fxml;
-
 }

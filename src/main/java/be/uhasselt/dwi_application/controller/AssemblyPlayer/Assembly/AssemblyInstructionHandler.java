@@ -1,9 +1,10 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyMQTTHelper.VisualDirectionMQTTHelper;
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyMQTTHelper.LEDStripMQTTHelper;
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyMQTTHelper.VibrationMQTTHelper;
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.VisualDirectionMQTTHelper;
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStripClient;
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.VibrationMQTTHelper;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.InstructionMeasurementHandler;
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.WebSocketRunner;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripConfig;
 import be.uhasselt.dwi_application.model.Jackson.hands.HandLabel;
 import be.uhasselt.dwi_application.model.basic.Color;
@@ -34,7 +35,7 @@ public class AssemblyInstructionHandler {
     private InstructionMeasurementHandler measurement;
     private final HandLabel pickingHand = HandLabel.RIGHT;
 
-    private final LEDStripMQTTHelper ledStrip;
+    private final LEDStripClient ledStrip;
     private final VibrationMQTTHelper vibration;
     private final VisualDirectionMQTTHelper directionMqtt;
 
@@ -58,7 +59,7 @@ public class AssemblyInstructionHandler {
 
         this.isRunning = false;
 
-        this.ledStrip = new LEDStripMQTTHelper();
+        this.ledStrip = new LEDStripClient();
         this.vibration = new VibrationMQTTHelper();
         this.directionMqtt = new VisualDirectionMQTTHelper();
 
@@ -114,10 +115,19 @@ public class AssemblyInstructionHandler {
             public void run() {
                 Position avgHandPosition = handTracking.getAvgHandPosition(HandLabel.RIGHT);
                 double[] direction = calculateDirectionToAssembly(avgHandPosition);
+                int qow = calculateQualityOfWorkScore(avgHandPosition);
 
                 updateDirection(direction);
-                updateVibrationFeedback(onCompleteCallback);
-                showLiveLight(direction);
+                updateVibrationFeedback();
+
+                if (qow > 85) {
+                    isCompleted.set(true);
+                    SoundPlayer.play(SoundPlayer.SoundType.OK);
+                    vibration.cancel();
+                    stop();
+                    Platform.runLater(onCompleteCallback);
+                }
+                showLiveLight(direction, qow);
             }
         }, 0, 200);
 
@@ -125,6 +135,7 @@ public class AssemblyInstructionHandler {
 
     public void stop(){
         if (!isRunning) return;
+        isRunning = false;
 
         System.out.println(ConsoleColors.RED + "<Stopping Assembly Instruction Assistance>" + ConsoleColors.RESET);
 
@@ -139,10 +150,9 @@ public class AssemblyInstructionHandler {
         }
 
         handTracking.stop();
-        isRunning = false;
     }
 
-    private void updateVibrationFeedback(Runnable onCompleteCallback) {
+    private void updateVibrationFeedback() {
         HandStatus currentStatus = handTracking.getHandStatus(pickingHand);
 
         if (currentStatus == HandStatus.UNKNOWN) {
@@ -159,18 +169,12 @@ public class AssemblyInstructionHandler {
         int qowScore = calculateQualityOfWorkScore(handPosition);
 
         vibration.vibrate((int) Math.round((qowScore / 100.0) * 255), qowScore);
-
-        if (qowScore > 85) {
-            isCompleted.set(true);
-            SoundPlayer.play(SoundPlayer.SoundType.OK);
-            vibration.cancel();
-            stop();
-            Platform.runLater(onCompleteCallback);
-        }
     }
 
 
     private void updateDirection(double[] direction) {
+        if(!isRunning) return;
+
         HandStatus newStatus = handTracking.getHandStatus(pickingHand);
         HandStatus cachedStatus = pickingHand == HandLabel.RIGHT ? rightHandStatus : leftHandStatus;
 
@@ -235,14 +239,16 @@ public class AssemblyInstructionHandler {
         return new double[]{relX, relY};
     }
 
-    private void showLiveLight(double[] direction) {
+    private void showLiveLight(double[] direction, int qow) {
+        if (!isRunning) return;
+
         if (handTracking.getHandStatus(pickingHand) == HandStatus.UNKNOWN) {
             if (!cachedBlueXRange.isEmpty()) {
-                ledStrip.sendOFF(LEDStripConfig.LEDStripId.X, cachedBlueXRange);
+                ledStrip.sendOFF(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.X, cachedBlueXRange);
                 cachedBlueXRange = Range.empty();
             }
             if (!cachedBlueYRange.isEmpty()) {
-                ledStrip.sendOFF(LEDStripConfig.LEDStripId.Y, cachedBlueYRange);
+                ledStrip.sendOFF(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.Y, cachedBlueYRange);
                 cachedBlueYRange = Range.empty();
             }
             return;
@@ -260,17 +266,17 @@ public class AssemblyInstructionHandler {
         Range newYRange = new Range(newYStart, newYEnd);
 
         if (!cachedBlueXRange.equalsRange(newXRange)) {
-            ledStrip.sendOFF(LEDStripConfig.LEDStripId.X, cachedBlueXRange);
+            ledStrip.sendOFF(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.X, cachedBlueXRange);
             if (newXRange.resolvedOverlap(assemblyXRange)){
-                ledStrip.sendDirectionalLight(LEDStripConfig.LEDStripId.X, newXRange, direction);
+                ledStrip.sendDirectionalLight(LEDStripConfig.LEDStripId.X, newXRange, direction, qow);
             };
             cachedBlueXRange = newXRange;
         }
 
         if(!cachedBlueYRange.equalsRange(newYRange)) {
-            ledStrip.sendOFF(LEDStripConfig.LEDStripId.Y, cachedBlueYRange);
+            ledStrip.sendOFF(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.Y, cachedBlueYRange);
             if (newYRange.resolvedOverlap(assemblyYRange)){
-                ledStrip.sendDirectionalLight(LEDStripConfig.LEDStripId.Y, newYRange, direction);
+                ledStrip.sendDirectionalLight(LEDStripConfig.LEDStripId.Y, newYRange, direction, qow);
             }
             cachedBlueYRange = newYRange;
         }
@@ -278,6 +284,5 @@ public class AssemblyInstructionHandler {
 
 
     public boolean isCompleted() {return isCompleted.get();}
-
     public boolean isRunning() {return isRunning;}
 }

@@ -1,7 +1,7 @@
 package be.uhasselt.dwi_application.utility.network.WebSocket;
 
 import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
-import java.io.IOException;
+
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -10,10 +10,10 @@ import jakarta.websocket.server.ServerEndpoint;
 
 
 @ServerEndpoint("/ws")
-public class WebSocketServer {
+public class WebSocketEndpoint {
     private static final Set<Session> sessions = new CopyOnWriteArraySet<>();
 
-    public WebSocketServer() {}
+    public WebSocketEndpoint() {}
 
     @OnOpen
     public void onOpen(Session session) {

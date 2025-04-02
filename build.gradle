@@ -35,6 +35,11 @@ javafx {
 }
 
 dependencies {
+    implementation("org.eclipse.jetty:jetty-servlet:11.0.25")
+    implementation 'org.eclipse.jetty:jetty-server:12.0.4'
+    implementation 'org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jakarta-server:12.0.4'
+    implementation 'jakarta.websocket:jakarta.websocket-api:2.1.1'
+
     implementation 'org.apache.poi:poi-ooxml:5.2.5'
     implementation 'org.jdbi:jdbi3-core:3.38.0'
     implementation 'org.jdbi:jdbi3-sqlobject:3.38.0'

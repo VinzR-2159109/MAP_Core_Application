@@ -38,13 +38,15 @@ public class AssemblyPlayerController implements Controller {
     private final PickInstructionHandler pickInstructionHandler;
     private final AssemblyInstructionHandler assemblyInstructionHandler;
 
+    private final WebSocketRunner websocket;
+
     private enum InstructionStatus {
         PENDING,
         COMPLETED_OK,
         COMPLETED_NOK
     }
 
-    public AssemblyPlayerController(Assembly assembly) {
+    public AssemblyPlayerController(Assembly assembly) throws Exception {
         System.out.println("\u001B[32m" +  "<Creating Assembly Player>" + "\u001B[0m");
         this.assembly = assembly;
 
@@ -54,6 +56,9 @@ public class AssemblyPlayerController implements Controller {
 
         this.manager = new AssemblyPlayerManager(assembly);
         this.currentInstruction = manager.moveToNextInstruction(null);
+
+        this.websocket = new WebSocketRunner();
+        websocket.connect();
     }
 
     @FXML
