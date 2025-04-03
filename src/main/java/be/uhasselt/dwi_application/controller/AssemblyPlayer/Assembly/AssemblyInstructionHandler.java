@@ -1,7 +1,7 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.VisualDirectionMQTTHelper;
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStripClient;
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.LEDStripClient;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.VibrationMQTTHelper;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.InstructionMeasurementHandler;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripConfig;
@@ -128,7 +128,7 @@ public class AssemblyInstructionHandler {
                 }
                 showLiveLight(direction, qow);
             }
-        }, 0, 200);
+        }, 0, 10);
 
     }
 

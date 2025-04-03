@@ -66,4 +66,6 @@ module be.uhasselt.dwi_application {
     exports be.uhasselt.dwi_application.model.workInstruction.picking;
     exports be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients;
     opens be.uhasselt.dwi_application.utility.network.WebSocket to javafx.fxml;
+    exports be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip;
+    opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip to javafx.fxml;
 }

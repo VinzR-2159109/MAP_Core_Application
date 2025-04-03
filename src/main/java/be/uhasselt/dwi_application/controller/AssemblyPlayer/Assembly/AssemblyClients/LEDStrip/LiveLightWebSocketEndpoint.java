@@ -1,4 +1,4 @@
-package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients;
+package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip;
 
 import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
 

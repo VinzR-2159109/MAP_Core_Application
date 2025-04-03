@@ -4,7 +4,7 @@ import be.uhasselt.dwi_application.model.Jackson.Commands.Websocket.WebSocketCom
 import be.uhasselt.dwi_application.utility.handTracking.HandsWebSocketEndpoint;
 import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
 import be.uhasselt.dwi_application.utility.network.MqttHandler;
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LiveLightWebSocketEndpoint;
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.LiveLightWebSocketEndpoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.websocket.DeploymentException;
 import org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
