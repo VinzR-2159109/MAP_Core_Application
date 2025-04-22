@@ -4,31 +4,36 @@ import be.uhasselt.dwi_application.utility.database.repository.settings.Settings
 import be.uhasselt.dwi_application.utility.database.repository.settings.SettingsRepository;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SettingsController {
-    @FXML private CheckBox Haptic_check;
+    @FXML private CheckBox haptic_check;
     @FXML private CheckBox liveLight_check;
     @FXML private CheckBox staticLight_check;
     @FXML private CheckBox flowLight_check;
+    @FXML private Spinner<Integer> necessaryQOW_spinner;
 
     private ArrayList<CheckBox> checkedBoxes = new ArrayList<>();
     private Settings settings = SettingsRepository.loadSettings();
     @FXML
     private void initialize() {
-        setupCheckbox(Haptic_check);
+        setupCheckbox(haptic_check);
         setupCheckbox(liveLight_check);
         setupCheckbox(staticLight_check);
         setupCheckbox(flowLight_check);
+
+        setupQOWSpinner();
     }
 
     private void setupCheckbox(CheckBox checkBox) {
         for (Settings.EnabledAssistanceSystem enabledSystem : settings.getEnabledAssistanceSystemsAsList()){
             switch (enabledSystem.name().toLowerCase()){
                 case "haptic":
-                    Haptic_check.setSelected(true);
+                    haptic_check.setSelected(true);
                     checkedBoxes.add(checkBox);
                     break;
                 case "live_light": liveLight_check.setSelected(true);
@@ -55,6 +60,21 @@ public class SettingsController {
         });
     }
 
+
+    private void setupQOWSpinner() {
+        SpinnerValueFactory<Integer> valueFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(50, 100);
+        necessaryQOW_spinner.setValueFactory(valueFactory);
+
+        // Set initial value
+        necessaryQOW_spinner.getValueFactory().setValue(settings.getNecessaryQOW());
+
+        // Listener to update settings
+        necessaryQOW_spinner.valueProperty().addListener((_, _, newVal) -> {
+            settings.setNecessaryQOW(newVal);
+            SettingsRepository.updateSettings(settings);
+        });
+    }
 
     private void updateSettings() {
         Settings settings = SettingsRepository.loadSettings();

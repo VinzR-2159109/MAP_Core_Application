@@ -60,7 +60,7 @@ public class AssemblyInstructionHandler {
 
         this.isRunning = false;
 
-        this.ledStrip = new LEDStripClient();
+        this.ledStrip = new LEDStripClient(settings);
         this.vibration = new VibrationMQTTHelper();
         this.directionMqtt = new VisualDirectionMQTTHelper();
 
@@ -116,17 +116,16 @@ public class AssemblyInstructionHandler {
         clk.schedule(new TimerTask() {
             @Override
             public void run() {
-                Position avgHandPosition = handTracking.getAvgHandPosition(HandLabel.RIGHT);
+                Position avgHandPosition = handTracking.getAvgHandPosition(pickingHand);
                 double[] direction = calculateDirectionToAssembly(avgHandPosition);
-                int qow = calculateQualityOfWorkScore(avgHandPosition);
-
+                double[] qow = calculateQualityOfWorkScore(avgHandPosition);
 
                 if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.HAPTIC)){
                     updateDirection(direction);
                     updateVibrationFeedback();
                 }
 
-                if (qow > 80) {
+                if (qow[2] > settings.getNecessaryQOW()) {
                     isCompleted.set(true);
                     SoundPlayer.play(SoundPlayer.SoundType.OK);
                     vibration.cancel();
@@ -135,7 +134,7 @@ public class AssemblyInstructionHandler {
                 }
 
                 if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.LIVE_LIGHT)){
-                    showLiveLight(direction, qow);
+                    showLiveLight(direction, qow[0], qow[1]);
                 }
 
             }
@@ -176,9 +175,9 @@ public class AssemblyInstructionHandler {
         lastQoWStatus = currentStatus;
 
         Position handPosition = handTracking.getAvgHandPosition(pickingHand);
-        int qowScore = calculateQualityOfWorkScore(handPosition);
+        double[] qow = calculateQualityOfWorkScore(handPosition);
 
-        vibration.vibrate((int) Math.round((qowScore / 100.0) * 255), qowScore);
+        vibration.vibrate((int) Math.round((qow[3] / 100.0) * 255), qow[3]);
     }
 
 
@@ -205,7 +204,9 @@ public class AssemblyInstructionHandler {
         directionMqtt.sendDirection(direction);
     }
 
-    private int calculateQualityOfWorkScore(Position handPosition) {
+    private double[] calculateQualityOfWorkScore(Position handPosition) {
+        if (handPosition == null) return new double[]{0, 0, 0};
+
         double avgX = assemblyInstruction.getAssemblyPositions()
                 .stream()
                 .mapToDouble(Position::getX)
@@ -218,11 +219,24 @@ public class AssemblyInstructionHandler {
                 .average()
                 .orElse(0.0);
 
-        double distance = Math.sqrt(Math.pow(avgX - handPosition.getX(), 2) + Math.pow(avgY - handPosition.getY(), 2));
+        double dx = Math.abs(avgX - handPosition.getX());
+        double dy = Math.abs(avgY - handPosition.getY());
+        double distance = Math.sqrt(dx * dx + dy * dy);
 
-        double maxDistance = 550;
-        return (int) Math.max(0, Math.min(100, 100 - (distance / maxDistance) * 100));
+        double maxDistance = 400.0;
+
+        // Clamp distance to maxDistance to avoid negative scores
+        dx = Math.min(dx, maxDistance);
+        dy = Math.min(dy, maxDistance);
+        distance = Math.min(distance, maxDistance);
+
+        double qowX = 100.0 * (1.0 - dx / maxDistance);
+        double qowY = 100.0 * (1.0 - dy / maxDistance);
+        double qow  = 100.0 * (1.0 - distance / maxDistance);
+        System.out.println("qowX: " + qowX + " qowY: " + qowY + " qowXY: " + qow);
+        return new double[]{qowX, qowY, qow};
     }
+
 
 
     private double[] calculateDirectionToAssembly(Position handPosition) {
@@ -249,7 +263,7 @@ public class AssemblyInstructionHandler {
         return new double[]{relX, relY};
     }
 
-    private void showLiveLight(double[] direction, int qow) {
+    private void showLiveLight(double[] direction, double qowX, double qowY) {
         if (!isRunning) return;
 
         if (handTracking.getHandStatus(pickingHand) == HandStatus.UNKNOWN) {
@@ -279,7 +293,7 @@ public class AssemblyInstructionHandler {
         if (!cachedBlueXRange.equalsRange(newXRange)) {
             ledStrip.sendOFF(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.X, cachedBlueXRange);
             if (newXRange.resolvedOverlap(assemblyXRange)){
-                ledStrip.sendDirectionalLight(LEDStripConfig.LEDStripId.X, newXRange, direction, qow);
+                ledStrip.sendDirectionalLight(LEDStripConfig.LEDStripId.X, newXRange, direction, qowX, qowY);
             };
             cachedBlueXRange = newXRange;
         }
@@ -287,7 +301,7 @@ public class AssemblyInstructionHandler {
         if(!cachedBlueYRange.equalsRange(newYRange)) {
             ledStrip.sendOFF(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.Y, cachedBlueYRange);
             if (newYRange.resolvedOverlap(assemblyYRange)){
-                ledStrip.sendDirectionalLight(LEDStripConfig.LEDStripId.Y, newYRange, direction, qow);
+                ledStrip.sendDirectionalLight(LEDStripConfig.LEDStripId.Y, newYRange, direction, qowX, qowY);
             }
             cachedBlueYRange = newYRange;
         }

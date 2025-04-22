@@ -1,5 +1,9 @@
 package be.uhasselt.dwi_application.utility.database.repository.settings;
 
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.util.Callback;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,17 +11,19 @@ public class Settings {
     private Long id;
     private int gridSize;
     private List<EnabledAssistanceSystem> enabledAssistanceSystems;
+    private int necessaryQOW;
 
     public enum EnabledAssistanceSystem {
         HAPTIC, LIVE_LIGHT, STATIC_LIGHT, FLOW_LIGHT
     }
     public Settings() {
-       this(40, List.of());
+       this(40, List.of(EnabledAssistanceSystem.STATIC_LIGHT), 75);
     }
 
-    public Settings(int gridSize, List<EnabledAssistanceSystem> enabledAssistanceSystems) {
+    public Settings(int gridSize, List<EnabledAssistanceSystem> enabledAssistanceSystems, int necessaryQOW) {
         this.gridSize = gridSize;
         this.enabledAssistanceSystems = enabledAssistanceSystems;
+        this.necessaryQOW = necessaryQOW;
     }
 
     public void setId(Long id) {
@@ -27,31 +33,20 @@ public class Settings {
     public void setGridSize(int gridSize) {this.gridSize = gridSize;}
     public int getGridSize(){return gridSize;}
 
-    public void setEnabledAssistanceSystemsFromList(List<EnabledAssistanceSystem> enabledAssistanceSystems) {
-        this.enabledAssistanceSystems = new ArrayList<>(enabledAssistanceSystems);
-    }
-
+    public void setEnabledAssistanceSystemsFromList(List<EnabledAssistanceSystem> enabledAssistanceSystems) {this.enabledAssistanceSystems = new ArrayList<>(enabledAssistanceSystems);}
     public List<EnabledAssistanceSystem> getEnabledAssistanceSystemsAsList() {
         return enabledAssistanceSystems;
     }
-
-
     public String getEnabledAssistanceSystems() {
         return getEnabledAssistanceSystemsAsString();
     }
-
-    public void setEnabledAssistanceSystems(String systemsString) {
-        setEnabledAssistanceSystemsFromString(systemsString);
-    }
-
-
+    public void setEnabledAssistanceSystems(String systemsString) {setEnabledAssistanceSystemsFromString(systemsString);}
     public String getEnabledAssistanceSystemsAsString() {
         return enabledAssistanceSystems.stream()
                 .map(Enum::name)
                 .reduce((a, b) -> a + "," + b)
                 .orElse("");
     }
-
     public void setEnabledAssistanceSystemsFromString(String systemsString) {
         if (systemsString == null || systemsString.isBlank()) {
             this.enabledAssistanceSystems = new ArrayList<>();
@@ -66,6 +61,8 @@ public class Settings {
         this.enabledAssistanceSystems = systems;
     }
 
+    public void setNecessaryQOW(int newNecessaryQOW) {this.necessaryQOW = newNecessaryQOW;}
+    public int getNecessaryQOW() {return necessaryQOW;}
 
     public Long getId() {
         return id;

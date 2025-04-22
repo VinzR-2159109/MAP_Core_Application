@@ -4,6 +4,7 @@ import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripConfig;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripRange;
 import be.uhasselt.dwi_application.model.basic.Color;
 import be.uhasselt.dwi_application.model.basic.Range;
+import be.uhasselt.dwi_application.utility.database.repository.settings.Settings;
 import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
 import be.uhasselt.dwi_application.utility.network.MqttHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,9 +17,15 @@ public class LEDStripClient {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final int BASE_BRIGHTNESS = 50;
     private final String TOPIC = "Output/LEDStrip";
+    private Settings settings;
     public enum Clients {
         MQTT, WS;
     }
+
+    public LEDStripClient(Settings settings) {
+        this.settings = settings;
+    }
+
     public void sendON(LEDStripConfig.LEDStripId id, Range range, Color color) {
         LEDStripRange ledRange = LEDStripRange.on(range.start(), range.end(), color, BASE_BRIGHTNESS);
         LEDStripConfig config = new LEDStripConfig(id, List.of(ledRange));
@@ -44,24 +51,30 @@ public class LEDStripClient {
             LEDStripConfig.LEDStripId id,
             Range range,
             double[] direction,
-            int qowScore
+            double qowX,
+            double qowY
     ) {
         int size = Math.max(0, range.end() - range.start() + 1);
         if (size <= 1) return;
 
         ArrayList<LEDStripRange> ranges = new ArrayList<>(size);
 
-        qowScore = Math.max(0, Math.min(100, qowScore));
+        double qowScore = (id == LEDStripConfig.LEDStripId.X) ? qowX : qowY;
 
-        double t = qowScore / 100.0;
-        double adjustedGreen = Math.pow(t, 1.5);
-        double adjustedRed = Math.pow(1 - t, 0.5);
+        Color color;
+        if (qowScore > settings.getNecessaryQOW()) {
+            color = new Color(0, 255, 0);
+        } else {
+            double t = qowScore / 100.0;
+            double adjustedGreen = Math.pow(t, 1.5);
+            double adjustedRed = Math.pow(1 - t, 0.5);
+            int r = (int) (255 * adjustedRed);
+            int g = (int) (255 * adjustedGreen);
+            color = new Color(r, g, 0);
+        }
 
-        int r = (int) (255 * adjustedRed);
-        int g = (int) (255 * adjustedGreen);
-        int b = 0;
-        Color color = new Color(r, g, b);
-
+        int minBrightness = 10;
+        int maxBrightness = 255;
 
         for (int i = 0; i < size; i++) {
             int index = range.start() + i;
@@ -73,8 +86,8 @@ public class LEDStripClient {
                 relativeIndex = direction[id.ordinal()] > 0 ? i : (size - 1 - i);
             }
 
-            // Brightness fade based on position along direction
-            int brightness = 5 + (int) ((250L * relativeIndex) / (size - 1));
+            double ratio = (double) relativeIndex / (size - 1);
+            int brightness = minBrightness + (int) ((maxBrightness - minBrightness) * ratio * ratio);
 
             ranges.add(LEDStripRange.on(index, index, color, brightness));
         }
@@ -82,6 +95,7 @@ public class LEDStripClient {
         LEDStripConfig config = new LEDStripConfig(id, ranges);
         sendConfig(Clients.WS, config);
     }
+
 
     private void sendConfig(Clients client, LEDStripConfig config) {
         String jsonConfig;
