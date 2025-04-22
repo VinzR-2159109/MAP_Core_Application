@@ -3,8 +3,11 @@ package be.uhasselt.dwi_application.utility.modules;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SoundPlayer {
+    private static final Set<MediaPlayer> activePlayers = new HashSet<>();
     private final MediaPlayer mediaPlayer;
 
     public enum SoundType {
@@ -26,25 +29,27 @@ public class SoundPlayer {
         mediaPlayer = new MediaPlayer(media);
 
         mediaPlayer.setOnEndOfMedia(() -> {
-            mediaPlayer.stop();
             mediaPlayer.dispose();
+            activePlayers.remove(mediaPlayer);
+        });
+
+        mediaPlayer.setOnError(() -> {
+            System.err.println("Media error: " + mediaPlayer.getError());
+            activePlayers.remove(mediaPlayer);
         });
     }
 
     public static void play(SoundType soundType) {
         SoundPlayer soundPlayer = new SoundPlayer(soundType);
-        soundPlayer.play();
+        activePlayers.add(soundPlayer.mediaPlayer);
+        soundPlayer._play();
     }
 
-    private void play() {
-        mediaPlayer.stop();
+    private void _play() {
         mediaPlayer.play();
     }
 
     private String getMediaURI(String path) {
-        if (!path.startsWith("http")) {
-            return new File(path).toURI().toString();
-        }
-        return path;
+        return new File(path).toURI().toString();
     }
 }

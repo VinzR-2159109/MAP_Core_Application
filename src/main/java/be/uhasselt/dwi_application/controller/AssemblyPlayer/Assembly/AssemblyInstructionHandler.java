@@ -11,6 +11,7 @@ import be.uhasselt.dwi_application.model.basic.Range;
 import be.uhasselt.dwi_application.model.basic.Position;
 import be.uhasselt.dwi_application.model.Jackson.hands.HandStatus;
 import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
+import be.uhasselt.dwi_application.utility.database.repository.settings.Settings;
 import be.uhasselt.dwi_application.utility.database.repository.settings.SettingsRepository;
 import be.uhasselt.dwi_application.utility.handTracking.HandTrackingHandler;
 import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
@@ -27,6 +28,7 @@ import static be.uhasselt.dwi_application.utility.modules.ConvertToStripCoords.c
 public class AssemblyInstructionHandler {
     private boolean isRunning;
     private final int gridSize;
+    private final Settings settings = SettingsRepository.loadSettings();
 
     private Timer clk;
     private final String sessionId;
@@ -91,19 +93,21 @@ public class AssemblyInstructionHandler {
             return;
         }
 
-        int greenXStart = 43 - (int) positions.stream().mapToDouble(Position::getX).max().orElse(0) / gridSize;
-        int greenXEnd   = 43 - (int) positions.stream().mapToDouble(Position::getX).min().orElse(0) / gridSize;
-        int greenYStart = 31 - (int) positions.stream().mapToDouble(Position::getY).max().orElse(0) / gridSize;
-        int greenYEnd   = 31 - (int) positions.stream().mapToDouble(Position::getY).min().orElse(0) / gridSize;
+        if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.STATIC_LIGHT)){
+            int greenXStart = 43 - (int) positions.stream().mapToDouble(Position::getX).max().orElse(0) / gridSize;
+            int greenXEnd   = 43 - (int) positions.stream().mapToDouble(Position::getX).min().orElse(0) / gridSize;
+            int greenYStart = 31 - (int) positions.stream().mapToDouble(Position::getY).max().orElse(0) / gridSize;
+            int greenYEnd   = 31 - (int) positions.stream().mapToDouble(Position::getY).min().orElse(0) / gridSize;
 
-        assemblyXRange = new Range(greenXStart, greenXEnd);
-        assemblyYRange = new Range(greenYStart, greenYEnd);
+            assemblyXRange = new Range(greenXStart, greenXEnd);
+            assemblyYRange = new Range(greenYStart, greenYEnd);
 
-        System.out.println("AssemblyXRange: " + assemblyXRange);
-        System.out.println("AssemblyYRange: " + assemblyYRange);
+            System.out.println(ConsoleColors.GREEN + "<Setting Assembly Locations on LEDStrip>" + ConsoleColors.RESET);
 
-        ledStrip.sendON(LEDStripConfig.LEDStripId.X, assemblyXRange, Color.fromBasics(Color.BasicColors.GREEN));
-        ledStrip.sendON(LEDStripConfig.LEDStripId.Y, assemblyYRange, Color.fromBasics(Color.BasicColors.GREEN));
+            ledStrip.sendON(LEDStripConfig.LEDStripId.X, assemblyXRange, Color.fromBasics(Color.BasicColors.GREEN));
+            ledStrip.sendON(LEDStripConfig.LEDStripId.Y, assemblyYRange, Color.fromBasics(Color.BasicColors.GREEN));
+
+        }
 
         this.measurement = new InstructionMeasurementHandler(assemblyInstruction.getAssembly(), assemblyInstruction, sessionId);
         measurement.startMeasurement();
@@ -116,17 +120,24 @@ public class AssemblyInstructionHandler {
                 double[] direction = calculateDirectionToAssembly(avgHandPosition);
                 int qow = calculateQualityOfWorkScore(avgHandPosition);
 
-                updateDirection(direction);
-                updateVibrationFeedback();
 
-                if (qow > 85) {
+                if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.HAPTIC)){
+                    updateDirection(direction);
+                    updateVibrationFeedback();
+                }
+
+                if (qow > 80) {
                     isCompleted.set(true);
                     SoundPlayer.play(SoundPlayer.SoundType.OK);
                     vibration.cancel();
                     stop();
                     Platform.runLater(onCompleteCallback);
                 }
-                showLiveLight(direction, qow);
+
+                if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.LIVE_LIGHT)){
+                    showLiveLight(direction, qow);
+                }
+
             }
         }, 0, 10);
 
@@ -256,10 +267,11 @@ public class AssemblyInstructionHandler {
         Position avgHandPosition = handTracking.getAvgHandPosition(pickingHand);
         Position gridPosition = convertToStripCoords(avgHandPosition);
 
-        int newXStart = (int) gridPosition.getX() - 2;
-        int newXEnd   = (int) gridPosition.getX() + 2;
-        int newYStart = (int) gridPosition.getY() - 2;
-        int newYEnd   = (int) gridPosition.getY() + 2;
+        int size = 3;
+        int newXStart = (int) gridPosition.getX() - size;
+        int newXEnd   = (int) gridPosition.getX() + size;
+        int newYStart = (int) gridPosition.getY() - size;
+        int newYEnd   = (int) gridPosition.getY() + size;
 
         Range newXRange = new Range(newXStart, newXEnd);
         Range newYRange = new Range(newYStart, newYEnd);

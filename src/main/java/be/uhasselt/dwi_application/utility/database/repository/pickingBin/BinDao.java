@@ -13,7 +13,7 @@ import java.util.List;
 @RegisterBeanMapper(PickingBin.class)
 public interface BinDao {
 
-    @SqlUpdate("INSERT INTO bins (id, POS_X, POS_Y, part_id) VALUES (:id, :pos_x, :pos_y, :partId)")
+    @SqlUpdate("INSERT INTO bins VALUES (:bin)")
     void insertBin(@BindBean PickingBin bin);
 
     @SqlQuery("SELECT * FROM bins WHERE id = :id")
@@ -22,18 +22,6 @@ public interface BinDao {
     @SqlQuery("SELECT * FROM bins")
     List<PickingBin> findAll();
 
-    @SqlUpdate("UPDATE BINS SET POS_X = :pos_x, POS_Y = :pos_y, part_id = :partId WHERE id = :id")
-    void updateBin(@BindBean PickingBin bin);
-
     @SqlUpdate("DELETE FROM BINS WHERE id = :id")
     void deleteBin(@Bind("id") Long id);
-
-    @SqlQuery("SELECT * FROM PART WHERE ID = :id")
-    Part findPartByBinId(@Bind("id") Long id);
-
-    @SqlUpdate("UPDATE BINS SET part_id = NULL WHERE part_id = :partId")
-    void removePartFromBin(@Bind("partId") Long partId);
-
-    @SqlQuery("SELECT * FROM BINS WHERE part_id = :partId")
-    List<PickingBin> findBinsByPartId(@Bind("partId") Long partId);
 }

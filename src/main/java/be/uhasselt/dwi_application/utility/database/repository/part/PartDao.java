@@ -19,7 +19,7 @@ public interface PartDao {
     @SqlUpdate("DELETE FROM Part WHERE id = :id")
     void deletePart(@Bind("id") Long id);
 
-    @SqlUpdate("UPDATE Part SET name = :name, assembly_id = :assemblyId WHERE id = :id")
+    @SqlUpdate("UPDATE Part SET name = :name, assembly_id = :assemblyId, BIN_ID = :binId WHERE id = :id")
     void updatePart(@BindBean Part part);
 
     @SqlUpdate("INSERT INTO Part (name, assembly_id) VALUES (:name, :assemblyId)")

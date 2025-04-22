@@ -27,25 +27,13 @@ public class BinRepository {
     }
 
     public List<PickingBin> getAll() {
-        List<PickingBin> bins = jdbi.withExtension(BinDao.class, BinDao::findAll);
-
-        for (PickingBin bin : bins) {
-            if (bin.getPartId() != null) {
-                Part part = jdbi.withExtension(PartDao.class, dao -> dao.findById(bin.getPartId()));
-                bin.setPart(part);
-            }
-        }
-        return bins;
+        return jdbi.withExtension(BinDao.class, BinDao::findAll);
     }
 
     public PickingBin getById(Long id) {
         return jdbi.withHandle(handle -> {
             BinDao dao = handle.attach(BinDao.class);
-            PickingBin bin = dao.findById(id);
-            if (bin != null) {
-                bin.setPart(dao.findPartByBinId(id));
-            }
-            return bin;
+            return dao.findById(id);
         });
     }
 
@@ -68,19 +56,5 @@ public class BinRepository {
         for (PickingBin bin : selectedBins) {
             delete(bin);
         }
-    }
-
-    public void updateBin(PickingBin bin) {
-        jdbi.useTransaction(handle -> {
-            BinDao dao = handle.attach(BinDao.class);
-            dao.updateBin(bin);
-        });
-    }
-
-    public List<PickingBin> getBinsByPartId(Long partId) {
-        return jdbi.withHandle(handle -> {
-            BinDao dao = handle.attach(BinDao.class);
-            return dao.findBinsByPartId(partId);
-        });
     }
 }

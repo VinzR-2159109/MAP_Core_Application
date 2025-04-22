@@ -78,7 +78,9 @@ public class AssemblyLocationPickerController implements Controller {
         gridSize_spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(10, 50, gridSize));
         gridSize_spinner.valueProperty().addListener((_, _, newValue) -> {
             gridSize = newValue;
-            SettingsRepository.updateSettings(new Settings(newValue));
+            Settings settings = SettingsRepository.loadSettings();
+            settings.setGridSize(newValue);
+            SettingsRepository.updateSettings(settings);
 
             locationPicker_pane.getChildren().clear();
             assemblyInstruction.clearPositions();

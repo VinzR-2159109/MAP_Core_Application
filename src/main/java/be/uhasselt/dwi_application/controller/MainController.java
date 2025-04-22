@@ -18,9 +18,8 @@ import java.net.URL;
 import java.util.Objects;
 
 public class MainController {
-    @FXML private HBox handtracking_hbox;
-    @FXML private HBox binManager_hbox;
     @FXML private HBox InstructionManager_hbox;
+    @FXML private HBox Settings_hbox;
     @FXML private AnchorPane contentPane;
 
     private static MainController instance;
@@ -38,10 +37,10 @@ public class MainController {
 
     public void onViewClicked(MouseEvent mouseEvent) {
         HBox source = (HBox) mouseEvent.getSource();
-        if (source == binManager_hbox) {
-            loadView(FxmlViews.BIN_MANAGER);
-        } else if (source == InstructionManager_hbox ) {
+        if (source == InstructionManager_hbox ) {
             loadView(FxmlViews.ASSEMBLY_EXPLORER);
+        } else if (source == Settings_hbox){
+            loadView(FxmlViews.SETTINGS);
         }
     }
 

@@ -27,16 +27,20 @@ module be.uhasselt.dwi_application {
     // ✅ Open packages for JavaFX & JDBI Reflection
     opens be.uhasselt.dwi_application to javafx.fxml;
     opens be.uhasselt.dwi_application.utility.modules to javafx.fxml;
+    opens be.uhasselt.dwi_application.utility.network.WebSocket to javafx.fxml;
+
     opens be.uhasselt.dwi_application.controller to javafx.fxml;
-    opens be.uhasselt.dwi_application.controller.BinManager to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.AssemblyPlayer to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.WorkInstruction.Part to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.WorkInstruction.Assembly to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.WorkInstruction.Manager to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.WorkInstruction.LocationPicker to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly to javafx.fxml;
+    opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip to javafx.fxml;
+    opens be.uhasselt.dwi_application.controller.Settings to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients to javafx.fxml;
+
     opens be.uhasselt.dwi_application.model.Jackson.StripLedConfig to com.fasterxml.jackson.databind;
 
     opens be.uhasselt.dwi_application.model.basic to org.jdbi.v3.core;
@@ -46,13 +50,12 @@ module be.uhasselt.dwi_application {
     opens be.uhasselt.dwi_application.utility.database.repository.instruction to org.jdbi.v3.core;
     opens be.uhasselt.dwi_application.utility.database.repository.settings to org.jdbi.v3.core;
 
-    // ✅ Export required packages
     exports be.uhasselt.dwi_application;
     exports be.uhasselt.dwi_application.controller;
-    exports be.uhasselt.dwi_application.controller.BinManager;
     exports be.uhasselt.dwi_application.controller.WorkInstruction.Part;
     exports be.uhasselt.dwi_application.controller.WorkInstruction.Manager to javafx.fxml;
     exports be.uhasselt.dwi_application.controller.WorkInstruction.Assembly to javafx.fxml;
+    exports be.uhasselt.dwi_application.controller.Settings to javafx.fxml;
     exports be.uhasselt.dwi_application.utility.handTracking;
 
     exports be.uhasselt.dwi_application.model.workInstruction;
@@ -65,7 +68,5 @@ module be.uhasselt.dwi_application {
     exports be.uhasselt.dwi_application.utility.database.repository.settings;
     exports be.uhasselt.dwi_application.model.workInstruction.picking;
     exports be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients;
-    opens be.uhasselt.dwi_application.utility.network.WebSocket to javafx.fxml;
     exports be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip;
-    opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip to javafx.fxml;
 }

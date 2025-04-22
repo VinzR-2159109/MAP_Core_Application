@@ -13,27 +13,22 @@
       <HBox BorderPane.alignment="CENTER">
          <children>
             <VBox fx:id="sidebar" spacing="5.0">
-               <children>
-                  <HBox fx:id="binManager_hbox" alignment="CENTER_LEFT" layoutX="10.0" layoutY="10.0" onMouseClicked="#onViewClicked" prefHeight="100.0" prefWidth="200.0" styleClass="hbox-menu" HBox.hgrow="ALWAYS">
-                     <children>
-                        <Label fx:id="BinManager_label" prefHeight="18.0" prefWidth="202.0" text="Bin Manager" textAlignment="CENTER">
-                           <HBox.margin>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </HBox.margin></Label>
-                     </children>
-                     <VBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </VBox.margin>
-                  </HBox>
-                  <HBox fx:id="InstructionManager_hbox" alignment="CENTER_LEFT" layoutX="10.0" layoutY="110.0" onMouseClicked="#onViewClicked" prefHeight="100.0" prefWidth="200.0" styleClass="hbox-menu" HBox.hgrow="ALWAYS">
-                     <children>
-                        <Label fx:id="InstructionManager_label" prefHeight="18.0" prefWidth="339.0" text="Instruction Manager" />
-                     </children>
-                     <VBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </VBox.margin>
-                  </HBox>
-               </children>
+               <HBox fx:id="InstructionManager_hbox" alignment="CENTER_LEFT" layoutX="10.0" layoutY="110.0" onMouseClicked="#onViewClicked" prefHeight="100.0" prefWidth="200.0" styleClass="hbox-menu" HBox.hgrow="ALWAYS">
+                  <children>
+                     <Label fx:id="InstructionManager_label" prefHeight="18.0" prefWidth="339.0" text="Instruction Manager" />
+                  </children>
+                  <VBox.margin>
+                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                  </VBox.margin>
+               </HBox>
+               <HBox fx:id="Settings_hbox" alignment="CENTER_LEFT" layoutX="15.0" layoutY="15.0" onMouseClicked="#onViewClicked" prefHeight="100.0" prefWidth="200.0" styleClass="hbox-menu">
+                  <children>
+                     <Label fx:id="InstructionManager_label1" prefHeight="18.0" prefWidth="339.0" text="Settings" />
+                  </children>
+                  <VBox.margin>
+                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                  </VBox.margin>
+               </HBox>
             </VBox>
             <Separator orientation="VERTICAL" prefHeight="1002.0" prefWidth="20.0" />
          </children>

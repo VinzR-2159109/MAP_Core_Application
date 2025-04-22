@@ -26,6 +26,7 @@ public class Range {
     }
 
     public boolean rangesOverlap(Range other) {
+        if (other == null) return false;
         return end >= other.start && other.end >= start;
     }
 

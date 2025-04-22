@@ -15,7 +15,10 @@ public class Part {
     @ColumnName("assembly_id")
     private Long assemblyId;
 
-    private Assembly assembly; // Lazily loaded when needed
+    @ColumnName("bin_id")
+    private Long binId;
+
+    private Assembly assembly;
 
     public Part(String name, Assembly assembly) {
         this.name = name;
@@ -31,10 +34,11 @@ public class Part {
     public Part(){}
 
     @JdbiConstructor
-    public Part(@ColumnName("id") Long id, @ColumnName("name") String name, @ColumnName("assembly_id") Long assemblyId) {
+    public Part(@ColumnName("id") Long id, @ColumnName("name") String name, @ColumnName("assembly_id") Long assemblyId, @ColumnName("bin_id") Long binId) {
         this.id = id;
         this.name = name;
         this.assemblyId = assemblyId;
+        this.binId = binId;
         this.assembly = null;
     }
 
@@ -45,14 +49,15 @@ public class Part {
     public void setName(String name) { this.name = name; }
 
     public Long getAssemblyId() { return assemblyId; }
-
     public void setAssemblyId(Long assemblyId) {
         this.assemblyId = assemblyId;
         this.assembly = null;
     }
 
+    public Long getBinId() {return binId;}
+    public void setBinId(Long binId) {this.binId = binId;}
+
     public Assembly getAssembly() {
-        // Lazily load Assembly if it's null
         if (assembly == null) {
             assembly = AssemblyRepository.getInstance().getById(assemblyId);
         }

@@ -47,17 +47,7 @@ public class PartRepository {
     public void delete(Part part) {
         Long partId = part.getId();
         jdbi.useTransaction(handle -> {
-            BinDao binDao = handle.attach(BinDao.class);
             PartDao partDao = handle.attach(PartDao.class);
-
-            // Removing part from bins
-            List<PickingBin> binsWithPart = binDao.findBinsByPartId(partId);
-            for (PickingBin bin : binsWithPart) {
-                bin.removePart();
-                binDao.updateBin(bin);
-                System.out.println("Removed part " + partId + " from bin " + bin.getId());
-            }
-
 
             partDao.deletePart(partId);
             System.out.println("Successfully deleted part: " + partId);

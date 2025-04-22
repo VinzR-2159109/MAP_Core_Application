@@ -13,10 +13,13 @@ public interface SettingsDao {
     @SqlQuery("SELECT * FROM settings LIMIT 1")
     Settings getSettings();
 
-    @SqlUpdate("INSERT INTO settings (GRID_SIZE) VALUES (:gridSize)")
+    @SqlUpdate("INSERT INTO settings (GRID_SIZE, enabled_assistance_systems) VALUES (:gridSize, '')")
     @GetGeneratedKeys
     long insertSettings(@Bind Settings settings);
 
-    @SqlUpdate("UPDATE settings SET GRID_SIZE = :gridSize WHERE id = :id")
-    void updateSettings(@BindBean Settings settings);
+    @SqlUpdate("UPDATE settings SET grid_size = :gridSize, enabled_assistance_systems = :enabledAssistanceSystems WHERE id = :id")
+    void updateSettings(@Bind("id") Long id,
+                        @Bind("gridSize") int gridSize,
+                        @Bind("enabledAssistanceSystems") String enabledAssistanceSystems);
+
 }

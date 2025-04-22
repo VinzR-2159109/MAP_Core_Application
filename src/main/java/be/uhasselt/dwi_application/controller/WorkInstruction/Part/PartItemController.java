@@ -23,7 +23,7 @@ public class PartItemController implements Controller {
     @FXML private ComboBox<PickingBin> binNum_cbx;
     @FXML private CheckBox partCheckbox;
 
-    private Part part;
+    private final Part part;
     private Assembly assembly;
 
     private final AssemblyRepository assemblyRepository;
@@ -53,13 +53,12 @@ public class PartItemController implements Controller {
             showErrorDialog("Error", "Part is null", "Check PartItemController.initialize()", "Close");
             return;
         }
+
         partName_lbl.setText(part.getName());
         partName_txt.setText(part.getName());
 
-        List<PickingBin> assignedBins = binRepository.getBinsByPartId(part.getId());
-        if (!assignedBins.isEmpty()) {
-            binNum_cbx.setValue(assignedBins.getFirst());
-        }
+        PickingBin bin = binRepository.getById(part.getBinId());
+        binNum_cbx.setValue(bin);
 
         populateBinComboBox();
     }
@@ -117,20 +116,13 @@ public class PartItemController implements Controller {
 
     private void updatePartBin() {
         System.out.println(ConsoleColors.BLUE + "<Updating Part Bin>" + ConsoleColors.RESET);
-        if (part == null) {
-            return;
-        }
+        if (part == null) return;
 
         PickingBin selectedBin = binNum_cbx.getSelectionModel().getSelectedItem();
-        if (selectedBin == null) {
-            return;
-        }
+        if (selectedBin == null) return;
 
-        List<PickingBin> binsWithPart = binRepository.getBinsByPartId(part.getId());
-
-        // Assign part to new bin
-        selectedBin.setPart(part);
-        binRepository.updateBin(selectedBin);
+        part.setBinId(selectedBin.getId());
+        partRepository.update(part);
     }
 
     @Override

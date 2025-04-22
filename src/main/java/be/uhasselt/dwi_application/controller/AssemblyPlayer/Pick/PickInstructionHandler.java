@@ -2,6 +2,7 @@ package be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick;
 
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.InstructionMeasurementHandler;
 import be.uhasselt.dwi_application.model.Jackson.ObstacleSensorData;
+import be.uhasselt.dwi_application.model.workInstruction.picking.Part;
 import be.uhasselt.dwi_application.model.workInstruction.picking.PickingBin;
 import be.uhasselt.dwi_application.model.workInstruction.picking.PickingInstruction;
 import be.uhasselt.dwi_application.utility.database.repository.pickingBin.BinRepository;
@@ -15,14 +16,12 @@ import javafx.application.Platform;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static be.uhasselt.dwi_application.utility.modules.Dialog.showErrorDialog;
-
 public class PickInstructionHandler {
-    private PickingBin bin;
     private InstructionMeasurementHandler measurement;
 
     private boolean isRunning;
     private String sessionId;
+    private Long binId;
 
     private static final String OBSTACLE_TOPIC = "Input/Bin/Obstacle";
 
@@ -55,17 +54,20 @@ public class PickInstructionHandler {
         obstacleInBin.set(false);
         isCompleted.set(false);
 
+        Part partToPick = pickingInstruction.getPartToPick();
+        binId = partToPick.getBinId();
 
-        this.bin = BinRepository.getInstance().getBinsByPartId(pickingInstruction.getPartId()).stream().findFirst()
-                .orElseThrow(() -> new BinNotFoundException(pickingInstruction.getPartToPick()));
+        if (binId == null) {
+            throw new BinNotFoundException(partToPick);
+        }
 
-        mqttHelper.SendSetBinLEDGreen(bin.getId());
-        mqttHelper.SendSetDisplayNumber(bin.getId().intValue(), pickingInstruction.getQuantity());
+        mqttHelper.SendSetBinLEDGreen(binId);
+        mqttHelper.SendSetDisplayNumber(binId, pickingInstruction.getQuantity());
 
         mqttHandler.subscribe(OBSTACLE_TOPIC, s -> {
             try {
                 ObstacleSensorData obstacleSensorData = objectMapper.readValue(s, ObstacleSensorData.class);
-                if (Objects.equals(obstacleSensorData.id(), bin.getId())) {
+                if (Objects.equals(obstacleSensorData.id(), binId)) {
                     boolean currentObstacle = obstacleSensorData.obstacle();
 
                     if (obstacleInBin.get() && !currentObstacle) {
@@ -79,7 +81,7 @@ public class PickInstructionHandler {
                     obstacleInBin.set(currentObstacle);
                 }
                 else if (obstacleSensorData.obstacle()) {
-                    System.out.println("Wrong Bin Picked: " + bin.getId());
+                    System.out.println("Wrong Bin Picked: " + binId);
                 }
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
@@ -97,8 +99,8 @@ public class PickInstructionHandler {
 
         measurement.stopMeasurement();
 
-        mqttHelper.SendSetBinLEDOff(bin.getId());
-        mqttHelper.SendSetDisplayOff(bin.getId().intValue());
+        mqttHelper.SendSetBinLEDOff(binId);
+        mqttHelper.SendSetDisplayOff(binId);
 
         mqttHandler.unsubscribe(OBSTACLE_TOPIC);
 

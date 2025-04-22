@@ -51,14 +51,17 @@ public class LEDStripClient {
 
         ArrayList<LEDStripRange> ranges = new ArrayList<>(size);
 
-        // Clamp QoW between 0 and 100
         qowScore = Math.max(0, Math.min(100, qowScore));
 
-        // Calculate color from QoW (red to green)
-        int r = (int) (255 * (1 - qowScore / 100.0));
-        int g = (int) (255 * (qowScore / 100.0));
+        double t = qowScore / 100.0;
+        double adjustedGreen = Math.pow(t, 1.5);
+        double adjustedRed = Math.pow(1 - t, 0.5);
+
+        int r = (int) (255 * adjustedRed);
+        int g = (int) (255 * adjustedGreen);
         int b = 0;
         Color color = new Color(r, g, b);
+
 
         for (int i = 0; i < size; i++) {
             int index = range.start() + i;

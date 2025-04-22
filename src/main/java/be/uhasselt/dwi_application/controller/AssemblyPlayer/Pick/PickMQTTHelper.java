@@ -3,6 +3,7 @@ package be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick;
 import be.uhasselt.dwi_application.model.Jackson.BinLedConfig;
 import be.uhasselt.dwi_application.model.Jackson.DisplayConfig;
 import be.uhasselt.dwi_application.model.basic.Color;
+import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
 import be.uhasselt.dwi_application.utility.network.MqttHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +19,7 @@ public class PickMQTTHelper {
                 null
         );
 
+        System.out.println(ConsoleColors.GREEN + "<Sending Bin LED Green>" + ConsoleColors.RESET);
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             String jsonString = objectMapper.writeValueAsString(ledConfig);
@@ -46,7 +48,7 @@ public class PickMQTTHelper {
         }
     }
 
-    public void SendSetDisplayNumber(int id, int quantity) {
+    public void SendSetDisplayNumber(Long id, int quantity) {
         DisplayConfig displayConfig = DisplayConfig.on(id, quantity);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -59,7 +61,7 @@ public class PickMQTTHelper {
         }
     }
 
-    public void SendSetDisplayOff(int id) {
+    public void SendSetDisplayOff(Long id) {
         DisplayConfig displayConfig = DisplayConfig.off(id);
 
         ObjectMapper objectMapper = new ObjectMapper();
