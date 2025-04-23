@@ -69,4 +69,6 @@ module be.uhasselt.dwi_application {
     exports be.uhasselt.dwi_application.model.workInstruction.picking;
     exports be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients;
     exports be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip;
+    exports be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.Effect;
+    opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.Effect to javafx.fxml;
 }

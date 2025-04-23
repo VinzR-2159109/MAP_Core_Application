@@ -61,7 +61,7 @@ public class AssemblyInstructionHandler {
 
         this.isRunning = false;
 
-        this.ledStrip = new LEDStripClient(settings);
+        this.ledStrip = new LEDStripClient();
         this.vibration = new VibrationMQTTHelper();
         this.directionMqtt = new VisualDirectionMQTTHelper();
 
@@ -170,8 +170,8 @@ public class AssemblyInstructionHandler {
         List<Integer> xIndices = IntStream.rangeClosed(assemblyXRange.start(), assemblyXRange.end()).boxed().toList();
         List<Integer> yIndices = IntStream.rangeClosed(assemblyYRange.start(), assemblyYRange.end()).boxed().toList();
 
-        ledStrip.sendON(LEDStripConfig.LEDStripId.X, xIndices, Color.fromBasics(Color.BasicColors.GREEN));
-        ledStrip.sendON(LEDStripConfig.LEDStripId.Y, yIndices, Color.fromBasics(Color.BasicColors.GREEN));
+        ledStrip.sendON(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.X, xIndices, Color.fromBasics(Color.BasicColors.GREEN));
+        ledStrip.sendON(LEDStripClient.Clients.WS , LEDStripConfig.LEDStripId.Y, yIndices, Color.fromBasics(Color.BasicColors.GREEN));
     }
 
     private void updateVibrationFeedback() {
