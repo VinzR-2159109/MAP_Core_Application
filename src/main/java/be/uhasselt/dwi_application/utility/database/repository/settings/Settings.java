@@ -1,9 +1,5 @@
 package be.uhasselt.dwi_application.utility.database.repository.settings;
 
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.util.Callback;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,18 +8,24 @@ public class Settings {
     private int gridSize;
     private List<EnabledAssistanceSystem> enabledAssistanceSystems;
     private int necessaryQOW;
+    private int videoEnlargementFactor;
+    private int XLEDLength;
+    private int yLEDLenght;
 
     public enum EnabledAssistanceSystem {
         HAPTIC, LIVE_LIGHT, STATIC_LIGHT, FLOW_LIGHT
     }
     public Settings() {
-       this(40, List.of(EnabledAssistanceSystem.STATIC_LIGHT), 75);
+       this(40, List.of(EnabledAssistanceSystem.STATIC_LIGHT), 85, 2, 43, 28);
     }
 
-    public Settings(int gridSize, List<EnabledAssistanceSystem> enabledAssistanceSystems, int necessaryQOW) {
+    private Settings(int gridSize, List<EnabledAssistanceSystem> enabledAssistanceSystems, int necessaryQOW, int videoEnlargementFactor, int XLEDLenght, int YLEDLenght) {
         this.gridSize = gridSize;
         this.enabledAssistanceSystems = enabledAssistanceSystems;
         this.necessaryQOW = necessaryQOW;
+        this.videoEnlargementFactor = videoEnlargementFactor;
+        this.XLEDLength = XLEDLenght;
+        this.yLEDLenght = YLEDLenght;
     }
 
     public void setId(Long id) {
@@ -63,6 +65,15 @@ public class Settings {
 
     public void setNecessaryQOW(int newNecessaryQOW) {this.necessaryQOW = newNecessaryQOW;}
     public int getNecessaryQOW() {return necessaryQOW;}
+
+    public void setVideoEnlargementFactor(int newVideoEnlargementFactor) {this.videoEnlargementFactor = newVideoEnlargementFactor;}
+    public int getVideoEnlargementFactor() {return videoEnlargementFactor;}
+
+    public int getXLEDLength() {return XLEDLength;}
+    public void setXLEDLength(int LEDLength) {this.XLEDLength = LEDLength;}
+
+    public int getYLEDLength() {return yLEDLenght;}
+    public void setYLEDLenght(int yLEDLenght) {this.yLEDLenght = yLEDLenght;}
 
     public Long getId() {
         return id;

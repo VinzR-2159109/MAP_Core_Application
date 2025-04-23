@@ -185,7 +185,7 @@ public class AssemblyPlayerController implements Controller {
 
     public void cleanup() {
         System.out.println("AssemblyPlayerController is being destroyed!");
-        // Stop any running background tasks
+
         if (pickInstructionHandler != null) {
             pickInstructionHandler.stop();
         }

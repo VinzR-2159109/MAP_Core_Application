@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.IntStream;
 
 import static be.uhasselt.dwi_application.utility.modules.ConvertToStripCoords.convertToStripCoords;
 
@@ -56,7 +57,7 @@ public class AssemblyInstructionHandler {
     public AssemblyInstructionHandler(String sessionId){
         System.out.println("<Constructing AssemblyInstructionHandler>");
 
-        this.gridSize = SettingsRepository.loadSettings().getGridSize() / 2;
+        this.gridSize = SettingsRepository.loadSettings().getGridSize() / settings.getVideoEnlargementFactor();
 
         this.isRunning = false;
 
@@ -93,20 +94,20 @@ public class AssemblyInstructionHandler {
             return;
         }
 
+        int greenXStart = 43 - (int) positions.stream().mapToDouble(Position::getX).max().orElse(0) / gridSize;
+        int greenXEnd   = 43 - (int) positions.stream().mapToDouble(Position::getX).min().orElse(0) / gridSize;
+        int greenYStart = (int) positions.stream().mapToDouble(Position::getY).max().orElse(0) / gridSize;
+        int greenYEnd   = (int) positions.stream().mapToDouble(Position::getY).min().orElse(0) / gridSize;
+
+        assemblyXRange = new Range(greenXStart, greenXEnd);
+        assemblyYRange = new Range(greenYEnd, greenYStart);
+        
         if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.STATIC_LIGHT)){
-            int greenXStart = 43 - (int) positions.stream().mapToDouble(Position::getX).max().orElse(0) / gridSize;
-            int greenXEnd   = 43 - (int) positions.stream().mapToDouble(Position::getX).min().orElse(0) / gridSize;
-            int greenYStart = 31 - (int) positions.stream().mapToDouble(Position::getY).max().orElse(0) / gridSize;
-            int greenYEnd   = 31 - (int) positions.stream().mapToDouble(Position::getY).min().orElse(0) / gridSize;
+            showStaticLight();
+        }
 
-            assemblyXRange = new Range(greenXStart, greenXEnd);
-            assemblyYRange = new Range(greenYStart, greenYEnd);
-
-            System.out.println(ConsoleColors.GREEN + "<Setting Assembly Locations on LEDStrip>" + ConsoleColors.RESET);
-
-            ledStrip.sendON(LEDStripConfig.LEDStripId.X, assemblyXRange, Color.fromBasics(Color.BasicColors.GREEN));
-            ledStrip.sendON(LEDStripConfig.LEDStripId.Y, assemblyYRange, Color.fromBasics(Color.BasicColors.GREEN));
-
+        if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.FLOW_LIGHT)){
+            showFlowLight();
         }
 
         this.measurement = new InstructionMeasurementHandler(assemblyInstruction.getAssembly(), assemblyInstruction, sessionId);
@@ -150,6 +151,7 @@ public class AssemblyInstructionHandler {
 
         measurement.stopMeasurement();
 
+        ledStrip.stopFlowLight();
         ledStrip.sendAllOFF();
         vibration.cancel();
 
@@ -159,6 +161,17 @@ public class AssemblyInstructionHandler {
         }
 
         handTracking.stop();
+    }
+
+    private void showStaticLight() {
+        if (!isRunning) return;
+        System.out.println(ConsoleColors.GREEN + "<Setting Assembly Locations on LEDStrip>" + ConsoleColors.RESET);
+
+        List<Integer> xIndices = IntStream.rangeClosed(assemblyXRange.start(), assemblyXRange.end()).boxed().toList();
+        List<Integer> yIndices = IntStream.rangeClosed(assemblyYRange.start(), assemblyYRange.end()).boxed().toList();
+
+        ledStrip.sendON(LEDStripConfig.LEDStripId.X, xIndices, Color.fromBasics(Color.BasicColors.GREEN));
+        ledStrip.sendON(LEDStripConfig.LEDStripId.Y, yIndices, Color.fromBasics(Color.BasicColors.GREEN));
     }
 
     private void updateVibrationFeedback() {
@@ -177,7 +190,7 @@ public class AssemblyInstructionHandler {
         Position handPosition = handTracking.getAvgHandPosition(pickingHand);
         double[] qow = calculateQualityOfWorkScore(handPosition);
 
-        vibration.vibrate((int) Math.round((qow[3] / 100.0) * 255), qow[3]);
+        vibration.vibrate((int) Math.round((qow[2] / 100.0) * 255), qow[2]);
     }
 
 
@@ -233,11 +246,9 @@ public class AssemblyInstructionHandler {
         double qowX = 100.0 * (1.0 - dx / maxDistance);
         double qowY = 100.0 * (1.0 - dy / maxDistance);
         double qow  = 100.0 * (1.0 - distance / maxDistance);
-        System.out.println("qowX: " + qowX + " qowY: " + qowY + " qowXY: " + qow);
+
         return new double[]{qowX, qowY, qow};
     }
-
-
 
     private double[] calculateDirectionToAssembly(Position handPosition) {
         double avgX = assemblyInstruction.getAssemblyPositions()
@@ -292,19 +303,37 @@ public class AssemblyInstructionHandler {
 
         if (!cachedBlueXRange.equalsRange(newXRange)) {
             ledStrip.sendOFF(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.X, cachedBlueXRange);
-            if (newXRange.resolvedOverlap(assemblyXRange)){
-                ledStrip.sendDirectionalLight(LEDStripConfig.LEDStripId.X, newXRange, direction, qowX, qowY);
-            };
+            if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.STATIC_LIGHT)){
+                if (newXRange.resolvedOverlap(assemblyXRange)){
+                    ledStrip.sendLiveLight(LEDStripConfig.LEDStripId.X, newXRange, direction, qowX, qowY);
+                };
+            } else {
+                ledStrip.sendLiveLight(LEDStripConfig.LEDStripId.X, newXRange, direction, qowX, qowY);
+            }
+
             cachedBlueXRange = newXRange;
         }
 
         if(!cachedBlueYRange.equalsRange(newYRange)) {
             ledStrip.sendOFF(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.Y, cachedBlueYRange);
-            if (newYRange.resolvedOverlap(assemblyYRange)){
-                ledStrip.sendDirectionalLight(LEDStripConfig.LEDStripId.Y, newYRange, direction, qowX, qowY);
+            if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.STATIC_LIGHT)){
+                if (newYRange.resolvedOverlap(assemblyYRange)) {
+                    ledStrip.sendLiveLight(LEDStripConfig.LEDStripId.Y, newYRange, direction, qowX, qowY);
+                }
+            }
+            else {
+                ledStrip.sendLiveLight(LEDStripConfig.LEDStripId.Y, newYRange, direction, qowX, qowY);
             }
             cachedBlueYRange = newYRange;
         }
+    }
+
+    private void showFlowLight(){
+        if (!isRunning) return;
+        System.out.println(ConsoleColors.GREEN + "Showing flow light" + ConsoleColors.RESET);
+
+        ledStrip.startFlowLight(LEDStripConfig.LEDStripId.X, assemblyXRange);
+        ledStrip.startFlowLight(LEDStripConfig.LEDStripId.Y, assemblyYRange);
     }
 
 

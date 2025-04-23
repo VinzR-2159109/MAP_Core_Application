@@ -26,7 +26,7 @@ public class SettingsRepository {
     private void _updateSettings(Settings updatedSettings) {
         Settings settings = _loadSettings();
         updatedSettings.setId(settings.getId());
-        settingsDAO.updateSettings(updatedSettings.getId(), updatedSettings.getGridSize(), updatedSettings.getEnabledAssistanceSystemsAsString(), updatedSettings.getNecessaryQOW());
+        settingsDAO.updateSettings(updatedSettings.getId(), updatedSettings.getGridSize(), updatedSettings.getEnabledAssistanceSystemsAsString(), updatedSettings.getNecessaryQOW(), updatedSettings.getVideoEnlargementFactor(), updatedSettings.getXLEDLength(), updatedSettings.getYLEDLength());
     }
 
     private Settings _loadSettings() {

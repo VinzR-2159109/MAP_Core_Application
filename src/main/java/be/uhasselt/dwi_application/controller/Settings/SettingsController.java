@@ -15,10 +15,16 @@ public class SettingsController {
     @FXML private CheckBox liveLight_check;
     @FXML private CheckBox staticLight_check;
     @FXML private CheckBox flowLight_check;
+
     @FXML private Spinner<Integer> necessaryQOW_spinner;
+    @FXML private Spinner<Integer> videoEnlargementFactor_spinner;
+
+    @FXML private Spinner<Integer> LEDXLenght_spinner;
+    @FXML private Spinner<Integer> LEDYLenght_spinner;
 
     private ArrayList<CheckBox> checkedBoxes = new ArrayList<>();
     private Settings settings = SettingsRepository.loadSettings();
+
     @FXML
     private void initialize() {
         setupCheckbox(haptic_check);
@@ -27,6 +33,8 @@ public class SettingsController {
         setupCheckbox(flowLight_check);
 
         setupQOWSpinner();
+        setupVideoEnlargementSpinner();
+        setupLEDLengthSpinners();
     }
 
     private void setupCheckbox(CheckBox checkBox) {
@@ -62,16 +70,45 @@ public class SettingsController {
 
 
     private void setupQOWSpinner() {
-        SpinnerValueFactory<Integer> valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(50, 100);
+        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(50, 100);
         necessaryQOW_spinner.setValueFactory(valueFactory);
 
-        // Set initial value
         necessaryQOW_spinner.getValueFactory().setValue(settings.getNecessaryQOW());
 
-        // Listener to update settings
         necessaryQOW_spinner.valueProperty().addListener((_, _, newVal) -> {
             settings.setNecessaryQOW(newVal);
+            SettingsRepository.updateSettings(settings);
+        });
+    }
+
+    private void setupVideoEnlargementSpinner() {
+        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 5);
+        videoEnlargementFactor_spinner.setValueFactory(valueFactory);
+
+        videoEnlargementFactor_spinner.getValueFactory().setValue(settings.getVideoEnlargementFactor());
+
+        videoEnlargementFactor_spinner.valueProperty().addListener((_, _, newVal) -> {
+            settings.setVideoEnlargementFactor(newVal);
+            SettingsRepository.updateSettings(settings);
+        });
+
+    }
+
+    private void setupLEDLengthSpinners() {
+        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100);
+        LEDXLenght_spinner.setValueFactory(valueFactory);
+        LEDYLenght_spinner.setValueFactory(valueFactory);
+
+        LEDXLenght_spinner.getValueFactory().setValue(settings.getXLEDLength());
+        LEDYLenght_spinner.getValueFactory().setValue(settings.getYLEDLength());
+
+        LEDXLenght_spinner.valueProperty().addListener((_, _, newVal) -> {
+            settings.setYLEDLenght(newVal);
+            SettingsRepository.updateSettings(settings);
+        });
+
+        LEDYLenght_spinner.valueProperty().addListener((_, _, newVal) -> {
+            settings.setYLEDLenght(newVal);
             SettingsRepository.updateSettings(settings);
         });
     }

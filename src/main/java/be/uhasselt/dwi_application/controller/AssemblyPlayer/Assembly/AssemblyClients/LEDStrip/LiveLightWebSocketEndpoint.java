@@ -37,6 +37,7 @@ public class LiveLightWebSocketEndpoint {
     }
 
     public static void broadcast(String message) {
+        System.out.println("Broadcasting: " + message);
         for (Session session : sessions) {
             if (session.isOpen()) {
                 session.getAsyncRemote().sendText(message);

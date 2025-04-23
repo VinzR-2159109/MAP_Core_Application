@@ -53,6 +53,24 @@
                   <Spinner fx:id="necessaryQOW_spinner" />
                </children>
             </HBox>
+            <HBox layoutX="10.0" layoutY="110.0" prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Label text="Video Enlargement Factor: " />
+                  <Spinner fx:id="videoEnlargementFactor_spinner" />
+               </children>
+            </HBox>
+            <HBox layoutX="10.0" layoutY="210.0" prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Label text="LEDStrip X Lenght: " />
+                  <Spinner fx:id="LEDXLenght_spinner" prefHeight="26.0" prefWidth="82.0" />
+                  <Label layoutX="10.0" layoutY="10.0" text="LEDStrip Y Length: ">
+                     <HBox.margin>
+                        <Insets left="100.0" />
+                     </HBox.margin>
+                  </Label>
+                  <Spinner fx:id="LEDYLenght_spinner" layoutX="123.0" layoutY="10.0" prefHeight="26.0" prefWidth="82.0" />
+               </children>
+            </HBox>
          </children>
       </VBox>
    </center>

@@ -48,7 +48,7 @@ public class AssemblyLocationPickerController implements Controller {
     private Rectangle selectionRectangle;
     private MjpegStreamReader streamReader;
     private int gridSize;
-    private int videoFeedEnlargement = 2;
+    private final int videoFeedEnlargement = SettingsRepository.loadSettings().getVideoEnlargementFactor();
 
     public AssemblyLocationPickerController(Assembly assembly, AssemblyInstruction assemblyInstruction) {
         this.assembly = assembly;
