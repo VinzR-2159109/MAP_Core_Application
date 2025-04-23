@@ -16,12 +16,13 @@ public interface SettingsDao {
     @GetGeneratedKeys
     long insertSettings(@Bind Settings settings);
 
-    @SqlUpdate("UPDATE settings SET grid_size = :gridSize, enabled_assistance_systems = :enabledAssistanceSystems, NECESSARY_QOW = :necessaryQOW, VIDEO_ENLARGEMENT_FACTOR = :videoEnlargementFactor, X_LED_LENGHT =:xLEDLength, Y_LED_LENGHT =:yLEDLength WHERE id = :id")
+    @SqlUpdate("UPDATE settings SET grid_size = :gridSize, enabled_assistance_systems = :enabledAssistanceSystems, NECESSARY_QOW = :necessaryQOW, VIDEO_ENLARGEMENT_FACTOR = :videoEnlargementFactor, X_LED_LENGHT =:xLEDLength, Y_LED_LENGHT =:yLEDLength , STATIC_BRIGHTNESS =:staticBrightness WHERE id = :id")
     void updateSettings(@Bind("id") Long id,
                         @Bind("gridSize") int gridSize,
                         @Bind("enabledAssistanceSystems") String enabledAssistanceSystems,
                         @Bind("necessaryQOW") int necessaryQOW,
                         @Bind("videoEnlargementFactor") int videoEnlargementFactor,
                         @Bind("xLEDLength") int xLedLength,
-                        @Bind("yLEDLength") int yLEDLength);
+                        @Bind("yLEDLength") int yLEDLength,
+                        @Bind("staticBrightness") int staticBrightness);
 }

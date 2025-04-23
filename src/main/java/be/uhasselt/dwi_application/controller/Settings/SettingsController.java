@@ -4,6 +4,7 @@ import be.uhasselt.dwi_application.utility.database.repository.settings.Settings
 import be.uhasselt.dwi_application.utility.database.repository.settings.SettingsRepository;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 
@@ -23,6 +24,8 @@ public class SettingsController {
     @FXML private Spinner<Integer> LEDXLength_spinner;
     @FXML private Spinner<Integer> LEDYLength_spinner;
 
+    @FXML private Slider staticBrightness_slider;
+
     private final ArrayList<CheckBox> checkedBoxes = new ArrayList<>();
     private final Settings settings = SettingsRepository.loadSettings();
 
@@ -37,7 +40,19 @@ public class SettingsController {
         setupQOWSpinner();
         setupVideoEnlargementSpinner();
         setupLEDLengthSpinners();
+
+        setupBrightnessSlider();
     }
+
+    private void setupBrightnessSlider() {
+        staticBrightness_slider.setValue(settings.getStaticBrightness());
+
+        staticBrightness_slider.valueProperty().addListener((_, _, newVal) -> {
+            settings.setStaticBrightness(newVal.intValue());
+            SettingsRepository.updateSettings(settings);
+        });
+    }
+
 
     private void setupCheckbox(CheckBox checkBox, Settings.EnabledAssistanceSystem system) {
         if (settings.getEnabledAssistanceSystemsAsList().contains(system)) {
@@ -93,7 +108,7 @@ public class SettingsController {
         });
 
         LEDYLength_spinner.valueProperty().addListener((_, _, newVal) -> {
-            settings.setYLEDLenght(newVal);
+            settings.setLEDLength(newVal);
             SettingsRepository.updateSettings(settings);
         });
     }

@@ -10,24 +10,29 @@ public class Settings {
     private int necessaryQOW;
     private int videoEnlargementFactor;
     private int XLEDLength;
-    private int yLEDLenght;
+    private int yLEDLength;
+    private int staticBrightness;
 
     public enum EnabledAssistanceSystem {
         HAPTIC, LIVE_LIGHT, STATIC_LIGHT, GRADIENT_LIGHT, FLOW_LIGHT
     }
     public Settings() {
-       this(40, List.of(EnabledAssistanceSystem.STATIC_LIGHT), 85, 2, 43, 28);
+       this(40, List.of(EnabledAssistanceSystem.STATIC_LIGHT), 85, 2, 43, 28, 50);
     }
 
-    private Settings(int gridSize, List<EnabledAssistanceSystem> enabledAssistanceSystems, int necessaryQOW, int videoEnlargementFactor, int XLEDLenght, int YLEDLenght) {
+    private Settings(int gridSize, List<EnabledAssistanceSystem> enabledAssistanceSystems, int necessaryQOW, int videoEnlargementFactor, int XLEDLength, int YLEDLength, int staticBrightness) {
         this.gridSize = gridSize;
         this.enabledAssistanceSystems = enabledAssistanceSystems;
         this.necessaryQOW = necessaryQOW;
         this.videoEnlargementFactor = videoEnlargementFactor;
-        this.XLEDLength = XLEDLenght;
-        this.yLEDLenght = YLEDLenght;
+        this.XLEDLength = XLEDLength;
+        this.yLEDLength = YLEDLength;
+        this.staticBrightness = staticBrightness;
     }
 
+    public Long getId() {
+        return id;
+    }
     public void setId(Long id) {
         this.id = id;
     }
@@ -72,10 +77,9 @@ public class Settings {
     public int getXLEDLength() {return XLEDLength;}
     public void setXLEDLength(int LEDLength) {this.XLEDLength = LEDLength;}
 
-    public int getYLEDLength() {return yLEDLenght;}
-    public void setYLEDLenght(int yLEDLenght) {this.yLEDLenght = yLEDLenght;}
+    public int getYLEDLength() {return yLEDLength;}
+    public void setLEDLength(int yLEDLength) {this.yLEDLength = yLEDLength;}
 
-    public Long getId() {
-        return id;
-    }
+    public int getStaticBrightness() {return staticBrightness;}
+    public void setStaticBrightness(int staticBrightness) {this.staticBrightness = staticBrightness;}
 }

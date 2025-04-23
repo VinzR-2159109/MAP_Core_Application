@@ -30,17 +30,17 @@ public class GradientLightEffect {
         int end = assemblyRange.end();
 
         int maxDistance = Math.max(start, length - 1 - end); // normalize both sides
+        int brightness = settings.getStaticBrightness();
 
         List<LEDStripRange> gradient = IntStream.range(0, length)
                 .mapToObj(i -> {
                     if (i >= start && i <= end) {
-                        // Inside assembly range → pure green
-                        return LEDStripRange.on(List.of(i), new Color(0, 255, 0), 255);
+                        return LEDStripRange.on(List.of(i), new Color(0, 255, 0), brightness);
                     } else {
                         int distance = (i < start) ? start - i : i - end;
                         float t = Math.min((float) distance / maxDistance, 1f);
                         int g = (int) (165 * (1 - t)); // fade green down
-                        return LEDStripRange.on(List.of(i), new Color(255, g, 0), 255); // red to orange
+                        return LEDStripRange.on(List.of(i), new Color(255, g, 0), brightness); // red to orange
                     }
                 })
                 .collect(Collectors.toList());

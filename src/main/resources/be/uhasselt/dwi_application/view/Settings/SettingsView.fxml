@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -74,6 +75,12 @@
                      </HBox.margin>
                   </Label>
                   <Spinner fx:id="LEDYLength_spinner" layoutX="123.0" layoutY="10.0" prefHeight="26.0" prefWidth="82.0" />
+               </children>
+            </HBox>
+            <HBox layoutX="10.0" layoutY="110.0" prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Label text="Static Brightness: " />
+                  <Slider fx:id="staticBrightness_slider" max="255.0" showTickLabels="true" />
                </children>
             </HBox>
          </children>

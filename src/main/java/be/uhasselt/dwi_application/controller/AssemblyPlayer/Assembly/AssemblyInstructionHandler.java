@@ -347,7 +347,6 @@ public class AssemblyInstructionHandler {
         ledStrip.startFlowLight(LEDStripConfig.LEDStripId.Y, assemblyYRange);
     }
 
-
     public boolean isCompleted() {return isCompleted.get();}
     public boolean isRunning() {return isRunning;}
 }
