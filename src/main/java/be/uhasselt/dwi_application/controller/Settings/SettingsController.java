@@ -15,45 +15,34 @@ public class SettingsController {
     @FXML private CheckBox liveLight_check;
     @FXML private CheckBox staticLight_check;
     @FXML private CheckBox flowLight_check;
+    @FXML private CheckBox gradientLight_check;
 
     @FXML private Spinner<Integer> necessaryQOW_spinner;
     @FXML private Spinner<Integer> videoEnlargementFactor_spinner;
 
-    @FXML private Spinner<Integer> LEDXLenght_spinner;
-    @FXML private Spinner<Integer> LEDYLenght_spinner;
+    @FXML private Spinner<Integer> LEDXLength_spinner;
+    @FXML private Spinner<Integer> LEDYLength_spinner;
 
-    private ArrayList<CheckBox> checkedBoxes = new ArrayList<>();
-    private Settings settings = SettingsRepository.loadSettings();
+    private final ArrayList<CheckBox> checkedBoxes = new ArrayList<>();
+    private final Settings settings = SettingsRepository.loadSettings();
 
     @FXML
     private void initialize() {
-        setupCheckbox(haptic_check);
-        setupCheckbox(liveLight_check);
-        setupCheckbox(staticLight_check);
-        setupCheckbox(flowLight_check);
+        setupCheckbox(haptic_check, Settings.EnabledAssistanceSystem.HAPTIC);
+        setupCheckbox(liveLight_check, Settings.EnabledAssistanceSystem.LIVE_LIGHT);
+        setupCheckbox(staticLight_check, Settings.EnabledAssistanceSystem.STATIC_LIGHT);
+        setupCheckbox(flowLight_check, Settings.EnabledAssistanceSystem.FLOW_LIGHT);
+        setupCheckbox(gradientLight_check, Settings.EnabledAssistanceSystem.GRADIENT_LIGHT);
 
         setupQOWSpinner();
         setupVideoEnlargementSpinner();
         setupLEDLengthSpinners();
     }
 
-    private void setupCheckbox(CheckBox checkBox) {
-        for (Settings.EnabledAssistanceSystem enabledSystem : settings.getEnabledAssistanceSystemsAsList()){
-            switch (enabledSystem.name().toLowerCase()){
-                case "haptic":
-                    haptic_check.setSelected(true);
-                    checkedBoxes.add(checkBox);
-                    break;
-                case "live_light": liveLight_check.setSelected(true);
-                    checkedBoxes.add(checkBox);
-                    break;
-                case "static_light": staticLight_check.setSelected(true);
-                    checkedBoxes.add(checkBox);
-                    break;
-                case "flow_light": flowLight_check.setSelected(true);
-                    checkedBoxes.add(checkBox);
-                    break;
-            }
+    private void setupCheckbox(CheckBox checkBox, Settings.EnabledAssistanceSystem system) {
+        if (settings.getEnabledAssistanceSystemsAsList().contains(system)) {
+            checkBox.setSelected(true);
+            checkedBoxes.add(checkBox);
         }
 
         checkBox.selectedProperty().addListener((_, _, newValue) -> {
@@ -68,11 +57,9 @@ public class SettingsController {
         });
     }
 
-
     private void setupQOWSpinner() {
         SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(50, 100);
         necessaryQOW_spinner.setValueFactory(valueFactory);
-
         necessaryQOW_spinner.getValueFactory().setValue(settings.getNecessaryQOW());
 
         necessaryQOW_spinner.valueProperty().addListener((_, _, newVal) -> {
@@ -84,37 +71,34 @@ public class SettingsController {
     private void setupVideoEnlargementSpinner() {
         SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 5);
         videoEnlargementFactor_spinner.setValueFactory(valueFactory);
-
         videoEnlargementFactor_spinner.getValueFactory().setValue(settings.getVideoEnlargementFactor());
 
         videoEnlargementFactor_spinner.valueProperty().addListener((_, _, newVal) -> {
             settings.setVideoEnlargementFactor(newVal);
             SettingsRepository.updateSettings(settings);
         });
-
     }
 
     private void setupLEDLengthSpinners() {
         SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100);
-        LEDXLenght_spinner.setValueFactory(valueFactory);
-        LEDYLenght_spinner.setValueFactory(valueFactory);
+        LEDXLength_spinner.setValueFactory(valueFactory);
+        LEDYLength_spinner.setValueFactory(valueFactory);
 
-        LEDXLenght_spinner.getValueFactory().setValue(settings.getXLEDLength());
-        LEDYLenght_spinner.getValueFactory().setValue(settings.getYLEDLength());
+        LEDXLength_spinner.getValueFactory().setValue(settings.getXLEDLength());
+        LEDYLength_spinner.getValueFactory().setValue(settings.getYLEDLength());
 
-        LEDXLenght_spinner.valueProperty().addListener((_, _, newVal) -> {
-            settings.setYLEDLenght(newVal);
+        LEDXLength_spinner.valueProperty().addListener((_, _, newVal) -> {
+            settings.setXLEDLength(newVal);
             SettingsRepository.updateSettings(settings);
         });
 
-        LEDYLenght_spinner.valueProperty().addListener((_, _, newVal) -> {
+        LEDYLength_spinner.valueProperty().addListener((_, _, newVal) -> {
             settings.setYLEDLenght(newVal);
             SettingsRepository.updateSettings(settings);
         });
     }
 
     private void updateSettings() {
-        Settings settings = SettingsRepository.loadSettings();
         List<Settings.EnabledAssistanceSystem> enabledAssistanceSystems = new ArrayList<>();
 
         for (CheckBox checkBox : checkedBoxes) {
@@ -124,6 +108,7 @@ public class SettingsController {
                     case "live light" -> Settings.EnabledAssistanceSystem.LIVE_LIGHT;
                     case "static light" -> Settings.EnabledAssistanceSystem.STATIC_LIGHT;
                     case "flow light" -> Settings.EnabledAssistanceSystem.FLOW_LIGHT;
+                    case "gradient light" -> Settings.EnabledAssistanceSystem.GRADIENT_LIGHT;
                     default -> throw new IllegalArgumentException("Unknown checkbox text: " + checkBox.getText());
                 };
                 enabledAssistanceSystems.add(system);
@@ -132,6 +117,7 @@ public class SettingsController {
 
         settings.setEnabledAssistanceSystemsFromList(enabledAssistanceSystems);
         SettingsRepository.updateSettings(settings);
-    }
 
+        System.out.println("Updated enabled systems: " + enabledAssistanceSystems);
+    }
 }

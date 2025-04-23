@@ -13,7 +13,7 @@ public class Settings {
     private int yLEDLenght;
 
     public enum EnabledAssistanceSystem {
-        HAPTIC, LIVE_LIGHT, STATIC_LIGHT, FLOW_LIGHT
+        HAPTIC, LIVE_LIGHT, STATIC_LIGHT, GRADIENT_LIGHT, FLOW_LIGHT
     }
     public Settings() {
        this(40, List.of(EnabledAssistanceSystem.STATIC_LIGHT), 85, 2, 43, 28);

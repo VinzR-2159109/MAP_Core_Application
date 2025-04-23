@@ -39,7 +39,6 @@ module be.uhasselt.dwi_application {
     opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.Settings to javafx.fxml;
     opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Pick to javafx.fxml;
-    opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients to javafx.fxml;
 
     opens be.uhasselt.dwi_application.model.Jackson.StripLedConfig to com.fasterxml.jackson.databind;
 
@@ -67,8 +66,9 @@ module be.uhasselt.dwi_application {
     exports be.uhasselt.dwi_application.utility.database.repository.instruction;
     exports be.uhasselt.dwi_application.utility.database.repository.settings;
     exports be.uhasselt.dwi_application.model.workInstruction.picking;
-    exports be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients;
     exports be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip;
     exports be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.Effect;
     opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.Effect to javafx.fxml;
+    exports be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.Haptic;
+    opens be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.Haptic to javafx.fxml;
 }

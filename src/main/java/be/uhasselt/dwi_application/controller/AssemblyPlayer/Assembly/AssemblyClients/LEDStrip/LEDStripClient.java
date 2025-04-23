@@ -51,8 +51,8 @@ public class LEDStripClient {
         flowLight.stop();
     }
 
-    public void gradientLight(LEDStripConfig.LEDStripId id, Range range) {
-        gradientLight.display(id, range);
+    public void gradientLight(LEDStripConfig.LEDStripId id, Range assemblyRange) {
+        gradientLight.display(id, assemblyRange);
     }
 
     public void sendLiveLight(LEDStripConfig.LEDStripId id, Range range, double[] dir, double qowX, double qowY) {

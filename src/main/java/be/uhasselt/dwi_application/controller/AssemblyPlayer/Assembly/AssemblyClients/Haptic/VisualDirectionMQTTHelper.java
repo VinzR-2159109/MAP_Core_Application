@@ -1,4 +1,4 @@
-package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients;
+package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.Haptic;
 
 import be.uhasselt.dwi_application.model.Jackson.DirectionConfig;
 import be.uhasselt.dwi_application.utility.network.MqttHandler;

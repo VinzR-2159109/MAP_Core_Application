@@ -26,19 +26,29 @@ public class GradientLightEffect {
                 ? settings.getXLEDLength()
                 : settings.getYLEDLength();
 
-        int target = (assemblyRange.start() + assemblyRange.end()) / 2;
+        int start = assemblyRange.start();
+        int end = assemblyRange.end();
 
-        List<LEDStripRange> gradient = IntStream.rangeClosed(0, Math.min(target, length - 1))
+        int maxDistance = Math.max(start, length - 1 - end); // normalize both sides
+
+        List<LEDStripRange> gradient = IntStream.range(0, length)
                 .mapToObj(i -> {
-                    float t = (float) i / target;
-                    int r = (int) (255 * (1 - t));
-                    int g = (int) (255 * t);
-                    return LEDStripRange.on(List.of(i), new Color(r, g, 0), 255);
+                    if (i >= start && i <= end) {
+                        // Inside assembly range → pure green
+                        return LEDStripRange.on(List.of(i), new Color(0, 255, 0), 255);
+                    } else {
+                        int distance = (i < start) ? start - i : i - end;
+                        float t = Math.min((float) distance / maxDistance, 1f);
+                        int g = (int) (165 * (1 - t)); // fade green down
+                        return LEDStripRange.on(List.of(i), new Color(255, g, 0), 255); // red to orange
+                    }
                 })
                 .collect(Collectors.toList());
 
         LEDStripConfig config = new LEDStripConfig(id, gradient);
         sender.sendConfig(LEDStripClient.Clients.WS, config);
     }
+
+
 }
 

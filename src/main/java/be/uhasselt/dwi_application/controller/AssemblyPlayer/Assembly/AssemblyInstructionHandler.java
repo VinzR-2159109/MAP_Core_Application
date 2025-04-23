@@ -1,8 +1,8 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.VisualDirectionMQTTHelper;
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.Haptic.VisualDirectionMQTTHelper;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.LEDStripClient;
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.VibrationMQTTHelper;
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.Haptic.VibrationMQTTHelper;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.InstructionMeasurementHandler;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripConfig;
 import be.uhasselt.dwi_application.model.Jackson.hands.HandLabel;
@@ -110,6 +110,10 @@ public class AssemblyInstructionHandler {
             showFlowLight();
         }
 
+        if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.GRADIENT_LIGHT)){
+            showGradientLight();
+        }
+
         this.measurement = new InstructionMeasurementHandler(assemblyInstruction.getAssembly(), assemblyInstruction, sessionId);
         measurement.startMeasurement();
 
@@ -172,6 +176,13 @@ public class AssemblyInstructionHandler {
 
         ledStrip.sendON(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.X, xIndices, Color.fromBasics(Color.BasicColors.GREEN));
         ledStrip.sendON(LEDStripClient.Clients.WS , LEDStripConfig.LEDStripId.Y, yIndices, Color.fromBasics(Color.BasicColors.GREEN));
+    }
+
+    private void showGradientLight(){
+        if (!isRunning) return;
+
+        ledStrip.gradientLight(LEDStripConfig.LEDStripId.X, assemblyXRange);
+        ledStrip.gradientLight(LEDStripConfig.LEDStripId.Y, assemblyYRange);
     }
 
     private void updateVibrationFeedback() {
