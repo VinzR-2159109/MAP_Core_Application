@@ -27,15 +27,21 @@ public class VibrationClient {
         }
     }
 
-    public void cancel(){
+    public void cancel(NetworkClients client){
         VibrationConfig config = VibrationConfig.off();
 
+        String jsonString;
         try {
-            String jsonVibration = objectMapper.writeValueAsString(config);
-            MqttHandler.getInstance().publish("Output/Vibration", jsonVibration);
+            jsonString = objectMapper.writeValueAsString(config);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to serialize Vibration command", e);
+        }
+
+        if (client == NetworkClients.MQTT){
+            MqttHandler.getInstance().publish("Output/Vibration", jsonString);
+        } else if (client == NetworkClients.WS){
+            HapticWebSocketEndpoint.broadcast(jsonString);
         }
     }
 }

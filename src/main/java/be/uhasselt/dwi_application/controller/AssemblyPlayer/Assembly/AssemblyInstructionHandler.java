@@ -134,7 +134,7 @@ public class AssemblyInstructionHandler {
                 if (qow[2] > settings.getNecessaryQOW()) {
                     isCompleted.set(true);
                     SoundPlayer.play(SoundPlayer.SoundType.OK);
-                    vibration.cancel();
+                    vibration.cancel(NetworkClients.WS);
                     stop();
                     Platform.runLater(onCompleteCallback);
                 }
@@ -158,7 +158,7 @@ public class AssemblyInstructionHandler {
 
         ledStrip.stopFlowLight();
         ledStrip.sendAllOFF();
-        vibration.cancel();
+        vibration.cancel(NetworkClients.WS);
 
         if (clk != null){
             clk.cancel();
@@ -191,7 +191,7 @@ public class AssemblyInstructionHandler {
 
         if (currentStatus == HandStatus.UNKNOWN) {
             if (lastQoWStatus != HandStatus.UNKNOWN) {
-                vibration.cancel();
+                vibration.cancel(NetworkClients.WS);
             }
             lastQoWStatus = currentStatus;
             return;
