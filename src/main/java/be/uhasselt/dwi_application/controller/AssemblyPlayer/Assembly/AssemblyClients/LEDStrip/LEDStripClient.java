@@ -9,6 +9,7 @@ import be.uhasselt.dwi_application.model.basic.Color;
 import be.uhasselt.dwi_application.model.basic.Range;
 import be.uhasselt.dwi_application.utility.database.repository.settings.Settings;
 import be.uhasselt.dwi_application.utility.database.repository.settings.SettingsRepository;
+import be.uhasselt.dwi_application.utility.network.NetworkClients;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,11 +33,11 @@ public class LEDStripClient {
     }
 
 
-    public void sendON(Clients client, LEDStripConfig.LEDStripId id, List<Integer> indices, Color color) {
+    public void sendON(NetworkClients client, LEDStripConfig.LEDStripId id, List<Integer> indices, Color color) {
         sendON(client, id, indices, color, 50);
     }
 
-    public void sendON(Clients client, LEDStripConfig.LEDStripId id, List<Integer> indices, Color color, int brightness) {
+    public void sendON(NetworkClients client, LEDStripConfig.LEDStripId id, List<Integer> indices, Color color, int brightness) {
         LEDStripRange range = LEDStripRange.on(indices, color, brightness);
         LEDStripConfig config = new LEDStripConfig(id, List.of(range));
         sender.sendConfig(client, config);
@@ -59,11 +60,11 @@ public class LEDStripClient {
         liveLight.display(id, range, dir, qowX, qowY);
     }
 
-    public void sendOFF(Clients client, LEDStripConfig.LEDStripId id, List<Integer> indices) {
+    public void sendOFF(NetworkClients client, LEDStripConfig.LEDStripId id, List<Integer> indices) {
         sender.sendOFF(client, id, indices);
     }
 
-    public void sendOFF(Clients client, LEDStripConfig.LEDStripId id, Range range) {
+    public void sendOFF(NetworkClients client, LEDStripConfig.LEDStripId id, Range range) {
         List<Integer> indices = IntStream.rangeClosed(range.start(), range.end()).boxed().collect(Collectors.toList());
         sender.sendOFF(client, id, indices);
     }
@@ -71,7 +72,7 @@ public class LEDStripClient {
     public void sendAllOFF() {
         List<Integer> x = IntStream.range(0, settings.getXLEDLength()).boxed().toList();
         List<Integer> y = IntStream.range(0, settings.getYLEDLength()).boxed().toList();
-        sender.sendOFF(Clients.MQTT, LEDStripConfig.LEDStripId.X, x);
-        sender.sendOFF(Clients.MQTT, LEDStripConfig.LEDStripId.Y, y);
+        sender.sendOFF(NetworkClients.MQTT, LEDStripConfig.LEDStripId.X, x);
+        sender.sendOFF(NetworkClients.MQTT, LEDStripConfig.LEDStripId.Y, y);
     }
 }

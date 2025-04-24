@@ -23,63 +23,49 @@
    <!-- Right: Control Panel -->
    <right>
       <VBox prefHeight="594.0" prefWidth="344.0" BorderPane.alignment="CENTER">
-         <children>
-            <VBox>
+         <VBox>
+            <VBox.margin>
+               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </VBox.margin>
+            <Label prefHeight="18.0" prefWidth="329.0" text="Add new Assembly: ">
                <VBox.margin>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                  <Insets left="20.0" right="20.0" top="20.0" />
                </VBox.margin>
-               <children>
-                  <Label prefHeight="18.0" prefWidth="329.0" text="Add new Assembly: ">
-                     <VBox.margin>
-                        <Insets left="20.0" right="20.0" top="20.0" />
-                     </VBox.margin>
-                     <padding>
-                        <Insets left="10.0" right="10.0" top="10.0" />
-                     </padding>
-                  </Label>
-      
-                  <!-- Assembly Name and Add Button -->
-                  <HBox alignment="CENTER" prefHeight="48.0" prefWidth="324.0">
-                     <children>
-                        <TextField fx:id="assemblyName_txt" prefHeight="33.0" prefWidth="150.0" text="Assembly Name" />
-      
-                              <Button fx:id="addAssembly_btn" mnemonicParsing="false" prefHeight="32.0" prefWidth="108.0" text="Add">
-                           <HBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </HBox.margin>
-                        </Button>
-                     </children>
-                  </HBox>
-               </children>
-            </VBox>
-            <VBox alignment="CENTER">
-               <children>
-                  <Label prefHeight="18.0" prefWidth="272.0" text="Delete all selected Assemblies: ">
-                     <VBox.margin>
-                        <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
-                     </VBox.margin>
-                  </Label>
-                  <Button fx:id="deleteAssembly_btn" mnemonicParsing="false" prefHeight="26.0" prefWidth="272.0" text="Delete" />
-               </children>
                <padding>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                  <Insets left="10.0" right="10.0" top="10.0" />
                </padding>
-            </VBox>
-            <VBox alignment="CENTER" layoutX="10.0" layoutY="126.0">
-               <children>
-                  <Label prefHeight="18.0" prefWidth="272.0" text="Select Color for all selected Assemblies:">
-                     <VBox.margin>
-                        <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
-                     </VBox.margin>
-                  </Label>
-                  <ColorPicker fx:id="colorPicker" prefHeight="26.0" prefWidth="272.0" />
-               </children>
-               <padding>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </padding>
-            </VBox>
+            </Label>
 
-         </children>
+            <!-- Assembly Name and Add Button -->
+            <HBox alignment="CENTER" prefHeight="48.0" prefWidth="324.0">
+               <TextField fx:id="assemblyName_txt" prefHeight="33.0" prefWidth="150.0" text="Assembly Name" />
+
+               <Button fx:id="addAssembly_btn" mnemonicParsing="false" prefHeight="32.0" prefWidth="108.0" text="Add">
+                  <HBox.margin>
+                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                  </HBox.margin>
+               </Button>
+            </HBox>
+         </VBox>
+         <VBox alignment="CENTER">
+            <padding>
+               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </padding>
+            <Label prefHeight="18.0" prefWidth="272.0" text="Delete all selected Assemblies: ">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
+               </VBox.margin>
+            </Label>
+            <Button fx:id="deleteAssembly_btn" mnemonicParsing="false" prefHeight="26.0" prefWidth="272.0" text="Delete" />
+         </VBox>
+         <VBox alignment="CENTER" layoutX="10.0" layoutY="126.0">
+            <padding><Insets bottom="10.0" left="10.0" right="10.0" top="10.0" /></padding>
+            <Label prefHeight="18.0" prefWidth="272.0" text="Select Color: ">
+               <VBox.margin><Insets bottom="10.0" left="20.0" right="20.0" top="20.0" /></VBox.margin>
+            </Label>
+            <ColorPicker fx:id="colorPicker" prefHeight="26.0" prefWidth="272.0" />
+         </VBox>
+
       </VBox>
    </right>
 

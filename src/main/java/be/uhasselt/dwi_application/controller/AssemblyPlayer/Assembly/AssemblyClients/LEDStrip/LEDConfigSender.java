@@ -5,6 +5,7 @@ import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripRange;
 import be.uhasselt.dwi_application.model.basic.Color;
 import be.uhasselt.dwi_application.utility.database.repository.settings.Settings;
 import be.uhasselt.dwi_application.utility.network.MqttHandler;
+import be.uhasselt.dwi_application.utility.network.NetworkClients;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,20 +20,20 @@ public class LEDConfigSender {
         this.settings = settings;
     }
 
-    public void sendOFF(LEDStripClient.Clients client, LEDStripConfig.LEDStripId id, List<Integer> indices) {
+    public void sendOFF(NetworkClients client, LEDStripConfig.LEDStripId id, List<Integer> indices) {
         sendConfig(client, LEDStripRange.off(indices), id);
     }
 
     public void sendON(LEDStripConfig.LEDStripId id, List<Integer> indices, Color color, int brightness) {
-        sendConfig(LEDStripClient.Clients.MQTT, LEDStripRange.on(indices, color, brightness), id);
+        sendConfig(NetworkClients.MQTT, LEDStripRange.on(indices, color, brightness), id);
     }
 
-    public void sendConfig(LEDStripClient.Clients client, LEDStripRange range, LEDStripConfig.LEDStripId id) {
+    public void sendConfig(NetworkClients client, LEDStripRange range, LEDStripConfig.LEDStripId id) {
         try {
             LEDStripConfig config = new LEDStripConfig(id, List.of(range));
             String json = objectMapper.writeValueAsString(config);
 
-            if (client == LEDStripClient.Clients.MQTT) {
+            if (client == NetworkClients.MQTT) {
                 MqttHandler.getInstance().publish(topic, json);
             } else {
                 LiveLightWebSocketEndpoint.broadcast(json);
@@ -42,10 +43,10 @@ public class LEDConfigSender {
         }
     }
 
-    public void sendConfig(LEDStripClient.Clients client, LEDStripConfig config) {
+    public void sendConfig(NetworkClients client, LEDStripConfig config) {
         try {
             String json = objectMapper.writeValueAsString(config);
-            if (client == LEDStripClient.Clients.MQTT) {
+            if (client == NetworkClients.MQTT) {
                 MqttHandler.getInstance().publish(topic, json);
             } else {
                 LiveLightWebSocketEndpoint.broadcast(json);

@@ -1,12 +1,12 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.Effect;
 
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.LEDConfigSender;
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.LEDStripClient;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripConfig;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripRange;
 import be.uhasselt.dwi_application.model.basic.Color;
 import be.uhasselt.dwi_application.model.basic.Range;
 import be.uhasselt.dwi_application.utility.database.repository.settings.Settings;
+import be.uhasselt.dwi_application.utility.network.NetworkClients;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,7 +101,7 @@ public class FlowLightEffect {
             }
 
             LEDStripConfig config = new LEDStripConfig(id, updates);
-            sender.sendConfig(LEDStripClient.Clients.WS, config);
+            sender.sendConfig(NetworkClients.WS, config);
         };
 
         ScheduledFuture<?> newTask = scheduler.scheduleAtFixedRate(task, 0, 200, TimeUnit.MILLISECONDS);

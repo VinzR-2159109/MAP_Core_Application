@@ -1,8 +1,8 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
+import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.Haptic.VibrationClient;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.Haptic.VisualDirectionMQTTHelper;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.LEDStripClient;
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.Haptic.VibrationMQTTHelper;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.InstructionMeasurementHandler;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripConfig;
 import be.uhasselt.dwi_application.model.Jackson.hands.HandLabel;
@@ -16,6 +16,7 @@ import be.uhasselt.dwi_application.utility.database.repository.settings.Settings
 import be.uhasselt.dwi_application.utility.handTracking.HandTrackingHandler;
 import be.uhasselt.dwi_application.utility.modules.ConsoleColors;
 import be.uhasselt.dwi_application.utility.modules.SoundPlayer;
+import be.uhasselt.dwi_application.utility.network.NetworkClients;
 import javafx.application.Platform;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public class AssemblyInstructionHandler {
     private final HandLabel pickingHand = HandLabel.RIGHT;
 
     private final LEDStripClient ledStrip;
-    private final VibrationMQTTHelper vibration;
+    private final VibrationClient vibration;
     private final VisualDirectionMQTTHelper directionMqtt;
 
     private final AtomicBoolean isCompleted;
@@ -62,7 +63,7 @@ public class AssemblyInstructionHandler {
         this.isRunning = false;
 
         this.ledStrip = new LEDStripClient();
-        this.vibration = new VibrationMQTTHelper();
+        this.vibration = new VibrationClient();
         this.directionMqtt = new VisualDirectionMQTTHelper();
 
         this.isCompleted = new AtomicBoolean(false);
@@ -174,8 +175,8 @@ public class AssemblyInstructionHandler {
         List<Integer> xIndices = IntStream.rangeClosed(assemblyXRange.start(), assemblyXRange.end()).boxed().toList();
         List<Integer> yIndices = IntStream.rangeClosed(assemblyYRange.start(), assemblyYRange.end()).boxed().toList();
 
-        ledStrip.sendON(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.X, xIndices, Color.fromBasics(Color.BasicColors.GREEN));
-        ledStrip.sendON(LEDStripClient.Clients.WS , LEDStripConfig.LEDStripId.Y, yIndices, Color.fromBasics(Color.BasicColors.GREEN));
+        ledStrip.sendON(NetworkClients.WS, LEDStripConfig.LEDStripId.X, xIndices, Color.fromBasics(Color.BasicColors.GREEN));
+        ledStrip.sendON(NetworkClients.WS , LEDStripConfig.LEDStripId.Y, yIndices, Color.fromBasics(Color.BasicColors.GREEN));
     }
 
     private void showGradientLight(){
@@ -201,7 +202,7 @@ public class AssemblyInstructionHandler {
         Position handPosition = handTracking.getAvgHandPosition(pickingHand);
         double[] qow = calculateQualityOfWorkScore(handPosition);
 
-        vibration.vibrate((int) Math.round((qow[2] / 100.0) * 255), qow[2]);
+        vibration.vibrate(NetworkClients.WS, (int) Math.round((qow[2] / 100.0) * 255), qow[2]);
     }
 
 
@@ -290,11 +291,11 @@ public class AssemblyInstructionHandler {
 
         if (handTracking.getHandStatus(pickingHand) == HandStatus.UNKNOWN) {
             if (!cachedBlueXRange.isEmpty()) {
-                ledStrip.sendOFF(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.X, cachedBlueXRange);
+                ledStrip.sendOFF(NetworkClients.WS, LEDStripConfig.LEDStripId.X, cachedBlueXRange);
                 cachedBlueXRange = Range.empty();
             }
             if (!cachedBlueYRange.isEmpty()) {
-                ledStrip.sendOFF(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.Y, cachedBlueYRange);
+                ledStrip.sendOFF(NetworkClients.WS, LEDStripConfig.LEDStripId.Y, cachedBlueYRange);
                 cachedBlueYRange = Range.empty();
             }
             return;
@@ -313,7 +314,7 @@ public class AssemblyInstructionHandler {
         Range newYRange = new Range(newYStart, newYEnd);
 
         if (!cachedBlueXRange.equalsRange(newXRange)) {
-            ledStrip.sendOFF(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.X, cachedBlueXRange);
+            ledStrip.sendOFF(NetworkClients.WS, LEDStripConfig.LEDStripId.X, cachedBlueXRange);
             if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.STATIC_LIGHT)){
                 if (newXRange.resolvedOverlap(assemblyXRange)){
                     ledStrip.sendLiveLight(LEDStripConfig.LEDStripId.X, newXRange, direction, qowX, qowY);
@@ -326,7 +327,7 @@ public class AssemblyInstructionHandler {
         }
 
         if(!cachedBlueYRange.equalsRange(newYRange)) {
-            ledStrip.sendOFF(LEDStripClient.Clients.WS, LEDStripConfig.LEDStripId.Y, cachedBlueYRange);
+            ledStrip.sendOFF(NetworkClients.WS, LEDStripConfig.LEDStripId.Y, cachedBlueYRange);
             if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.STATIC_LIGHT)){
                 if (newYRange.resolvedOverlap(assemblyYRange)) {
                     ledStrip.sendLiveLight(LEDStripConfig.LEDStripId.Y, newYRange, direction, qowX, qowY);

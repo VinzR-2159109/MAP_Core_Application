@@ -1,12 +1,12 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.Effect;
 
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.LEDConfigSender;
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.LEDStripClient;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripConfig;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripRange;
 import be.uhasselt.dwi_application.model.basic.Color;
 import be.uhasselt.dwi_application.model.basic.Range;
 import be.uhasselt.dwi_application.utility.database.repository.settings.Settings;
+import be.uhasselt.dwi_application.utility.network.NetworkClients;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ public class LiveLightEffect {
             output.add(LEDStripRange.on(List.of(idx), color, brightness));
         }
 
-        sender.sendConfig(LEDStripClient.Clients.WS, new LEDStripConfig(id, output));
+        sender.sendConfig(NetworkClients.WS, new LEDStripConfig(id, output));
     }
 }
 
