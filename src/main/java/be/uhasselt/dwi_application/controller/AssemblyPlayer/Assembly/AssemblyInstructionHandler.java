@@ -1,7 +1,6 @@
 package be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly;
 
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.Haptic.VibrationClient;
-import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.Haptic.VisualDirectionMQTTHelper;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.Assembly.AssemblyClients.LEDStrip.LEDStripClient;
 import be.uhasselt.dwi_application.controller.AssemblyPlayer.InstructionMeasurementHandler;
 import be.uhasselt.dwi_application.model.Jackson.StripLedConfig.LEDStripConfig;
@@ -40,7 +39,6 @@ public class AssemblyInstructionHandler {
 
     private final LEDStripClient ledStrip;
     private final VibrationClient vibration;
-    private final VisualDirectionMQTTHelper directionMqtt;
 
     private final AtomicBoolean isCompleted;
     private final HandTrackingHandler handTracking = HandTrackingHandler.getInstance();
@@ -64,7 +62,6 @@ public class AssemblyInstructionHandler {
 
         this.ledStrip = new LEDStripClient();
         this.vibration = new VibrationClient();
-        this.directionMqtt = new VisualDirectionMQTTHelper();
 
         this.isCompleted = new AtomicBoolean(false);
         this.sessionId = sessionId;
@@ -127,7 +124,6 @@ public class AssemblyInstructionHandler {
                 double[] qow = calculateQualityOfWorkScore(avgHandPosition);
 
                 if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.HAPTIC)){
-                    updateDirection(direction);
                     updateVibrationFeedback();
                 }
 
@@ -203,30 +199,6 @@ public class AssemblyInstructionHandler {
         double[] qow = calculateQualityOfWorkScore(handPosition);
 
         vibration.vibrate(NetworkClients.WS, (int) Math.round((qow[2] / 100.0) * 255), qow[2]);
-    }
-
-
-    private void updateDirection(double[] direction) {
-        if(!isRunning) return;
-
-        HandStatus newStatus = handTracking.getHandStatus(pickingHand);
-        HandStatus cachedStatus = pickingHand == HandLabel.RIGHT ? rightHandStatus : leftHandStatus;
-
-        if (!newStatus.equals(cachedStatus)) {
-            if (pickingHand == HandLabel.RIGHT) rightHandStatus = newStatus;
-            else leftHandStatus = newStatus;
-
-            if (newStatus == HandStatus.UNKNOWN) {
-                directionMqtt.sendUnknown();
-                return;
-            }
-        }
-
-        if (newStatus == HandStatus.UNKNOWN) {
-            return;
-        }
-
-        directionMqtt.sendDirection(direction);
     }
 
     private double[] calculateQualityOfWorkScore(Position handPosition) {

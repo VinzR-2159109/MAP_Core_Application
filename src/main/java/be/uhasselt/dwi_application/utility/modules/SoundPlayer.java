@@ -1,5 +1,6 @@
 package be.uhasselt.dwi_application.utility.modules;
 
+import javafx.application.Platform;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import java.io.File;
@@ -40,6 +41,14 @@ public class SoundPlayer {
     }
 
     public static void play(SoundType soundType) {
+        if (Platform.isFxApplicationThread()) {
+            createAndPlay(soundType);
+        } else {
+            Platform.runLater(() -> createAndPlay(soundType));
+        }
+    }
+
+    private static void createAndPlay(SoundType soundType) {
         SoundPlayer soundPlayer = new SoundPlayer(soundType);
         activePlayers.add(soundPlayer.mediaPlayer);
         soundPlayer._play();

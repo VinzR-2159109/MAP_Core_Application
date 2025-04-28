@@ -17,7 +17,7 @@ public class LiveLightWebSocketEndpoint {
     @OnOpen
     public void onOpen(Session session) {
         sessions.add(session);
-        System.out.println("Client connected: " + session.getId());
+        System.out.println("[Client connected: " + session.getId());
     }
 
     @OnClose

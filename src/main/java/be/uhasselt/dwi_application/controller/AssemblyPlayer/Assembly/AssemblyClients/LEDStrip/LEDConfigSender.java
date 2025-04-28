@@ -14,33 +14,15 @@ import java.util.List;
 public class LEDConfigSender {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String topic = "Output/LEDStrip";
-    private final Settings settings;
-
-    public LEDConfigSender(Settings settings) {
-        this.settings = settings;
-    }
 
     public void sendOFF(NetworkClients client, LEDStripConfig.LEDStripId id, List<Integer> indices) {
-        sendConfig(client, LEDStripRange.off(indices), id);
+        LEDStripConfig config = new LEDStripConfig(id, List.of(LEDStripRange.off(indices)));
+        sendConfig(client, config);
     }
 
-    public void sendON(LEDStripConfig.LEDStripId id, List<Integer> indices, Color color, int brightness) {
-        sendConfig(NetworkClients.MQTT, LEDStripRange.on(indices, color, brightness), id);
-    }
-
-    public void sendConfig(NetworkClients client, LEDStripRange range, LEDStripConfig.LEDStripId id) {
-        try {
-            LEDStripConfig config = new LEDStripConfig(id, List.of(range));
-            String json = objectMapper.writeValueAsString(config);
-
-            if (client == NetworkClients.MQTT) {
-                MqttHandler.getInstance().publish(topic, json);
-            } else {
-                LiveLightWebSocketEndpoint.broadcast(json);
-            }
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize LED command", e);
-        }
+    public void sendON(NetworkClients client, LEDStripConfig.LEDStripId id, List<Integer> indices, Color color, int brightness) {
+        LEDStripConfig config = new LEDStripConfig(id, List.of(LEDStripRange.on(indices, color, brightness)));
+        sendConfig(client, config);
     }
 
     public void sendConfig(NetworkClients client, LEDStripConfig config) {

@@ -21,12 +21,13 @@ public class LEDStripClient {
     private final LiveLightEffect liveLight;
     private final LEDConfigSender sender;
 
-    private Settings settings = SettingsRepository.loadSettings();
+    private final Settings settings = SettingsRepository.loadSettings();
+
     public enum Clients {
         MQTT, WS;
     }
     public LEDStripClient() {
-        this.sender = new LEDConfigSender(settings);
+        this.sender = new LEDConfigSender();
         this.flowLight = new FlowLightEffect(settings, sender);
         this.gradientLight = new GradientLightEffect(settings, sender);
         this.liveLight = new LiveLightEffect(settings, sender);
