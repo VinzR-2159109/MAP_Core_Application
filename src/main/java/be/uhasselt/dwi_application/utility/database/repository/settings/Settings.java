@@ -7,27 +7,33 @@ public class Settings {
     private Long id;
     private int gridSize;
     private List<EnabledAssistanceSystem> enabledAssistanceSystems;
+
     private int necessaryQOW;
     private int videoEnlargementFactor;
     private int XLEDLength;
-    private int yLEDLength;
+    private int YLEDLength;
     private int staticBrightness;
+
+    private boolean assemblyAssistanceEnabled;
 
     public enum EnabledAssistanceSystem {
         HAPTIC, LIVE_LIGHT, STATIC_LIGHT, GRADIENT_LIGHT, FLOW_LIGHT
     }
     public Settings() {
-       this(40, List.of(EnabledAssistanceSystem.STATIC_LIGHT), 85, 2, 43, 28, 50);
+       this(40, List.of(EnabledAssistanceSystem.STATIC_LIGHT), 85, 2, 43, 28, 50, true);
     }
 
-    private Settings(int gridSize, List<EnabledAssistanceSystem> enabledAssistanceSystems, int necessaryQOW, int videoEnlargementFactor, int XLEDLength, int YLEDLength, int staticBrightness) {
+    private Settings(int gridSize, List<EnabledAssistanceSystem> enabledAssistanceSystems, int necessaryQOW,
+                     int videoEnlargementFactor, int XLEDLength, int YLEDLength, int staticBrightness,
+                     boolean assemblyAssistanceEnabled) {
         this.gridSize = gridSize;
         this.enabledAssistanceSystems = enabledAssistanceSystems;
         this.necessaryQOW = necessaryQOW;
         this.videoEnlargementFactor = videoEnlargementFactor;
         this.XLEDLength = XLEDLength;
-        this.yLEDLength = YLEDLength;
+        this.YLEDLength = YLEDLength;
         this.staticBrightness = staticBrightness;
+        this.assemblyAssistanceEnabled = assemblyAssistanceEnabled;
     }
 
     public Long getId() {
@@ -77,9 +83,12 @@ public class Settings {
     public int getXLEDLength() {return XLEDLength;}
     public void setXLEDLength(int LEDLength) {this.XLEDLength = LEDLength;}
 
-    public int getYLEDLength() {return yLEDLength;}
-    public void setLEDLength(int yLEDLength) {this.yLEDLength = yLEDLength;}
+    public int getYLEDLength() {return YLEDLength;}
+    public void setYLEDLength(int yLEDLength) {this.YLEDLength = yLEDLength;}
 
     public int getStaticBrightness() {return staticBrightness;}
     public void setStaticBrightness(int staticBrightness) {this.staticBrightness = staticBrightness;}
+
+    public boolean isAssemblyAssistanceEnabled() {return assemblyAssistanceEnabled;}
+    public void setAssemblyAssistanceEnabled(boolean assemblyAssistanceEnabled) {this.assemblyAssistanceEnabled = assemblyAssistanceEnabled;}
 }

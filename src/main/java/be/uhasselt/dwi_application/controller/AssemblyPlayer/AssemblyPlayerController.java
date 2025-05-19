@@ -7,7 +7,10 @@ import be.uhasselt.dwi_application.model.workInstruction.Assembly;
 import be.uhasselt.dwi_application.model.workInstruction.AssemblyInstruction;
 import be.uhasselt.dwi_application.model.workInstruction.Instruction;
 import be.uhasselt.dwi_application.model.workInstruction.picking.PickingInstruction;
+import be.uhasselt.dwi_application.utility.database.repository.settings.Settings;
+import be.uhasselt.dwi_application.utility.database.repository.settings.SettingsRepository;
 import be.uhasselt.dwi_application.utility.exception.BinNotFoundException;
+import be.uhasselt.dwi_application.utility.modules.SoundPlayer;
 import be.uhasselt.dwi_application.utility.network.WebSocket.WebSocketRunner;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -36,6 +39,7 @@ public class AssemblyPlayerController implements Controller {
     private final AssemblyPlayerManager manager;
     private final PickInstructionHandler pickInstructionHandler;
     private final AssemblyInstructionHandler assemblyInstructionHandler;
+    private final Settings settings = SettingsRepository.loadSettings();
 
     private final WebSocketRunner websocket;
 
@@ -107,27 +111,27 @@ public class AssemblyPlayerController implements Controller {
     }
 
     private void handleOk() {
-        if (!pickInstructionHandler.isCompleted() && pickInstructionHandler.isRunning()){
-            showErrorDialogWithChoice("Warning", "The system did not mark the picking as completed", "Are you sure that you completed the Picking Instruction correctly?", "Yes", "No",() -> {
-                pickInstructionHandler.stop();
+        if (settings.isAssemblyAssistanceEnabled()){
+            if (!pickInstructionHandler.isCompleted() && pickInstructionHandler.isRunning()){
+                showErrorDialogWithChoice("Warning", "The system did not mark the picking as completed", "Are you sure that you completed the Picking Instruction correctly?", "Yes", "No",() -> {
+                    pickInstructionHandler.stop();
 
-                hint_hbox.setVisible(false);
-                setNextInstruction(manager.moveToNextInstruction(currentInstruction));
-            });
-            return;
+                    hint_hbox.setVisible(false);
+                    setNextInstruction(manager.moveToNextInstruction(currentInstruction));
+                });
+                return;
+            }
+
+            if (!assemblyInstructionHandler.isCompleted() && assemblyInstructionHandler.isRunning()){
+                showErrorDialogWithChoice("Warning", "Het systeem heeft de assemblageInstructie niet as compleet gezien", "Ben je zeker dat de assemblage juist is uitgevoerd?", "Ja", "Nee",() -> {
+                    assemblyInstructionHandler.stop();
+
+                    hint_hbox.setVisible(false);
+                    setNextInstruction(manager.moveToNextInstruction(currentInstruction));
+                });
+                return;
+            }
         }
-
-        if (!assemblyInstructionHandler.isCompleted() && assemblyInstructionHandler.isRunning()){
-            showErrorDialogWithChoice("Warning", "Het systeem heeft de assemblageInstructie niet as compleet gezien", "Ben je zeker dat de assemblage juist is uitgevoerd?", "Ja", "Nee",() -> {
-                assemblyInstructionHandler.stop();
-
-                hint_hbox.setVisible(false);
-                setNextInstruction(manager.moveToNextInstruction(currentInstruction));
-            });
-            return;
-        }
-
-
         hint_hbox.setVisible(false);
         setNextInstruction(manager.moveToNextInstruction(currentInstruction));
     }
@@ -159,6 +163,7 @@ public class AssemblyPlayerController implements Controller {
         System.out.println("\u001B[33m" + "<handleAssemblyInstruction>" + "\u001B[0m");
         try {
             assemblyInstructionHandler.start(assemblyInstruction, () -> {
+                SoundPlayer.play(SoundPlayer.SoundType.OK);
                 applyButtonStatus(InstructionStatus.COMPLETED_OK);
             });
             applyButtonStatus(InstructionStatus.PENDING);

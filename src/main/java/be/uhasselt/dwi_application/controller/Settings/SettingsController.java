@@ -18,6 +18,8 @@ public class SettingsController {
     @FXML private CheckBox flowLight_check;
     @FXML private CheckBox gradientLight_check;
 
+    @FXML private CheckBox assemblyAssistance_check;
+
     @FXML private Spinner<Integer> necessaryQOW_spinner;
     @FXML private Spinner<Integer> videoEnlargementFactor_spinner;
 
@@ -37,11 +39,22 @@ public class SettingsController {
         setupCheckbox(flowLight_check, Settings.EnabledAssistanceSystem.FLOW_LIGHT);
         setupCheckbox(gradientLight_check, Settings.EnabledAssistanceSystem.GRADIENT_LIGHT);
 
+        setupAssemblyAssistanceCheckbox();
+
         setupQOWSpinner();
         setupVideoEnlargementSpinner();
         setupLEDLengthSpinners();
 
         setupBrightnessSlider();
+    }
+
+    private void setupAssemblyAssistanceCheckbox() {
+        assemblyAssistance_check.setSelected(settings.isAssemblyAssistanceEnabled());
+
+        assemblyAssistance_check.selectedProperty().addListener((_, _, newValue) -> {
+            settings.setAssemblyAssistanceEnabled(newValue);
+            SettingsRepository.updateSettings(settings);
+        });
     }
 
     private void setupBrightnessSlider() {
@@ -108,7 +121,7 @@ public class SettingsController {
         });
 
         LEDYLength_spinner.valueProperty().addListener((_, _, newVal) -> {
-            settings.setLEDLength(newVal);
+            settings.setYLEDLength(newVal);
             SettingsRepository.updateSettings(settings);
         });
     }

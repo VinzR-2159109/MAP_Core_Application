@@ -73,6 +73,7 @@ public class LEDStripClient {
     public void sendAllOFF() {
         List<Integer> x = IntStream.range(0, settings.getXLEDLength()).boxed().toList();
         List<Integer> y = IntStream.range(0, settings.getYLEDLength()).boxed().toList();
+
         sender.sendOFF(NetworkClients.MQTT, LEDStripConfig.LEDStripId.X, x);
         sender.sendOFF(NetworkClients.MQTT, LEDStripConfig.LEDStripId.Y, y);
     }

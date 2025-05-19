@@ -6,6 +6,8 @@ import be.uhasselt.dwi_application.model.workInstruction.picking.Part;
 import be.uhasselt.dwi_application.model.workInstruction.picking.PickingBin;
 import be.uhasselt.dwi_application.model.workInstruction.picking.PickingInstruction;
 import be.uhasselt.dwi_application.utility.database.repository.pickingBin.BinRepository;
+import be.uhasselt.dwi_application.utility.database.repository.settings.Settings;
+import be.uhasselt.dwi_application.utility.database.repository.settings.SettingsRepository;
 import be.uhasselt.dwi_application.utility.exception.BinNotFoundException;
 import be.uhasselt.dwi_application.utility.modules.SoundPlayer;
 import be.uhasselt.dwi_application.utility.network.MqttHandler;
@@ -16,12 +18,16 @@ import javafx.application.Platform;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static be.uhasselt.dwi_application.utility.modules.Dialog.showExceptionDialog;
+
 public class PickInstructionHandler {
     private InstructionMeasurementHandler measurement;
 
     private boolean isRunning;
     private String sessionId;
     private Long binId;
+
+    private final Settings settings = SettingsRepository.loadSettings();
 
     private static final String OBSTACLE_TOPIC = "Input/Bin/Obstacle";
 
@@ -61,32 +67,34 @@ public class PickInstructionHandler {
             throw new BinNotFoundException(partToPick);
         }
 
-        mqttHelper.SendSetBinLEDGreen(binId);
-        mqttHelper.SendSetDisplayNumber(binId, pickingInstruction.getQuantity());
+        if (settings.isAssemblyAssistanceEnabled()) {
+            mqttHelper.SendSetBinLEDGreen(binId);
+            mqttHelper.SendSetDisplayNumber(binId, pickingInstruction.getQuantity());
 
-        mqttHandler.subscribe(OBSTACLE_TOPIC, s -> {
-            try {
-                ObstacleSensorData obstacleSensorData = objectMapper.readValue(s, ObstacleSensorData.class);
-                if (Objects.equals(obstacleSensorData.id(), binId)) {
-                    boolean currentObstacle = obstacleSensorData.obstacle();
+            mqttHandler.subscribe(OBSTACLE_TOPIC, s -> {
+                try {
+                    ObstacleSensorData obstacleSensorData = objectMapper.readValue(s, ObstacleSensorData.class);
+                    if (Objects.equals(obstacleSensorData.id(), binId)) {
+                        boolean currentObstacle = obstacleSensorData.obstacle();
 
-                    if (obstacleInBin.get() && !currentObstacle) {
-                        isCompleted.set(true);
-                        SoundPlayer.play(SoundPlayer.SoundType.OK);
+                        if (obstacleInBin.get() && !currentObstacle) {
+                            isCompleted.set(true);
+                            SoundPlayer.play(SoundPlayer.SoundType.OK);
 
-                        stop();
-                        Platform.runLater(onCompleteCallback);
+                            stop();
+                            Platform.runLater(onCompleteCallback);
+                        }
+
+                        obstacleInBin.set(currentObstacle);
+                    } else if (obstacleSensorData.obstacle()) {
+                        System.out.println("Wrong Bin Picked: " + binId);
                     }
-
-                    obstacleInBin.set(currentObstacle);
+                } catch (JsonProcessingException e) {
+                    showExceptionDialog("Invalid JSON", e);
+                    e.printStackTrace();
                 }
-                else if (obstacleSensorData.obstacle()) {
-                    System.out.println("Wrong Bin Picked: " + binId);
-                }
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-        });
+            });
+        }
 
         measurement = new InstructionMeasurementHandler(pickingInstruction.getAssembly(), pickingInstruction, sessionId);
         measurement.startMeasurement();

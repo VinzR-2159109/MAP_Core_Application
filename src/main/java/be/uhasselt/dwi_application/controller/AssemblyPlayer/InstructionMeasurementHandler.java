@@ -26,6 +26,7 @@ public class InstructionMeasurementHandler {
 
     public void stopMeasurement(){
         System.out.println(ConsoleColors.RED + "<Stopping Measurement>" + ConsoleColors.RESET);
+
         elapsedTimer.stop();
 
         InstructionPerformanceData performanceData = new InstructionPerformanceData(id, assembly, elapsedTimer.getElapsedTime(), instruction);

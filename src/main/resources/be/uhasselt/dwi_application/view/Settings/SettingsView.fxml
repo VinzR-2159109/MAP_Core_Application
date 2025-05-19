@@ -53,6 +53,18 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </padding>
             </HBox>
+            <HBox layoutX="10.0" layoutY="10.0" prefHeight="100.0" prefWidth="200.0">
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+               <children>
+                  <Label text="Assembly Assistance: " />
+                  <CheckBox fx:id="assemblyAssistance_check" mnemonicParsing="false" text="Enable">
+                     <HBox.margin>
+                        <Insets left="5.0" />
+                     </HBox.margin></CheckBox>
+               </children>
+            </HBox>
             <HBox prefHeight="100.0" prefWidth="200.0">
                <children>
                   <Label text="Necessary Quality of Work Score: " />

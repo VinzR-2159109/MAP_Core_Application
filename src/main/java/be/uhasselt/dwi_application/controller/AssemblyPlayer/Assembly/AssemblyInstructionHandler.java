@@ -43,8 +43,6 @@ public class AssemblyInstructionHandler {
     private final AtomicBoolean isCompleted;
     private final HandTrackingHandler handTracking = HandTrackingHandler.getInstance();
 
-    private HandStatus leftHandStatus = HandStatus.UNKNOWN;
-    private HandStatus rightHandStatus = HandStatus.UNKNOWN;
     private HandStatus lastQoWStatus = HandStatus.UNKNOWN;
 
     private Range assemblyXRange;
@@ -92,24 +90,26 @@ public class AssemblyInstructionHandler {
             return;
         }
 
-        int greenXStart = 43 - (int) positions.stream().mapToDouble(Position::getX).max().orElse(0) / gridSize;
-        int greenXEnd   = 43 - (int) positions.stream().mapToDouble(Position::getX).min().orElse(0) / gridSize;
+        int greenXStart = settings.getXLEDLength() - (int) positions.stream().mapToDouble(Position::getX).max().orElse(0) / gridSize;
+        int greenXEnd   = settings.getXLEDLength() - (int) positions.stream().mapToDouble(Position::getX).min().orElse(0) / gridSize;
         int greenYStart = (int) positions.stream().mapToDouble(Position::getY).max().orElse(0) / gridSize;
         int greenYEnd   = (int) positions.stream().mapToDouble(Position::getY).min().orElse(0) / gridSize;
 
         assemblyXRange = new Range(greenXStart, greenXEnd);
         assemblyYRange = new Range(greenYEnd, greenYStart);
-        
-        if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.STATIC_LIGHT)){
-            showStaticLight();
-        }
 
-        if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.FLOW_LIGHT)){
-            showFlowLight();
-        }
+        if (settings.isAssemblyAssistanceEnabled()){
+            if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.STATIC_LIGHT)){
+                showStaticLight();
+            }
 
-        if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.GRADIENT_LIGHT)){
-            showGradientLight();
+            if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.FLOW_LIGHT)){
+                showFlowLight();
+            }
+
+            if (settings.getEnabledAssistanceSystemsAsList().contains(Settings.EnabledAssistanceSystem.GRADIENT_LIGHT)){
+                showGradientLight();
+            }
         }
 
         this.measurement = new InstructionMeasurementHandler(assemblyInstruction.getAssembly(), assemblyInstruction, sessionId);
@@ -119,6 +119,8 @@ public class AssemblyInstructionHandler {
         clk.schedule(new TimerTask() {
             @Override
             public void run() {
+                if (!settings.isAssemblyAssistanceEnabled()) return;
+
                 Position avgHandPosition = handTracking.getAvgHandPosition(pickingHand);
                 double[] direction = calculateDirectionToAssembly(avgHandPosition);
                 double[] qow = calculateQualityOfWorkScore(avgHandPosition);
@@ -129,7 +131,6 @@ public class AssemblyInstructionHandler {
 
                 if (qow[2] > settings.getNecessaryQOW()) {
                     isCompleted.set(true);
-                    SoundPlayer.play(SoundPlayer.SoundType.OK);
                     vibration.cancel(NetworkClients.WS);
                     stop();
                     Platform.runLater(onCompleteCallback);
@@ -141,7 +142,6 @@ public class AssemblyInstructionHandler {
 
             }
         }, 0, 10);
-
     }
 
     public void stop(){
